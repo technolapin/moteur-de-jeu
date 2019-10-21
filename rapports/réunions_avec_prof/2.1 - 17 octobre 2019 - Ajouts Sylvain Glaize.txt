@@ -1,0 +1,24 @@
+Suite à nos discussion d’hier, j’ai repensé à des choses qui peuvent être transmises aux étudiants.
+ 
+D’un côté, sur « comment démarrer », je l’ai un peu dit hier mais par écrit :
+•	S’assurer d’une toolchain qui fonctionne pour tout le monde.
+	o	J’ai fait un essai avec VS Code, avec le plugin Rust (rls), et cela donne un environnement qui m’a l’air agréable
+		https://marketplace.visualstudio.com/items?itemName=rust-lang.rust
+•	Construire un premier programme simple avec un Cube, pour s’assurer que tout fonctionne pour tout le monde.
+	o	Une série d’articles existe pour démarrer une exemple simple avec Rust et OpenGL ici
+		https://nercury.github.io/rust/opengl/tutorial/2018/02/08/opengl-in-rust-from-scratch-00-setup.html
+•	Ajouter au cube un comportement et un deuxième cube manipulé par un joueur.
+•	Une fois ce petit prototype « hardcodé », les étudiants pourront commencer à déterminer quels sont les composants nécessaires, et construire à partir de là.
+ 
+Un autre côté, que je n’ai, je pense, pas assez creusé hier :
+•	Un moteur est fait pour être utilisé par, essentiellement, les programmeurs « Gameplay »
+•	L’un des buts d’un moteur est donc d’offrir une interface de programmation aux programmeurs Gameplay, un environnement « simplifié » qui permet de se concentrer sur l’implémentation du jeu, sans (trop) s’occuper des détails techniques
+	o	Ainsi, en tant que Gameplay Programmer on veut pouvoir « spawner » une entité dans une scène, et lui associer un comportement que l’on programme.
+	o	Ce comportement peut utiliser des systèmes, ou plutôt des informations produites par des systèmes comme :
+			Est-ce que l’entité a touché une autre entité ?
+			Est-ce que le joueur être en train de vouloir faire une action ?
+	o	Comment est-ce que c’est fait est du domaine du moteur.
+	o	Un des challenges est donc d’offrir une bonne interface de programmation aux Programmeurs Gameplay (pour le projet, les étudiants jouent les deux rôles)
+•	Il y deux grandes manières de voir l’utilisation d’un moteur :
+	o	Soit comme une (ou plusieurs) bibliothèques (crate pour Rust) : main() est alors de la responsabilité du Gameplay, qui consomme le moteur comme une bibliothèque de services
+	o	Soit comme un framework qui s’occupe de charger le gameplay : main() est alors de la responsabilité du Moteur, qui doit avoir un moyen de charger la partie Gameplay (par Bibliothèque Dynamique par exemple).
