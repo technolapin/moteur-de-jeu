@@ -8,6 +8,7 @@
 * Clément CHOMICKY
 * Barbara PARE 
 * Maylis MONTANI
+* Nicolas GOISLARD
 
 ### Encadrants 
 * Nabil MUSTAFA
@@ -85,7 +86,5 @@
 * Réunion toutes les semaines avec Nabil (?)
 * Réunions une fois par mois avec Sylvain
 
-
-## MAIL SYLVAIN
 
 ## REUNION ETUDIANTS
