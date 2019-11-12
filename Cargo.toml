@@ -1,5 +1,5 @@
 [package]
-name = "moteurJeuVideo"
+name = "moteur_jeu_video"
 version = "0.1.0"
 authors = ["SailorSparkle <50321866+SailorSparkle@users.noreply.github.com>"]
 edition = "2018"

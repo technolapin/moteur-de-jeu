@@ -4,7 +4,7 @@
 
 Télécharger GIT. Une fois installé, pour Windows, aller dans le répertoire voulu, faire un clique droit et sélectionner `Git Bash here`.
 
-Cloner le dépôt : `git clone https://github.com/734F96/moteurJeuVideo.git`.
+Cloner le dépôt : `git clone https://github.com/734F96/moteur_jeu_video.git`.
 
 Enregistrer son adresse mail pour les commits : `git config user.email "user@domain.tld"`.
 **Bien mettre l'adresse associée à son compte GitHub pour que les commits soient associés à ce compte.**
