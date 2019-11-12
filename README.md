@@ -5,14 +5,14 @@ Encadrants :
 - Nabil MUSTAFA, ESIEE Paris
 
 Participants :
-- Clément CHOMICKI : Chef de projet
-- Alexandre LEBLON
-- Maÿlis MONTANI (Uniquement au semestre 1)
-- Barbara PARE (Uniquement au semestre 1)
-- Amaury BARUZY
+- Clément CHOMICKI / `Chef de projet`
+- Alexandre LEBLON /
+- Maÿlis MONTANI `Uniquement au semestre 1`
+- Barbara PARE `Uniquement au semestre 1`
+- Amaury BARUZY /
 - Nicolas GOISLARD
-- Sébastien ZHOU (Uniquement au semestre 2)
-- Hugo DELADRIERE (Uniquement au semestre 2)
+- Sébastien ZHOU `Uniquement au semestre 2`
+- Hugo DELADRIERE `Uniquement au semestre 2`
 
 ## Sujet du Projet
 
