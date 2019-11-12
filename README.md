@@ -37,4 +37,4 @@ Les étudiants devront entre autre :
 2. Impl ́ementer ces parties en veillant à leur modularité / architecture.
 3. En architecture, déterminer en particulier sur quel modèle les entités du monde virtuel sont gérées.
 4. Optimiser le programme (CPU/GPU ainsi que mémoire).
-5. Décider et impl ́ementer un "jeu test" pour montrer les possibilités du moteur.
+5. Décider et implémenter un "jeu test" pour montrer les possibilités du moteur.
