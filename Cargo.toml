@@ -9,4 +9,7 @@ edition = "2018"
 [dependencies]
 # Bibliothèque SDL2, permettant d'utiliser OpenGL
 # Article suivi : https://nercury.github.io/rust/opengl/tutorial/2018/02/08/opengl-in-rust-from-scratch-01-window.html
+# MEGA IMPORTANT : Sur Linux, il faut installer la librairie :
+# sudo apt install libsdl2-dev
+# Sur Windows... https://nercury.github.io/rust/opengl/tutorial/2018/02/08/opengl-in-rust-from-scratch-01-window.html#initializing-sdl
 sdl2 = "*"
