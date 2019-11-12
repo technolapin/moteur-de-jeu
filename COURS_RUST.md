@@ -197,3 +197,30 @@ match a // avec a:u8 par exemple
 	1 => 8,
 }
 ```
+
+## GENERICITE EN RUST
+
+```
+fn foo<T> ( a : T ) {
+	a
+}
+```
+
+Comme les templates en C, sauf que là, c'est pas que du copié-collé.
+
+```
+struct<T> S<T> {
+	champ : T
+}
+```
+
+## LIFETIME
+
+```
+struct S<'a> {
+	champs
+}
+```
+
+Ou on peut utiliser `static` pour qu'elle ne soit jamais supprimée.
+```
