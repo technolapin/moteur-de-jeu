@@ -1,8 +1,16 @@
 [package]
 name = "moteur_jeu_video"
-version = "0.1.0"
-authors = ["SailorSparkle <50321866+SailorSparkle@users.noreply.github.com>"]
-edition = "2018"
+version = "0.0.1"
+authors = [ "Clément CHOMICKI",
+            "Alexandre LEBLON",
+            "Maÿlis MONTANI",
+            "Barbara PARE",
+            "Amaury BARUZY",
+            "Nicolas GOISLARD",
+            "Sébastien ZHOU",
+            "Hugo DELADRIERE"
+          ]
+edition = "2018" # Edition de Rust
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
