@@ -53,6 +53,7 @@ impl EntityAllocator
 }
 
 
+
 struct StorageIndex
 {
     index: usize
@@ -82,6 +83,7 @@ trait Storage
     fn get(&self, entity: Entity) -> Option<&Self::Component>;
     fn get_mut(&mut self, entity: Entity) -> Option<&mut Self::Component>;
     fn insert(&mut self, entity: &Entity, comp: Self::Component); // should add an Ok(()) return type later
+    fn delete(&mut self, entity: &Entity);
     fn new() -> Self;
 }
 
@@ -133,6 +135,17 @@ where
             self.data.push(Some(comp));
         }
     }
+    fn delete(&mut self, entity: &Entity)
+    {
+        let index = entity.index;
+        if index >= self.data.len() || self.data.get(index).is_none()
+        {
+            panic!("Tried to access a non-existing component");
+        }
+        
+        self.data[index] = None;
+
+    }
     
     fn new() -> Self
     {
@@ -163,6 +176,8 @@ where
     {
         Self(vec![])
     }
+    fn delete(&mut self, entity: &Entity)
+    {}
 }
 
 
@@ -243,6 +258,10 @@ impl World
         self
         
     }
+
+    fn delete_entity(&mut self, index: usize)
+    {
+    }
     
 }
 
@@ -312,6 +331,18 @@ fn main() {
         for position in st_ref
         {
             position.x = 1;
+            println!("Position {:?}", position);
+        }
+    }
+    {
+        let st_ref = world.get_storage_mut::<Position>()
+            .unwrap().data
+            .iter_mut()
+            .map(|y| match y.as_mut() {Some(x) => x, _ => unreachable!()});
+
+        println!("lol {:?}", st_ref);
+        for position in st_ref
+        {
             println!("Position {:?}", position);
         }
     }
