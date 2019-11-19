@@ -14,5 +14,8 @@ pub trait Storage
     fn insert(&mut self, index: usize, comp: Self::Component); // should add an Ok(()) return type later
     fn delete(&mut self, index: usize);
     fn new() -> Self;
+    fn len(&self) -> usize;
 }
+
+
 

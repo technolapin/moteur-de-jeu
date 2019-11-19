@@ -2,19 +2,27 @@ type Generation = u64;
 type Index = usize;
 
 
+
+/**
+Represents an object.
+An entity isn't made to be stored, but can sometimes be instancied for various reasons.
+**/
 pub struct Entity(Generation, Index);
 
 impl Entity
 {
+    /// The index of the entity is the index of all of its components
     fn index(self) -> Index
     {
         self.1
     }
+    /// The generation of the entity is a number who caracterise it. A generation cannot be the wame for two differents living entities.
     fn generation(self) -> Generation
     {
         self.0
     }
 
+    /// A dead entity is caracterised by a generation of 0
     fn is_alive(self) -> bool
     {
         self.0 > 0
@@ -31,9 +39,11 @@ pub struct EntityAllocator
 {
     generations: Vec<Generation>,
     free_indexes: Vec<usize>,
-    max_index: usize,
+    vec_length: usize,
     last_generation: u64
 }
+
+
 
 impl EntityAllocator
 {
@@ -43,7 +53,7 @@ impl EntityAllocator
         {
             generations: vec![],
             free_indexes: vec![],
-            max_index: 0,
+            vec_length: 0,
             last_generation: 0
         }
     }
@@ -56,6 +66,7 @@ impl EntityAllocator
             index
         )
     }
+    
     pub fn new_entity(&mut self) -> Entity
     {
         self.last_generation += 1;
@@ -63,9 +74,9 @@ impl EntityAllocator
         {
             None =>
             {
-                self.max_index += 1;
+                self.vec_length += 1;
                 self.generations.push(self.last_generation);
-                self.entity(self.max_index-1)
+                self.entity(self.vec_length-1)
             },
             Some(index) =>
             {
@@ -73,6 +84,19 @@ impl EntityAllocator
                 self.entity(index)
             }
         }
+    }
+    
+    pub fn is_alive(&self, index: Index) -> bool
+    {
+        self.vec_length > index && self.generations[index] > 0
+    }
+    
+    pub fn delete(&mut self, index: Index)
+    {
+        assert!(!self.is_alive(index));
+        self.generations[index] = 0;
+        self.free_indexes.push(index);
+        
     }
 }
 

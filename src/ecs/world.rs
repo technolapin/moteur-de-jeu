@@ -8,7 +8,6 @@ use crate::ecs::component::{Component, Storage};
 pub struct World
 {
     entity_allocator: EntityAllocator,
-    entities: Vec<Entity>,
     components: AnyMap,
 }
 
@@ -19,7 +18,6 @@ impl World
         Self
         {
             entity_allocator: EntityAllocator::new(),
-            entities: vec![],
             components: AnyMap::new(),
         }
         
@@ -61,13 +59,14 @@ impl World
 
     fn new_entity(&mut self) -> &mut Self
     {
-        self.entities.push(self.entity_allocator.new_entity());
+        self.entity_allocator.new_entity();
         self
         
     }
 
     fn delete_entity(&mut self, index: usize)
     {
+        self.entity_allocator.delete(index);
     }
     
 }
