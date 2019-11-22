@@ -1,28 +1,9 @@
-use std::any::{TypeId, Any};
-
 mod ecs;
 
 use crate::ecs::entity::{Entity, EntityAllocator};
 use crate::ecs::world::World;
 use crate::ecs::component::{Storage, Component};
-
-/* TODO
-trait Joinable
-{
-    fn exist(&self, index: usize) -> bool;
-}
-
-struct Join<A, B>
-where
-    A: Joinable,
-    B: Joinable
-{
-    mask: Vec<bool>,
-    storages: (A, B)
-}
-*/
-
-
+use crate::ecs::archetype::*;
 
 // exemple de storage
 struct VecStorage<T>
@@ -89,6 +70,10 @@ where
             data: vec![]
         }
     }
+    fn len(&self) -> usize
+    {
+        self.data.len()
+    }
 }
 
 struct NotAStorage<Compo>(Vec<Compo>);
@@ -112,6 +97,10 @@ where
     }
     fn delete(&mut self, index: usize)
     {}
+    fn len(&self) -> usize
+    {
+        0
+    }
 }
 
 
@@ -161,6 +150,16 @@ fn main() {
     world
         .add_component::<Position>()
         .add_component::<IsFalling>();
+
+
+    let mut storage_a = VecStorage::<Shape>::new();
+    let mut storage_b = VecStorage::<Position>::new();
+
+//    let join = (&mut storage_a, &mut storage_b);
+
+  //  let it = join.iter();
+    
+
 
     /*
     {
@@ -242,6 +241,28 @@ fn main() {
             println!("Position {:?}", position);
         }
     }
-*/
-}
+     */
 
+    use anymap::AnyMap;
+    let tuple = (1usize, 2u32, 3i64);
+
+    let mut anymap = AnyMap::new();
+    tuple.anymap(&mut anymap);
+
+
+    println!("{:?}", anymap);
+    println!("{:?}", tuple);
+
+    
+    let moo = <(usize, u32) as Untuplable>::has_elements(&anymap);
+
+    println!("{:?}", moo);
+
+
+    let mut arch = Archetype::new();
+    arch.add_component::<Position>();
+    arch.add_component::<Shape>();
+
+    println!("{}", arch.has_components::<(IsFalling, Position)>())
+    
+}
