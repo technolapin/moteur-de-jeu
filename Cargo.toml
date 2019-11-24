@@ -24,3 +24,4 @@ sdl2 = "*"
 anymap = "*"
 # Binding vers OpenGL
 gl = "*" 
+tuple_utils="*"

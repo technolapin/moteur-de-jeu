@@ -263,6 +263,11 @@ fn main() {
     arch.add_component::<Position>();
     arch.add_component::<Shape>();
 
-    println!("{}", arch.has_components::<(IsFalling, Position)>())
+    println!("has {}", arch.has_components::<(Position, Shape,)>());
+
+    arch.add_entity((Position{x: 0, y: 0},
+                     Shape::Square(0,0,0,0)));
+    
+    let poses = arch.get_storage_mut::<Position>();
     
 }

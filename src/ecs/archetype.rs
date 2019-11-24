@@ -6,6 +6,7 @@
 use anymap::AnyMap;
 use crate::ecs::component::{Component, Storage};
 use tuple_utils::{Split};
+use std::cell::{RefCell, RefMut, Ref};
 
 // 4 G entities is faaaar enought
 // one entities and its components is at least a few bytes, and we don't have the ram for that much
@@ -14,21 +15,69 @@ use tuple_utils::{Split};
 type Index = usize;
 
 
+struct StoragesMap
+{
+    anymap: AnyMap
+}
+
+
+
+impl StoragesMap
+{
+    fn new() -> Self
+    {
+        Self
+        {
+            anymap: AnyMap::new()
+        }
+    }
+
+    fn insert<S: Storage + 'static>(&mut self, sto: S)
+    {
+        self.anymap.insert(RefCell::new(sto));
+    }
+
+    fn insert_component<C: Component>(&mut self,
+                                      index: usize,
+                                      comp: <<C as Component>::Storage as Storage>::Component)
+    where
+        <C as Component>::Storage : 'static
+    {
+        let mut storage_ref = self.get_mut::<<C as Component>::Storage>();
+        (*storage_ref).insert(index, comp);
+    }
+    
+
+    fn get<S: Storage + 'static>(&self) -> Ref<S>
+    {
+        self.anymap.get::<RefCell<S>>().unwrap().borrow()
+    }
+    fn get_mut<S: Storage + 'static>(&self) -> RefMut<S>
+    {
+        self.anymap.get::<RefCell<S>>().unwrap().borrow_mut()
+    }
+
+    fn contains<S: Storage + 'static>(&self) -> bool
+    {
+        self.anymap.contains::<S>()
+    }
+}
+
 
 
 pub struct Archetype
 {
-    storages: AnyMap
+    storages: StoragesMap
 }
 
 
-impl Archetype
+impl<'a> Archetype
 {
     pub fn new() -> Self
     {
         Self
         {
-            storages: AnyMap::new()
+            storages: StoragesMap::new()
         }
     }
 
@@ -40,14 +89,15 @@ impl Archetype
         self
     }
 
-    fn get_storage<C>(&self) -> Option<&C::Storage>
+    
+    fn get_storage<C>(&self) -> Ref<C::Storage>
     where
         C: Component + 'static
     {
         self.storages.get::<C::Storage>()
     }
 
-    fn get_storage_mut<C>(&mut self) -> Option<&mut C::Storage>
+    pub fn get_storage_mut<C>(&self) -> RefMut<C::Storage>
     where
         C: Component + 'static
     {
@@ -66,18 +116,27 @@ impl Archetype
     where
         <Comps as ComponentsTuple>::Storages: Untuplable
     {
-        <Comps::Storages as Untuplable>::has_elements(&self.storages)
+        <Comps::Storages as Untuplable>::has_elements(&self.storages.anymap)
     }
 
-    /*
-    fn get_storages<Compos: ComponentsTuple>(&self) ->
-        <<Compos as ComponentsTuple>::Storages as RefTuplable>::RefTuple
+    pub fn add_entity<Comps: ComponentsTuple>(&self, compos: Comps)
     where
-        <Compos as ComponentsTuple>::Storages: RefTuplable
+        <Comps as ComponentsTuple>::Storages: Untuplable
     {
         
+        assert!(self.has_components::<Comps>());
+        
     }
-    */
+    
+    
+    fn get_storages<Compos: ComponentsTupleFetchable<'a>+ ComponentsTuple>(&'a self) ->
+        <Compos as ComponentsTupleFetchable>::RefMutStorages
+    where
+        Compos::Storages: MutRefTuplable<'a>
+    {
+        <Compos as ComponentsTupleFetchable<'a>>::fetch(&self.storages)
+    }
+    
     /*
     fn iter<C>(&mut self) -> ()
     where
@@ -90,6 +149,8 @@ impl Archetype
     
     
 }
+
+
 
 /*
 pub trait Join: Sized
@@ -261,6 +322,8 @@ impl<'a, A: Storage, B: Storage> Join for (&'a mut A, &'a mut B)
 
 
 
+
+
 pub trait Untuplable
 {
     type Whole;
@@ -269,7 +332,7 @@ pub trait Untuplable
     type Tail;
     fn untuple(self) -> Self::Untupled;
     fn pop(self) -> Self::Head;
-    fn anymap(self, mut anymap: &mut AnyMap);
+    fn anymap(self, anymap: &mut AnyMap);
     fn has_elements(anymap: &AnyMap) -> bool;
 }
 
@@ -293,7 +356,7 @@ impl<A: 'static> Untuplable for (A,)
     }
     fn has_elements(anymap: &AnyMap) -> bool
     {
-        anymap.contains::<A>()
+        anymap.contains::<RefCell<A>>()
     }
 }
 
@@ -330,12 +393,14 @@ macro_rules! implement_untuple {
             
             fn has_elements(anymap: &AnyMap) -> bool
             {
-                anymap.contains::<Self::Head>()
+                anymap.contains::<RefCell<Self::Head>>()
                     && <Self::Tail as Untuplable>::has_elements(anymap)
-            }              
+            }
+
         }
     }
 }
+
 
 
 
@@ -347,6 +412,65 @@ pub trait ComponentsTuple
     
 }
 
+trait ComponentsTupleFetchable<'a>: ComponentsTuple
+where
+    Self::Storages: MutRefTuplable<'a>
+{
+    type RefMutStorages;
+    type WeirdComponentTypes;
+    fn fetch(storage_cells: &'a StoragesMap) -> Self::RefMutStorages;
+    fn insert(components: Self::WeirdComponentTypes, index: usize, storage_cells: &'a mut StoragesMap);
+}
+
+
+/*
+
+        impl<'a, A: Component, B: Component> ComponentsTupleFetchable<'a> for (A, B)
+        where
+            <A as Component>::Storage: 'static,
+        <B as Component>::Storage: 'static
+
+{
+            type RefMutStorages =  (RefMut<'a, A::Storage>, RefMut<'a, B::Storage>);
+            fn fetch(storage_cells: &'a StoragesMap) -> Self::RefMutStorages
+            {
+                (storage_cells.get_mut::<<A as Component>::Storage>(),
+                 storage_cells.get_mut::<<B as Component>::Storage>())
+            }
+        }
+*/
+
+
+macro_rules! implement_ComponentsTupleFetchable {
+    ($($comp:ident),*) => {
+        impl<'a, $($comp: Component),*,> ComponentsTupleFetchable<'a> for ($($comp),*,)
+        where
+            $($comp::Storage: 'static),*,
+
+{
+            type RefMutStorages =  ($(RefMut<'a, $comp::Storage>),*,);
+            type WeirdComponentTypes = ($(<<$comp as Component>::Storage as Storage>::Component),*,);
+            fn fetch(storage_cells: &'a StoragesMap) -> Self::RefMutStorages
+            {
+                ($(storage_cells.get_mut::<<$comp as Component>::Storage>()),*,)
+            }
+            
+            fn insert(components: Self::WeirdComponentTypes, index: usize, storage_cells: &'a mut StoragesMap)
+            {
+                match components
+                {
+                    ($($comp),*,) =>
+                    {
+                        $(storage_cells.insert_component::<$comp>(index, $comp));*
+                    }
+                }
+            }
+
+            
+        }
+        
+    }
+}
 
 
 trait RefTuplable<'a>{
@@ -460,7 +584,9 @@ macro_rules! tuples_macro {
 }
 
 tuples_macro!(A);
-*/
+ */
+
+
 implement_untuple!(A, B);
 implement_untuple!(A, B, C);
 
@@ -473,3 +599,7 @@ implement_componentstuples!(A, B, C, D);
 implement_reftuplable!(A);
 implement_reftuplable!(A, B);
 implement_reftuplable!(A, B, C);
+
+implement_ComponentsTupleFetchable!(A);
+implement_ComponentsTupleFetchable!(A, B);
+implement_ComponentsTupleFetchable!(A, B, C);
