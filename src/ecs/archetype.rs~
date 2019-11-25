@@ -1,8 +1,0 @@
-struct BitSet;
-
-struct Archetype
-{
-    indexes_bitset: BitSet,
-    storages: AnyMap<>
-    
-}
