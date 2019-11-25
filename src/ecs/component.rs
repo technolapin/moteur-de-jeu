@@ -1,3 +1,4 @@
+use std::slice::Iter;
 
 /// A component is something you store in a storage
 pub trait Component
@@ -15,6 +16,7 @@ pub trait Storage
     fn delete(&mut self, index: usize);
     fn new() -> Self;
     fn len(&self) -> usize;
+//    fn iter(&mut self) -> Iter<Option<Component>>;
 }
 
 

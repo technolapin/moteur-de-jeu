@@ -4,14 +4,15 @@ use crate::ecs::entity::{Entity, EntityAllocator};
 use crate::ecs::world::World;
 use crate::ecs::component::{Storage, Component};
 use crate::ecs::archetype::*;
+use std::slice::Iter;
 
 // exemple de storage
+
 struct VecStorage<T>
 {
     free_space: Vec<usize>,
     data: Vec<Option<T>>
 }
-
 
 impl<Compo> Storage for VecStorage<Compo>
 where
@@ -74,8 +75,13 @@ where
     {
         self.data.len()
     }
+/*
+    fn iter(&mut self) -> Iter<Option<Compo>>
+    {
+        self.data.iter()
+    }
+*/
 }
-
 struct NotAStorage<Compo>(Vec<Compo>);
 impl<Compo> Storage for NotAStorage<Compo>
 where
@@ -101,6 +107,8 @@ where
     {
         0
     }
+    
+    //fn iter(&mut self) -> (){}
 }
 
 
@@ -265,9 +273,30 @@ fn main() {
 
     println!("has {}", arch.has_components::<(Position, Shape,)>());
 
-    arch.add_entity((Position{x: 0, y: 0},
+    arch.add_entity::<(Position, Shape)>((Position{x: 0, y: 0},
                      Shape::Square(0,0,0,0)));
+    arch.add_entity::<(Position, Shape)>((Position{x: 0, y: 0},
+                     Shape::Square(0,0,0,0)));
+    arch.add_entity::<(Position, Shape)>((Position{x: 0, y: 0},
+                     Shape::Square(0,0,0,0)));
+    arch.add_entity::<(Position, Shape)>((Position{x: 0, y: 0},
+                     Shape::Square(0,0,0,0)));
+    {
+        let mut poses = arch.get_storage_mut::<Position>();
+        for i in 0..poses.data.len()
+        {
+            let pos = poses.get_mut(i).unwrap();
+            pos.x = i as i32;
+        }
+        
+        println!("POSES {:?}", poses.data);
+    }
     
-    let poses = arch.get_storage_mut::<Position>();
+    println!("{:?}", arch);
+
+
+    
+    
     
 }
+
