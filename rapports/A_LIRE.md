@@ -14,3 +14,8 @@ https://nercury.github.io/rust/opengl/tutorial/2018/02/08/opengl-in-rust-from-sc
 
 Utiliser VS Code avec l'extention Rust :
 https://marketplace.visualstudio.com/items?itemName=rust-lang.rust
+
+## Documentations de nos Libs
+
+nPhysics : Bibliothèque pour faire de la physique :
+https://www.nphysics.org/
