@@ -121,10 +121,10 @@ impl Camera
         let v =  v_prod(s, f);
 
         [
-            [s.0, u.0, f.0, 0.],
-            [s.1, u.1, f.1, 0.],
-            [s.2, u.2, f.2, 0.],
-            [0., 0., 0., 0.],
+            [s.0, u.0, f.0, 0.0],
+            [s.1, u.1, f.1, 0.0],
+            [s.2, u.2, f.2, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
         ]
         
     }
@@ -140,10 +140,10 @@ fn main() {
     // lit le .obj
     // building the vertex and index buffers
     let vertex_buffer = load_wavefront(&graphics.display,
-                                                include_bytes!("teapot.obj"));
+                                                include_bytes!("teto.obj"));
 
     // list of teapots with position and direction
-    let mut teapots = (0 .. 10000)
+    let mut teapots = (0 .. 100)
         .map(|_| {
             let pos: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
             let dir: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
