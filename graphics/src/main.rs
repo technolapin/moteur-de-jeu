@@ -18,9 +18,10 @@ fn load_wavefront(display: &glium::Display,
 
     implement_vertex!(Vertex, position, normal, texture);
 
-    let mut data = ::std::io::BufReader::new(data);
-    let data = obj::Obj::load_buf(&mut data).unwrap();
-
+    let mut data = ::std::io::BufReader::new(data); // on ouvre le fichier
+    let mut data = obj::Obj::load_buf(&mut data).unwrap();
+    data.load_mtls().unwrap(); // charge le mlt associé
+   
     let mut vertex_data = Vec::new();
 
     for object in data.objects.iter() {
@@ -122,7 +123,7 @@ impl Camera
 
         [
             [s.0, u.0, f.0, 0.0],
-            [s.1, u.1, f.1, 0.0],
+            [s.1, u.0, f.1, 0.0],
             [s.2, u.2, f.2, 0.0],
             [0.0, 0.0, 0.0, 1.0],
         ]
@@ -139,8 +140,14 @@ fn main() {
 
     // lit le .obj
     // building the vertex and index buffers
-    let vertex_buffer = load_wavefront(&graphics.display,
-                                                include_bytes!("teto.obj"));
+    let teapot_vertex_buffer = load_wavefront(
+        &graphics.display,
+        include_bytes!("teapot.obj")
+    );
+    let teto_vertex_buffer = load_wavefront(
+        &graphics.display,
+        include_bytes!("teto.obj")
+    );
 
     // list of teapots with position and direction
     let mut teapots = (0 .. 100)
@@ -188,9 +195,18 @@ fn main() {
         }
         
 
-        graphics.draw(&vertex_buffer,
-                      &per_instance);
-        
+        //graphics.draw(&teto_vertex_buffer,
+          //            &per_instance);
+
+        let mut frame = graphics.frame();
+        frame.clear();
+        frame.draw(&graphics,
+                   &teapot_vertex_buffer,
+                   &per_instance);
+        frame.draw(&graphics,
+                   &teto_vertex_buffer,
+                   &per_instance);
+        frame.show();
     }
 }
 
@@ -198,10 +214,64 @@ fn main() {
 struct Graphical
 {
     display: glium::Display,
+    frame: Option<Frame>,
     program: glium::Program,
     camera: Camera
 }
 
+
+struct Frame
+{
+    frame: glium::Frame
+}
+
+impl Frame
+{
+    fn new(gr: &Graphical) -> Self
+    {
+        Self
+        {
+            frame: gr.display.draw()
+        }
+    }
+    fn draw(&mut self,
+            gr: &Graphical,
+            vertex_buffer: &glium::vertex::VertexBufferAny,
+            per_instance: &glium::VertexBuffer<Attr>)
+    {
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+        // drawing a frame
+        let params = glium::DrawParameters
+        {
+            depth: glium::Depth {
+                test: glium::DepthTest::IfLess, // si c'est devant
+                write: true, // alors on dessine
+                .. Default::default()
+            },
+            .. Default::default()
+        };
+
+
+        self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
+                          indices,
+                          &gr.program,
+                          &uniform! { matrix: gr.camera.get_view_matrix() },
+                          &params
+        ).unwrap();
+
+        
+    }
+    
+    fn clear(&mut self)
+    {
+        self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
+    }
+    fn show(self)
+    {
+        self.frame.finish().unwrap();
+    }
+}
 
 
 
@@ -248,54 +318,33 @@ impl Graphical
                 f_color = vec4(color, 1.0);
             }
         ",
-            None)
-            .unwrap();
+            None).unwrap();
 
-        Self
+        
+        let mut gr = Self
         {
             display: display,
+            frame: None,
             program: program,
-            camera: Camera::new(1.0)
-        }
-    }
-
-    
-    fn draw(&mut self,
-            vertex_buffer: &glium::vertex::VertexBufferAny, // le buffer de l'objet
-            per_instance: &glium::VertexBuffer<Attr>) // les positions des instanciations de l'objet
-    {
-
-        // NoIndices est le type d'indices qu'on utilise quand on a pas besoin d'indices
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
-        // drawing a frame
-        let params = glium::DrawParameters
-        {
-            depth: glium::Depth {
-                test: glium::DepthTest::IfLess, // si c'est devant
-                write: true, // alors on dessine
-                .. Default::default()
-            },
-            .. Default::default()
+            camera: Camera::new(2.0)
         };
-
-        let mut target = self.display.draw();
-        // remet tout en noir et la distance depth à 1.0
-        target.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
-
-        target.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
-                      indices,
-                      &self.program,
-                      &uniform! { matrix: self.camera.get_view_matrix() },
-                      &params
-        ).unwrap();
-        
-        target.finish().unwrap();
-        
-        
+        gr.frame = Some(Frame::new(&mut gr));
+        gr
     }
-
-
-    
+/*
+    fn clear(&mut self)
+    {
+        self.frame.unwrap().clear();
+    }
+    fn show(&mut self)
+    {
+        self.frame.unwrap().show();
+        self.frame = Some(Frame::new(self));
+    }
+*/
+    fn frame(&mut self) -> Frame
+    {
+        Frame::new(self)
+    }
 }
     
