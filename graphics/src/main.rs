@@ -65,7 +65,7 @@ fn load_wavefront(display: &glium::Display,
 
 fn normalize_vec(v: (f32, f32, f32)) -> (f32, f32, f32)
 {
-    let norm = (v.0*v.0 + v.1*v.1 * v.2*v.2).sqrt();
+    let norm = (v.0*v.0 + v.1*v.1 + v.2*v.2).sqrt();
     (v.0/norm, v.1/norm, v.2/norm)
 }
 
@@ -88,9 +88,11 @@ implement_vertex!(Attr, world_position);
 struct Camera
 {
     position: (f32, f32, f32),
+    up: (f32, f32, f32),
     orientation: (f32, f32, f32),
     aspect_ratio: f32
 }
+
 
 impl Camera
 {
@@ -100,6 +102,7 @@ impl Camera
         {
             position: (0., 0., 0.),
             orientation: (0., 0., -1.),
+            up: (0., 1., 0.),
             aspect_ratio: aspect_ratio
         }
     }
@@ -112,21 +115,69 @@ impl Camera
     {
         self.orientation = normalize_vec(orientation);
     }
+
+    fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32))
+    {
+        //on tourne de rx rad autour de l'axe 0x
+        //on tourne de ry rad autour de l'axe 0y
+        //on tourne de rz rad autour de l'axe 0z
+
+        let (x, y, z) = self.orientation;
+        let (ux, uy, uz) = self.up;
+
+        let (x, y, z) = ( x,
+                          y*rx.cos() + z*rx.sin(),
+                          -y*rx.sin() + z*rx.cos());
+        let (ux, uy, uz) = ( ux,
+                          uy*rx.cos() + uz*rx.sin(),
+                          -uy*rx.sin() + uz*rx.cos());
+        
+
+        let (x, y, z) = ( x*ry.cos() - z*ry.sin(),
+                          y,
+                          x*ry.sin() + z*ry.cos());
+        let (ux, uy, uz) = ( ux*ry.cos() - uz*ry.sin(),
+                          uy,
+                          ux*ry.sin() + uz*ry.cos());
+
+        
+        let (x, y, z) = ( x*rz.cos() + y*rz.sin(),
+                          -x*rz.sin() + y*rz.cos(),
+                          z);
+        let (ux, uy, uz) = ( ux*rz.cos() + uy*rz.sin(),
+                          -ux*rz.sin() + uy*rz.cos(),
+                          uz);
+        
+        self.orientation = normalize_vec((x, y, z));
+        self.up = (ux, uy, uz);
+        println!("orientation: {:?}", self.orientation);
+        
+        
+    }
+    
     
     fn get_view_matrix(&self) -> [[f32; 4]; 4]
     {
         let f = self.orientation;
-        let u = (0., 1., 0.);
-
+        //let u = (0., 1., 0.);
+        //let u = normalize_vec((-f.1, -f.2, f.0));
+        let u = self.up;
+        
         let s = normalize_vec(v_prod(f, u));
         let v =  v_prod(s, f);
+        let p = (
+            -self.position.0*s.0 -self.position.1*s.1 -self.position.1*s.2,
+            -self.position.0*u.0 -self.position.1*u.1 -self.position.1*u.2,
+            -self.position.0*f.0 -self.position.1*f.1 -self.position.1*f.2
+        );
 
         [
             [s.0, u.0, f.0, 0.0],
-            [s.1, u.0, f.1, 0.0],
+            [s.1, u.1, f.1, 0.0],
             [s.2, u.2, f.2, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
+            [p.0, p.1, p.2, 1.0],
         ]
+
         
     }
     
@@ -176,12 +227,10 @@ fn main() {
         glium::vertex::VertexBuffer::dynamic(&graphics.display, &data).unwrap()
     };
 
-
-
-
     // the main loop
     loop
     {
+        graphics.camera.rotation((0., 0.01, 0.001));
         // updating the teapots
         {
             let mut mapping = per_instance.map();
@@ -195,26 +244,25 @@ fn main() {
         }
         
 
-        //graphics.draw(&teto_vertex_buffer,
-          //            &per_instance);
-
         let mut frame = graphics.frame();
         frame.clear();
         frame.draw(&graphics,
-                   &teapot_vertex_buffer,
-                   &per_instance);
-        frame.draw(&graphics,
                    &teto_vertex_buffer,
                    &per_instance);
+        frame.draw(&graphics,
+                   &teapot_vertex_buffer,
+                   &per_instance);
+
         frame.show();
-    }
+        
+    }   
+
 }
 
 
 struct Graphical
 {
     display: glium::Display,
-    frame: Option<Frame>,
     program: glium::Program,
     camera: Camera
 }
@@ -256,7 +304,7 @@ impl Frame
         self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                           indices,
                           &gr.program,
-                          &uniform! { matrix: gr.camera.get_view_matrix() },
+                          &uniform! { view_matrix: gr.camera.get_view_matrix() },
                           &params
         ).unwrap();
 
@@ -296,11 +344,13 @@ impl Graphical
             out vec3 v_normal;
             out vec3 v_color;
 
+            uniform mat4 view_matrix;
+
             void main() {
                 v_position = position;
                 v_normal = normal;
                 v_color = vec3(float(gl_InstanceID) / 10000.0, 1.0, 1.0);
-                gl_Position = vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
             }
         ",
             "
@@ -321,30 +371,15 @@ impl Graphical
             None).unwrap();
 
         
-        let mut gr = Self
+        Self
         {
             display: display,
-            frame: None,
             program: program,
             camera: Camera::new(2.0)
-        };
-        gr.frame = Some(Frame::new(&mut gr));
-        gr
+        }
     }
-/*
-    fn clear(&mut self)
-    {
-        self.frame.unwrap().clear();
-    }
-    fn show(&mut self)
-    {
-        self.frame.unwrap().show();
-        self.frame = Some(Frame::new(self));
-    }
-*/
     fn frame(&mut self) -> Frame
     {
         Frame::new(self)
     }
 }
-    
