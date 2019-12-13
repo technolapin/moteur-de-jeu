@@ -5,18 +5,20 @@ extern crate rand;
 #[allow(unused_imports)]
 use glium::{glutin, Surface};
 
+#[derive(Copy, Clone)]
+struct Vertex {
+    position: [f32; 3],
+    normal: [f32; 3],
+    texture: [f32; 2],
+}
+
+implement_vertex!(Vertex, position, normal, texture);
+
+
 
 fn load_wavefront(display: &glium::Display,
                   data: &[u8]) -> glium::vertex::VertexBufferAny
 {
-    #[derive(Copy, Clone)]
-    struct Vertex {
-        position: [f32; 3],
-        normal: [f32; 3],
-        texture: [f32; 2],
-    }
-
-    implement_vertex!(Vertex, position, normal, texture);
 
     let mut data = ::std::io::BufReader::new(data); // on ouvre le fichier
     let mut data = obj::Obj::load_buf(&mut data).unwrap();
@@ -55,6 +57,226 @@ fn load_wavefront(display: &glium::Display,
         .into_vertex_buffer_any()
 }
 
+use glium::vertex::{VertexBufferAny, VertexBuffer};
+use glium::texture::{RawImage2d, Texture2d};
+
+
+#[derive(Debug)]
+struct Material
+{
+    texture: Texture2d
+}
+
+#[derive(Debug)]
+struct Group
+{
+    voxels: VertexBufferAny,
+    material: Option<String>
+}
+
+#[derive(Debug)]
+struct Objects
+{
+//    meshes: Vec<(VertexBufferAny, Option<String>)>,
+    objects: HashMap<String, Vec<Group>>,
+    materials: HashMap<String, Material>
+}
+
+use std::fs::File;
+use obj::{Obj, Mtl};
+use std::io::Cursor;
+use std::collections::HashMap;
+
+
+
+impl Objects
+{
+    fn new(gr: &Graphical, path_to_wavefront: &str, path_to_mtl: &str) -> Self
+    {
+        use genmesh::{Polygon, Triangle, Quad};
+        
+        
+        
+        let file = File::open(path_to_wavefront).unwrap();
+        let mut bufreader = ::std::io::BufReader::new(file);
+        let mut obj = Obj::load_buf(&mut bufreader).unwrap();
+        obj.load_mtls().unwrap();
+        
+        let file = File::open(path_to_mtl).unwrap();
+        let mut bufreader = ::std::io::BufReader::new(file);
+        
+        let mtl = Mtl::load(&mut bufreader);
+        
+        //println!("{}", mtl.materials);
+        /*
+        let ambient_color = None; // Ka
+        let diffuse_color = None; // Kd
+        let specular_color = None; // Ks
+        let emissive = None; // Ke
+        // Km?
+        // Tf?
+        let specular_exponent = None; // Ns
+        // Ni?
+        let opacity = None; // d or Tr (d = 1-Tr)
+        let illumination = None; // illum
+
+        let map_ambiant_color = None;
+        let map_diffuse_color = None;
+        let map_specular_color = None;
+        let map_emissive = None;
+        let map_specular_exponent = None;
+        let map_opacity = None;
+        let map_bump = None;
+        let map_reflexion = None;
+         */
+        let mut materials = HashMap::new();
+        
+        
+        for material in mtl.materials.iter()
+        {
+            let texture = if let Some(texture_path) = &material.map_kd
+            {
+                let file = File::open(texture_path).unwrap();
+                let mut bufreader = ::std::io::BufReader::new(file);
+                let image = image::load(&mut bufreader,
+                                    image::PNG).unwrap().to_rgba();
+                let image_dimensions = image.dimensions();
+                let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+                let texture = Texture2d::new(&gr.display, image).unwrap();
+                texture
+            }
+            else
+            {
+                Texture2d::empty(&gr.display, 1, 1).unwrap()
+            };
+            println!("MATERIAL: {}", material.name.clone());
+            materials.insert(material.name.clone(), Material{texture: texture});
+        }
+                
+        let mut objects = Objects{
+            objects: HashMap::new(),
+            materials: materials
+        };
+        
+        println!("{:?}", obj.objects);
+        
+        for object in obj.objects.iter()
+        {
+            let mut groups = Vec::new();
+            for group in object.groups.iter()
+            {
+                let mut mesh = Vec::new();
+                
+                
+                for polygon in group.polys.iter()
+                {
+                    match polygon
+                    {
+                        &Polygon::PolyTri(
+                            Triangle{x: v1, y: v2, z: v3}) =>
+                        {
+                            for v in [v1, v2, v3].iter()
+                            {
+                                let position = obj.position[v.0];
+                                let texture = v.1.map(|index| obj.texture[index]);
+                                let normal = v.2.map(|index| obj.normal[index]);
+
+                                let texture = texture.unwrap_or([0.0, 0.0]);
+                                let normal = normal.unwrap_or([0.0, 0.0, 0.0]);
+
+                                mesh.push(Vertex
+                                          {
+                                              position: position,
+                                              normal: normal,
+                                              texture: texture,
+                                          })
+                            
+                            }
+                        },
+                        &Polygon::PolyQuad(
+                            Quad{x: v1, y: v2, z: v3, w: v4}) =>
+                        {
+                            for v in [v1, v2, v3].iter()
+                            {
+                                let position = obj.position[v.0];
+                                let texture = v.1.map(|index| obj.texture[index]);
+                                let normal = v.2.map(|index| obj.normal[index]);
+
+                                let texture = texture.unwrap_or([0.0, 0.0]);
+                                let normal = normal.unwrap_or([0.0, 0.0, 0.0]);
+
+                                mesh.push(Vertex
+                                          {
+                                              position: position,
+                                              normal: normal,
+                                              texture: texture,
+                                          })
+                                    
+                            }
+                            for v in [v3, v4, v1].iter()
+                            {
+                                let position = obj.position[v.0];
+                                let texture = v.1.map(|index| obj.texture[index]);
+                                let normal = v.2.map(|index| obj.normal[index]);
+
+                                let texture = texture.unwrap_or([0.0, 0.0]);
+                                let normal = normal.unwrap_or([0.0, 0.0, 0.0]);
+
+                                mesh.push(Vertex
+                                          {
+                                              position: position,
+                                              normal: normal,
+                                              texture: texture,
+                                          })
+                                    
+                            }
+                        }
+
+                    }
+                }
+
+                groups.push(
+                    Group
+                    {
+                        voxels: VertexBuffer::new(&gr.display, &mesh).unwrap()
+                            .into_vertex_buffer_any(),
+                        material: match &group.material
+                        {
+                            Some(mat) => Some(mat.name.clone()),
+                            None => None
+                        }
+                    }
+                );
+                
+            }
+            objects.objects.insert(object.name.clone(), groups);
+        }
+
+        objects
+
+    }
+
+    fn get_object(&self, name: String) -> Vec<(&VertexBufferAny, Option<&Material>)>
+    {
+        let groups = self.objects.get(&name).unwrap();
+
+        groups.iter().map(|group|
+                          {
+                              (
+                                  &group.voxels,
+                                  match &group.material
+                                  {
+                                      None => None,
+                                      Some(string) => self.materials.get(string)
+                                  }
+                               )
+                          }
+        ).collect::<Vec<_>>()
+        
+        
+    }
+
+}
 
 
 
@@ -150,7 +372,6 @@ impl Camera
         
         self.orientation = normalize_vec((x, y, z));
         self.up = (ux, uy, uz);
-        println!("orientation: {:?}", self.orientation);
         
         
     }
@@ -199,7 +420,25 @@ fn main() {
         &graphics.display,
         include_bytes!("teto.obj")
     );
+    let textured_cube = load_wavefront(
+        &graphics.display,
+        include_bytes!("textured_cube.obj")
+    );
 
+    /*
+    use std::io::Cursor;
+    let image = image::load(Cursor::new(&include_bytes!("zelda.png")[..]),
+                            image::PNG).unwrap().to_rgba();
+    let image_dimensions = image.dimensions();
+    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = glium::texture::Texture2d::new(&graphics.display, image).unwrap();
+*/
+
+    let kube = Objects::new(&graphics, "textured_cube.obj", "textured_cube.mtl");
+    // let kube = Objects::new(&graphics, "teto.obj", "teto.mtl");
+    
+    println!("\nKube: {:?}", kube);
+    
     // list of teapots with position and direction
     let mut teapots = (0 .. 100)
         .map(|_| {
@@ -227,6 +466,11 @@ fn main() {
         glium::vertex::VertexBuffer::dynamic(&graphics.display, &data).unwrap()
     };
 
+
+
+    let to_display = kube.get_object(String::from("Cube.001"));
+    
+    
     // the main loop
     loop
     {
@@ -246,13 +490,36 @@ fn main() {
 
         let mut frame = graphics.frame();
         frame.clear();
+        /*
         frame.draw(&graphics,
                    &teto_vertex_buffer,
                    &per_instance);
         frame.draw(&graphics,
                    &teapot_vertex_buffer,
                    &per_instance);
+         */
+        /*
+        frame.draw(&graphics,
+                   &textured_cube,
+                   &per_instance, &texture);
+*/
+        to_display.iter().for_each(
+            |(vertexes, maybe_material)|
+            {
+                match maybe_material
+                {
+                    Some(material) =>
+                    {
+                        frame.draw(&graphics,
+                                   vertexes,
+                                   &per_instance, &material.texture);
+                    },
+                    None => unimplemented!()
+                }
+            }
+        );
 
+        
         frame.show();
         
     }   
@@ -285,7 +552,9 @@ impl Frame
     fn draw(&mut self,
             gr: &Graphical,
             vertex_buffer: &glium::vertex::VertexBufferAny,
-            per_instance: &glium::VertexBuffer<Attr>)
+            per_instance: &glium::VertexBuffer<Attr>,
+            texture: &glium::texture::Texture2d
+    )
     {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -304,7 +573,7 @@ impl Frame
         self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                           indices,
                           &gr.program,
-                          &uniform! { view_matrix: gr.camera.get_view_matrix() },
+                          &uniform! { texture: texture, view_matrix: gr.camera.get_view_matrix() },
                           &params
         ).unwrap();
 
@@ -340,13 +609,17 @@ impl Graphical
             in vec3 position;
             in vec3 normal;
             in vec3 world_position;
+            in vec2 texture;
+            out vec2 v_tex_coords;
             out vec3 v_position;
             out vec3 v_normal;
             out vec3 v_color;
 
             uniform mat4 view_matrix;
 
+
             void main() {
+                v_tex_coords = texture;
                 v_position = position;
                 v_normal = normal;
                 v_color = vec3(float(gl_InstanceID) / 10000.0, 1.0, 1.0);
@@ -358,8 +631,16 @@ impl Graphical
 
             in vec3 v_normal;
             in vec3 v_color;
+            in vec2 v_tex_coords;
             out vec4 f_color;
 
+
+            uniform sampler2D tex;
+
+            void main() {
+              f_color = texture(tex, v_tex_coords);
+            }
+        ",/*
             const vec3 LIGHT = vec3(-0.2, 0.8, 0.1);
 
             void main() {
@@ -367,7 +648,7 @@ impl Graphical
                 vec3 color = (0.3 + 0.7 * lum) * v_color;
                 f_color = vec4(color, 1.0);
             }
-        ",
+        ",*/
             None).unwrap();
 
         
