@@ -15,7 +15,7 @@ struct Vertex {
 implement_vertex!(Vertex, position, normal, texture);
 
 
-
+/*
 fn load_wavefront(display: &glium::Display,
                   data: &[u8]) -> glium::vertex::VertexBufferAny
 {
@@ -56,15 +56,29 @@ fn load_wavefront(display: &glium::Display,
     glium::vertex::VertexBuffer::new(display, &vertex_data).unwrap()
         .into_vertex_buffer_any()
 }
-
+*/
 use glium::vertex::{VertexBufferAny, VertexBuffer};
 use glium::texture::{RawImage2d, Texture2d};
 
 
 #[derive(Debug)]
-struct Material
+enum Material
 {
-    texture: Texture2d
+    Textured // incomplets
+    {
+        texture: Texture2d
+    },
+    NonTextured
+    {
+        ambiant: [f32; 3],
+        diffuse: [f32; 3],
+        specular: [f32; 3],
+        emission: [f32; 3],
+        opacity: f32
+        
+    },
+    Default
+        
 }
 
 #[derive(Debug)]
@@ -87,6 +101,11 @@ use obj::{Obj, Mtl};
 use std::io::Cursor;
 use std::collections::HashMap;
 
+fn maybe<T>(option: Option<T>, s: &'static str) -> T
+{
+    assert!(option.is_some(), s);
+    option.unwrap()
+}
 
 
 impl Objects
@@ -134,23 +153,83 @@ impl Objects
         
         for material in mtl.materials.iter()
         {
-            let texture = if let Some(texture_path) = &material.map_kd
+            let mat = match &material
             {
-                let file = File::open(texture_path).unwrap();
-                let mut bufreader = ::std::io::BufReader::new(file);
-                let image = image::load(&mut bufreader,
+                obj::Material {
+                    name: _,
+                    ka: _,
+                    kd: _,
+                    ks: _,
+                    ke: _,
+                    km: _,
+                    tf: _,
+                    ns: _,
+                    ni: _,
+                    tr: _,
+                    d: _,
+                    illum: _,
+                    map_ka: _,
+                    map_kd: Some(texture_path),
+                    map_ks: _,
+                    map_ke: _,
+                    map_ns: _,
+                    map_d: _,
+                    map_bump: _,
+                    map_refl: _,
+                }                =>
+                {
+                    let file = File::open(texture_path).unwrap();
+                    let mut bufreader = ::std::io::BufReader::new(file);
+                    let image = image::load(&mut bufreader,
                                     image::PNG).unwrap().to_rgba();
-                let image_dimensions = image.dimensions();
-                let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-                let texture = Texture2d::new(&gr.display, image).unwrap();
-                texture
-            }
-            else
-            {
-                Texture2d::empty(&gr.display, 1, 1).unwrap()
+                    let image_dimensions = image.dimensions();
+                    let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+                    let texture = Texture2d::new(&gr.display, image).unwrap();
+                    Material::Textured{texture: texture}
+                },
+                obj::Material {
+                    name: _,
+                    ka: Some(ambiant),
+                    kd: Some(diffuse),
+                    ks: Some(specular),
+                    ke: Some(emission),
+                    km: _,
+                    tf: _,
+                    ns: _,
+                    ni: _,
+                    tr: transparency,
+                    d: opacity,
+                    illum: _,
+                    map_ka: _,
+                    map_kd: None,
+                    map_ks: _,
+                    map_ke: _,
+                    map_ns: _,
+                    map_d: _,
+                    map_bump: _,
+                    map_refl: _,
+                } =>
+                {
+                    let opacity = opacity.unwrap_or(1.).min(
+                        1. - transparency.unwrap_or(0.)
+                    );
+
+                    Material::NonTextured
+                    {
+                        ambiant: *ambiant,
+                        diffuse: *diffuse,
+                        specular: *specular,
+                        emission: *emission,
+                        opacity: opacity
+                    }
+                },
+
+                _ =>
+                {
+                    Material::Default
+                }
             };
-            println!("MATERIAL: {}", material.name.clone());
-            materials.insert(material.name.clone(), Material{texture: texture});
+            materials.insert(material.name.clone(), mat);
         }
                 
         let mut objects = Objects{
@@ -158,7 +237,6 @@ impl Objects
             materials: materials
         };
         
-        println!("{:?}", obj.objects);
         
         for object in obj.objects.iter()
         {
@@ -258,7 +336,7 @@ impl Objects
 
     fn get_object(&self, name: String) -> Vec<(&VertexBufferAny, Option<&Material>)>
     {
-        let groups = self.objects.get(&name).unwrap();
+        let groups = maybe(self.objects.get(&name), "COULD NOT GET OBJECT");
 
         groups.iter().map(|group|
                           {
@@ -410,6 +488,8 @@ fn main() {
 
     let mut graphics = Graphical::new();
 
+    /*
+    
     // lit le .obj
     // building the vertex and index buffers
     let teapot_vertex_buffer = load_wavefront(
@@ -424,7 +504,7 @@ fn main() {
         &graphics.display,
         include_bytes!("textured_cube.obj")
     );
-
+    */
     /*
     use std::io::Cursor;
     let image = image::load(Cursor::new(&include_bytes!("zelda.png")[..]),
@@ -434,10 +514,11 @@ fn main() {
     let texture = glium::texture::Texture2d::new(&graphics.display, image).unwrap();
 */
 
-    let kube = Objects::new(&graphics, "textured_cube.obj", "textured_cube.mtl");
-    // let kube = Objects::new(&graphics, "teto.obj", "teto.mtl");
     
-    println!("\nKube: {:?}", kube);
+    let kube = Objects::new(&graphics, "textured_cube.obj", "textured_cube.mtl");
+    let teto = Objects::new(&graphics, "teto.obj", "teto.mtl");
+    let red = Objects::new(&graphics, "red_cube.obj", "red_cube.mtl");
+    println!("\nteto: {:?}", teto);
     
     // list of teapots with position and direction
     let mut teapots = (0 .. 100)
@@ -467,8 +548,11 @@ fn main() {
     };
 
 
+    let mut to_display = Vec::new();
 
-    let to_display = kube.get_object(String::from("Cube.001"));
+    to_display.append(&mut kube.get_object(String::from("Cube.001")));
+    to_display.append(&mut teto.get_object(String::from("Lat式改変テト_mesh_Lat式改変テト")));
+    to_display.append(&mut red.get_object(String::from("Cube")));
     
     
     // the main loop
@@ -512,7 +596,7 @@ fn main() {
                     {
                         frame.draw(&graphics,
                                    vertexes,
-                                   &per_instance, &material.texture);
+                                   &per_instance, material);
                     },
                     None => unimplemented!()
                 }
@@ -530,7 +614,9 @@ fn main() {
 struct Graphical
 {
     display: glium::Display,
-    program: glium::Program,
+    program_textured: glium::Program,
+    program_nontextured: glium::Program,
+    program_default: glium::Program,
     camera: Camera
 }
 
@@ -553,7 +639,7 @@ impl Frame
             gr: &Graphical,
             vertex_buffer: &glium::vertex::VertexBufferAny,
             per_instance: &glium::VertexBuffer<Attr>,
-            texture: &glium::texture::Texture2d
+            material: &Material
     )
     {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
@@ -569,13 +655,49 @@ impl Frame
             .. Default::default()
         };
 
+        match material
+        {
+            Material::Textured{texture: texture} =>
+            {
+                self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
+                                  indices,
+                                  &gr.program_textured,
+                                  &uniform! { texture: texture, view_matrix: gr.camera.get_view_matrix() },
+                                  &params).unwrap();
+            },
+            Material::NonTextured{
+                ambiant: ambiant,
+                diffuse: diffuse,
+                specular: specular,
+                emission: emission,
+                opacity: opacity
+            } =>
+            {
+                self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
+                                  indices,
+                                  &gr.program_nontextured,
+                                  &uniform! {view_matrix: gr.camera.get_view_matrix(),
+                                             ambiant: *ambiant,
+                                             diffuse: *diffuse,
+                                             specular: *specular,
+                                             emission: *emission,
+                                             opacity: *opacity
+                                  },
+                                  &params).unwrap();
+            }
+            _ =>
+            {
+                self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
+                                  indices,
+                                  &gr.program_default,
+                                  &uniform! {view_matrix: gr.camera.get_view_matrix() },
+                                  &params).unwrap();
+            }
+            
+        }
+        
 
-        self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
-                          indices,
-                          &gr.program,
-                          &uniform! { texture: texture, view_matrix: gr.camera.get_view_matrix() },
-                          &params
-        ).unwrap();
+        
 
         
     }
@@ -601,7 +723,7 @@ impl Graphical
         let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
         // les shaders, toussa
-        let program = glium::Program::from_source(
+        let program_textured = glium::Program::from_source(
             &display,
             "
             #version 140
@@ -651,11 +773,94 @@ impl Graphical
         ",*/
             None).unwrap();
 
+        let program_nontextured = glium::Program::from_source(
+            &display,
+            "
+            #version 140
+
+            in vec3 position;
+            in vec3 normal;
+            in vec3 world_position;
+
+            out vec3 v_position;
+            out vec3 v_normal;
+            out vec3 v_color;
+
+            uniform mat4 view_matrix;
+            uniform vec3 ambiant;
+            uniform vec3 diffuse;
+            uniform vec3 specular;
+            uniform vec3 emission;
+            uniform float opacity;
+
+            void main() {
+                v_position = position;
+                v_normal = normalize(normal);
+                v_color = diffuse;
+                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+            }
+        ",
+            "
+            #version 140
+
+            in vec3 v_normal;
+            in vec3 v_color;
+            out vec4 f_color;
+
+
+ 
+            void main() {
+              f_color = vec4(v_color, 255);
+            }
+        ",
+            None).unwrap();
+
+
+
+        let program_default = glium::Program::from_source(
+            &display,
+            "
+            #version 140
+
+            in vec3 position;
+            in vec3 normal;
+            in vec3 world_position;
+            out vec3 v_position;
+
+            uniform mat4 view_matrix;
+
+
+            void main() {
+                v_position = position;
+                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+            }
+        ",
+            "
+            #version 140
+            out vec4 f_color;
+
+
+            void main() {
+              f_color = vec4(255, 0, 255, 255);
+            }
+        ",/*
+            const vec3 LIGHT = vec3(-0.2, 0.8, 0.1);
+
+            void main() {
+                float lum = max(dot(normalize(v_normal), normalize(LIGHT)), 0.0);
+                vec3 color = (0.3 + 0.7 * lum) * v_color;
+                f_color = vec4(color, 1.0);
+            }
+        ",*/
+            None).unwrap();
+
         
         Self
         {
             display: display,
-            program: program,
+            program_textured: program_textured,
+            program_nontextured: program_nontextured,
+            program_default: program_default,
             camera: Camera::new(2.0)
         }
     }
