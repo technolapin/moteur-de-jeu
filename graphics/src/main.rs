@@ -70,10 +70,11 @@ enum Material
     },
     NonTextured
     {
-        ambiant: [f32; 3],
-        diffuse: [f32; 3],
-        specular: [f32; 3],
-        emission: [f32; 3],
+        ambiant_color: [f32; 3],
+        diffuse_color: [f32; 3],
+        specular_color: [f32; 3],
+        specular_exponent: f32,
+        emission_color: [f32; 3],
         opacity: f32
         
     },
@@ -135,7 +136,7 @@ impl Objects
         // Km?
         // Tf?
         let specular_exponent = None; // Ns
-        // Ni?
+        let refraction_indice = None;// Ni?
         let opacity = None; // d or Tr (d = 1-Tr)
         let illumination = None; // illum
 
@@ -178,10 +179,7 @@ impl Objects
                     map_refl: _,
                 }                =>
                 {
-                    let file = File::open(texture_path).unwrap();
-                    let mut bufreader = ::std::io::BufReader::new(file);
-                    let image = image::load(&mut bufreader,
-                                    image::PNG).unwrap().to_rgba();
+                    let image = image::open(texture_path).unwrap().to_rgba();
                     let image_dimensions = image.dimensions();
                     let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
                     let texture = Texture2d::new(&gr.display, image).unwrap();
@@ -195,7 +193,7 @@ impl Objects
                     ke: Some(emission),
                     km: _,
                     tf: _,
-                    ns: _,
+                    ns: Some(specular_exponent),
                     ni: _,
                     tr: transparency,
                     d: opacity,
@@ -216,10 +214,11 @@ impl Objects
 
                     Material::NonTextured
                     {
-                        ambiant: *ambiant,
-                        diffuse: *diffuse,
-                        specular: *specular,
-                        emission: *emission,
+                        ambiant_color: *ambiant,
+                        diffuse_color: *diffuse,
+                        specular_color: *specular,
+                        specular_exponent: *specular_exponent,
+                        emission_color: *emission,
                         opacity: opacity
                     }
                 },
@@ -666,10 +665,11 @@ impl Frame
                                   &params).unwrap();
             },
             Material::NonTextured{
-                ambiant: ambiant,
-                diffuse: diffuse,
-                specular: specular,
-                emission: emission,
+                ambiant_color: ambiant,
+                diffuse_color: diffuse,
+                specular_color: specular,
+                specular_exponent: specular_exponent,
+                emission_color: emission,
                 opacity: opacity
             } =>
             {
@@ -680,6 +680,7 @@ impl Frame
                                              ambiant: *ambiant,
                                              diffuse: *diffuse,
                                              specular: *specular,
+                                             specular_exponent: *specular_exponent,
                                              emission: *emission,
                                              opacity: *opacity
                                   },
@@ -784,33 +785,40 @@ impl Graphical
 
             out vec3 v_position;
             out vec3 v_normal;
-            out vec3 v_color;
+            out vec4 v_color;
 
             uniform mat4 view_matrix;
-            uniform vec3 ambiant;
+
+            uniform vec3 ambiant; // remarque, ce n'est pas le rôle de l'objet de savoir l'ambiance
             uniform vec3 diffuse;
             uniform vec3 specular;
+            uniform float specular_exponent;
             uniform vec3 emission;
             uniform float opacity;
 
+            const vec3 light_direction = normalize(vec3(0., 1., 1.));
+            const vec3 light_color = vec3(1., 1., 0.9);
+
             void main() {
+                float diffusion = max(dot(normalize(normal), light_direction), 0.);
                 v_position = position;
                 v_normal = normalize(normal);
-                v_color = diffuse;
+                v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity);
                 gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
             }
         ",
             "
             #version 140
+            uniform vec3 specular;
 
             in vec3 v_normal;
-            in vec3 v_color;
+            in vec4 v_color;
             out vec4 f_color;
 
 
  
             void main() {
-              f_color = vec4(v_color, 255);
+              f_color = v_color;
             }
         ",
             None).unwrap();
