@@ -54,7 +54,11 @@ impl Frame
                 self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                                   indices,
                                   &gr.program_textured,
-                                  &uniform! { texture: texture, view_matrix: gr.camera.get_view_matrix() },
+                                  &uniform! {
+                                      texture: texture,
+                                      view_matrix: gr.camera.get_view_matrix(),
+                                      perspective_matrix: gr.camera.get_perspective_matrix(),
+                                  },
                                   &params).unwrap();
             },
             Material::NonTextured{
@@ -70,6 +74,7 @@ impl Frame
                                   indices,
                                   &gr.program_nontextured,
                                   &uniform! {view_matrix: gr.camera.get_view_matrix(),
+                                             perspective_matrix: gr.camera.get_perspective_matrix(),
                                              ambiant: *ambiant,
                                              diffuse: *diffuse,
                                              specular: *specular,

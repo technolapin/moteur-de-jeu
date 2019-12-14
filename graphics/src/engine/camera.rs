@@ -23,6 +23,11 @@ impl Camera
         }
     }
 
+    pub fn set_aspect_ratio(&mut self, width: f32, height: f32)
+    {
+        self.aspect_ratio = height/width;
+    }
+    
     pub fn set_position(&mut self, position: (f32, f32, f32))
     {
         self.position = position;
@@ -95,6 +100,24 @@ impl Camera
         ]
 
         
+    }
+
+    pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4]
+    {
+        //let (width, height) = target.get_dimensions();
+
+        let fov: f32 = 3.141592 / 3.0;
+        let zfar = 1024.0;
+        let znear = 0.1;
+
+        let f = 1.0 / (fov / 2.0).tan();
+
+        [
+            [f *   self.aspect_ratio,    0.0,              0.0              ,   0.0],
+            [         0.0           ,     f ,              0.0              ,   0.0],
+            [         0.0           ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
+            [         0.0           ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
+        ]
     }
     
 }

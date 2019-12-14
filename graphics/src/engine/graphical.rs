@@ -12,6 +12,7 @@ pub struct Graphical
 
 impl Graphical
 {
+
     pub fn new() -> Self
     {
         let event_loop = glutin::EventsLoop::new();
@@ -34,6 +35,7 @@ impl Graphical
             out vec3 v_color;
 
             uniform mat4 view_matrix;
+            uniform mat4 perspective_matrix;
 
 
             void main() {
@@ -41,7 +43,7 @@ impl Graphical
                 v_position = position;
                 v_normal = normal;
                 v_color = vec3(float(gl_InstanceID) / 10000.0, 1.0, 1.0);
-                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = perspective_matrix*view_matrix*vec4(position * 0.0005 + world_position, 1.0);
             }
         ",
             "
@@ -83,6 +85,7 @@ impl Graphical
             out vec4 v_color;
 
             uniform mat4 view_matrix;
+            uniform mat4 perspective_matrix;
 
             uniform vec3 ambiant; // remarque, ce n'est pas le rôle de l'objet de savoir l'ambiance
             uniform vec3 diffuse;
@@ -103,7 +106,7 @@ impl Graphical
                 v_position = position;
                 v_normal = normalize(normal);
                 v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity + specular*spec);
-                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = perspective_matrix*view_matrix*vec4(position * 0.0005 + world_position, 1.0);
             }
         ",
             "
@@ -171,9 +174,18 @@ impl Graphical
             camera: Camera::new(2.0)
         }
     }
+
     
     pub fn frame(&mut self) -> Frame
     {
         Frame::new(self)
     }
+
+    pub fn update_dimensions(&mut self)
+    {
+        let (w, h) = self.display.get_framebuffer_dimensions();
+        println!("{} {} {}", w, h, (w as f32)/(h as f32));
+        self.camera.set_aspect_ratio(w as f32, h as f32);
+    }
+
 }
