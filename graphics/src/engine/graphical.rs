@@ -96,9 +96,13 @@ impl Graphical
 
             void main() {
                 float diffusion = max(dot(normalize(normal), light_direction), 0.);
+                vec3 camera_dir = normalize(-position);
+                vec3 half_direction = normalize(normalize(light_direction) + camera_dir);
+
+                float spec = pow(max(dot(half_direction, normalize(normal)), 0.0), specular_exponent);
                 v_position = position;
                 v_normal = normalize(normal);
-                v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity);
+                v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity + specular*spec);
                 gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
             }
         ",

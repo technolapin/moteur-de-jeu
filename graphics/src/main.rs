@@ -28,14 +28,33 @@ use misc::*;
 
 
 
+use std::path::Path;
 
 fn main() {
+
+    let args: Vec<String> = std::env::args().collect();
+    let executable_path = Path::new(&args[0]);
+    let crate_path = executable_path.parent().unwrap().parent().unwrap().parent().unwrap();
+    let ressources_path = crate_path.join(Path::new("ressources"));
+    // The first argument is the path that was used to call the program.
+    println!("My path is {:?}.", executable_path);
+    println!("Crate path is {:?}.", crate_path);
+    
     let mut graphics = Graphical::new();
 
     
-    let kube = Objects::new(&graphics, "textured_cube.obj", "textured_cube.mtl");
-    let teto = Objects::new(&graphics, "teto.obj", "teto.mtl");
-    let red = Objects::new(&graphics, "red_cube.obj", "red_cube.mtl");
+    let kube = Objects::new(&graphics,
+                            Path::new("textured_cube.obj"),
+                            Path::new("textured_cube.mtl"),
+                            &ressources_path);
+    let teto = Objects::new(&graphics,
+                            Path::new("teto.obj"),
+                            Path::new("teto.mtl"),
+                            &ressources_path);
+    let red = Objects::new(&graphics,
+                           Path::new("red_cube.obj"),
+                           Path::new("red_cube.mtl"),
+                           &ressources_path);
     
     println!("\nteto: {:?}", teto);
     

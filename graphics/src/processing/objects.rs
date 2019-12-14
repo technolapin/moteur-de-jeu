@@ -23,19 +23,29 @@ pub struct Objects
     materials: HashMap<String, Material>
 }
 
+use std::path::Path;
+
 impl Objects
 {
-    pub fn new(gr: &Graphical, path_to_wavefront: &str, path_to_mtl: &str) -> Self
+    pub fn new(gr: &Graphical, path_to_wavefront: &Path, path_to_mtl: &Path, ressources_path: &Path) -> Self
     {
         use genmesh::{Polygon, Triangle, Quad};
         
+        let path_to_wavefront = ressources_path
+            .join(path_to_wavefront);
+        let path_to_mtl = ressources_path
+            .join(path_to_mtl);
+
+        println!("OBJ {:?}", path_to_wavefront);
+        println!("MTL {:?}", path_to_mtl);
+
+        let file = File::open(path_to_wavefront).expect("Can't open wavefront");
         
-        
-        let file = File::open(path_to_wavefront).unwrap();
         let mut bufreader = ::std::io::BufReader::new(file);
+
         let mut obj = Obj::load_buf(&mut bufreader).unwrap();
-        obj.load_mtls().unwrap();
-        
+        println!("MARCO!");
+        //obj.load_mtls().unwrap(); // ne sert à priori à rien du tout pour nous, à voir (et fait planter)
         let file = File::open(path_to_mtl).unwrap();
         let mut bufreader = ::std::io::BufReader::new(file);
         
@@ -93,7 +103,8 @@ impl Objects
                     map_refl: _,
                 }                =>
                 {
-                    let image = image::open(texture_path).unwrap().to_rgba();
+                    println!("TEXTURE PATH {}", texture_path);
+                    let image = image::open(ressources_path.join(Path::new(texture_path))).unwrap().to_rgba();
                     let image_dimensions = image.dimensions();
                     let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
                     let texture = Texture2d::new(&gr.display, image).unwrap();
