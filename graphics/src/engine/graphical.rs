@@ -27,7 +27,7 @@ impl Graphical
 
             in vec3 position;
             in vec3 normal;
-            in vec3 world_position;
+            in mat4 world_transformation;
             in vec2 texture;
             out vec2 v_tex_coords;
             out vec3 v_position;
@@ -43,7 +43,7 @@ impl Graphical
                 v_position = position;
                 v_normal = normal;
                 v_color = vec3(float(gl_InstanceID) / 10000.0, 1.0, 1.0);
-                gl_Position = perspective_matrix*view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
             "
@@ -78,7 +78,7 @@ impl Graphical
 
             in vec3 position;
             in vec3 normal;
-            in vec3 world_position;
+            in mat4 world_transformation;
 
             out vec3 v_position;
             out vec3 v_normal;
@@ -106,7 +106,7 @@ impl Graphical
                 v_position = position;
                 v_normal = normalize(normal);
                 v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity + specular*spec);
-                gl_Position = perspective_matrix*view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
             "
@@ -134,7 +134,7 @@ impl Graphical
 
             in vec3 position;
             in vec3 normal;
-            in vec3 world_position;
+            in mat4 world_transformation;
             out vec3 v_position;
 
             uniform mat4 view_matrix;
@@ -142,7 +142,7 @@ impl Graphical
 
             void main() {
                 v_position = position;
-                gl_Position = view_matrix*vec4(position * 0.0005 + world_position, 1.0);
+                gl_Position = view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
             "

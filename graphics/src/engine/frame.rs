@@ -5,10 +5,11 @@ use super::graphical::*;
 use crate::processing::material::*;
 
 #[derive(Copy, Clone)]
-pub struct Attr {
-    pub world_position: (f32, f32, f32),
+pub struct Attr 
+{
+    pub world_transformation: [[f32; 4]; 4],
 }
-implement_vertex!(Attr, world_position);
+implement_vertex!(Attr, world_transformation);
 
 
 

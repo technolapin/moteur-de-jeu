@@ -76,7 +76,7 @@ fn main() {
         let data = teapots.iter().map(|_| {
             Attr
             {
-                world_position: (0.0, 0.0, 0.0),
+                world_transformation: [[0.; 4]; 4],
             }
         }).collect::<Vec<_>>();
 
@@ -116,14 +116,17 @@ fn main() {
 
 
 
-    {
+    {//varaible locale aux crochets
         let mut mapping = per_instance.map();
         for (src, dest) in teapots.iter_mut().zip(mapping.iter_mut()) {
             (src.0).0 += (src.1).0 * 0.001;
             (src.0).1 += (src.1).1 * 0.001;
             (src.0).2 += (src.1).2 * 0.001;
 
-            dest.world_position = src.0;
+            dest.world_transformation = [ [1.,0.,0.,(src.0).0],
+					  [0.,1.,0.,(src.0).1],
+					  [0.,0.,1.,(src.0).2],
+					  [0.,0.,0.,1.] 		];
         }
     }
     
