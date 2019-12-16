@@ -28,6 +28,43 @@ use rayon::iter::*;
 
 use std::path::Path;
 
+fn produit_matrix(mat_a: [[f32; 4]; 4], mat_b: [[f32; 4]; 4]) -> [[f32; 4]; 4]
+{
+	let mut out = [[0.; 4]; 4];
+	
+	for i in 0..4
+	{
+		for j in 0..4
+		{
+			let mut somme = 0.;
+			for k in 0..4
+			{
+				somme += mat_a[i][k]*mat_b[k][j];
+			}
+			out[i][j] = somme;
+		}
+	}
+	out
+}
+
+
+fn scalar_product(mat: [[f32; 4]; 4], s: f32) -> [[f32; 4]; 4]
+{
+	let mut out = [[0.; 4]; 4];
+	
+	for i in 0..4
+	{
+		for j in 0..4
+		{
+			out[i][j] = mat[i][j]*s;
+		}
+	}
+	out
+	
+}
+
+
+
 fn main() {
 
     let args: Vec<String> = std::env::args().collect();
@@ -60,10 +97,9 @@ fn main() {
     let mut teapots = (0 .. 100)
         .map(|_| {
             let pos: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
-            let dir: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
-            let pos = (pos.0 * 1.5 - 0.75, pos.1 * 1.5 - 0.75, pos.2 * 1.5 - 0.75);
-            let dir = (dir.0 * 1.5 - 0.75, dir.1 * 1.5 - 0.75, dir.2 * 1.5 - 0.75);
-            (pos, dir)
+            let rot: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
+            (pos, rot)
+	    
         })
         .collect::<Vec<_>>();
 
@@ -119,14 +155,27 @@ fn main() {
     {//varaible locale aux crochets
         let mut mapping = per_instance.map();
         for (src, dest) in teapots.iter_mut().zip(mapping.iter_mut()) {
-            (src.0).0 += (src.1).0 * 0.001;
-            (src.0).1 += (src.1).1 * 0.001;
-            (src.0).2 += (src.1).2 * 0.001;
+	    let rotx= [ [1.,	0.,		0.,		0.],
+		    [0.,((src.1).0).cos(), -((src.1).0).sin() , 0.],
+		    [0.,((src.1).0).sin()  , ((src.1).0).cos(), 0.],
+		    [0.,     	0. ,              0.,           1.] ];
 
-            dest.world_transformation = [ [1.,0.,0.,(src.0).0],
-					  [0.,1.,0.,(src.0).1],
-					  [0.,0.,1.,(src.0).2],
-					  [0.,0.,0.,1.] 		];
+	    let roty= [ [((src.1).1).sin()	, 0.,	((src.1).1).cos(), 0.],
+		    [0.			, 1., 		0. 	 , 0.],
+		    [((src.1).1).cos()	, 0., -((src.1).1).sin() , 0.],
+		    [0.			, 0.,           0.	 , 1.] ];
+
+	    let rotz= [ [((src.1).2).cos(), -((src.1).2).sin() , 0., 0.],
+		    [((src.1).2).sin()  , ((src.1).2).cos(), 0., 0.],
+		    [0.,     	0. ,              1.,           0.] ,
+		    [0.,     	0. ,              0.,           1.]];
+		let rots = produit_matrix(rotx, produit_matrix(roty, rotz));
+		let translation = [ [1.,0.,0.,(src.0).0],
+				  [0.,1.,0.,(src.0).1],
+				  [0.,0.,1.,(src.0).2],
+					  [0.,0.,0.,1.]];
+let aggrandissement = 0.005;
+            dest.world_transformation = scalar_product(produit_matrix(translation, rots), aggrandissement);
         }
     }
     
