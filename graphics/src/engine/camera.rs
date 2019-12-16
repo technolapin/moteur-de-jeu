@@ -87,9 +87,9 @@ impl Camera
         let s = normalize_vec(v_prod(f, u));
         let v =  v_prod(s, f);
         let p = (
-            -self.position.0*s.0 -self.position.1*s.1 -self.position.1*s.2,
-            -self.position.0*u.0 -self.position.1*u.1 -self.position.1*u.2,
-            -self.position.0*f.0 -self.position.1*f.1 -self.position.1*f.2
+            -self.position.0*s.0 -self.position.1*s.1 -self.position.2*s.2,
+            -self.position.0*u.0 -self.position.1*u.1 -self.position.2*u.2,
+            -self.position.0*f.0 -self.position.1*f.1 -self.position.2*f.2
         );
 
         [

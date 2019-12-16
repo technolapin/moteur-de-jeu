@@ -19,7 +19,7 @@ use misc::*;
 
         
 
-
+use nalgebra::base::*;
 
 use rayon::prelude::*;
 use rayon::iter::*;
@@ -63,6 +63,35 @@ fn scalar_product(mat: [[f32; 4]; 4], s: f32) -> [[f32; 4]; 4]
 	
 }
 
+fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4]
+{
+	let mut out = [[0.; 4]; 4];
+	for i in 0..4
+	{
+		for j in 0..4
+		{
+			out[j][i] = *mat.get(i + 4*j).unwrap();
+		}
+	}
+	out
+}
+
+
+fn transpose(mat: [[f32; 4]; 4]) -> [[f32; 4]; 4]
+{
+	let mut out = [[0.; 4]; 4];
+	
+	for i in 0..4
+	{
+		for j in 0..4
+		{
+			out[i][j] = mat[j][i];
+		}
+	}
+	out
+	
+}
+
 
 
 fn main() {
@@ -96,8 +125,10 @@ fn main() {
     // list of teapots with position and direction
     let mut teapots = (0 .. 100)
         .map(|_| {
-            let pos: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
+            let pos: (f32, f32, f32) = ((rand::random::<f32>()), rand::random::<f32>(), rand::random::<f32>());
+	    let pos = (pos.0 * 1.5 - 0.75, pos.1 * 1.5 - 0.75, pos.2 * 1.5 - 0.75);
             let rot: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
+		let rot = (rot.0*6., rot.1*6., rot.2*6.);
             (pos, rot)
 	    
         })
@@ -155,35 +186,54 @@ fn main() {
     {//varaible locale aux crochets
         let mut mapping = per_instance.map();
         for (src, dest) in teapots.iter_mut().zip(mapping.iter_mut()) {
+		let rot = Matrix4::new_rotation(Vector3::new((src.1).0, (src.1).1, (src.1).2));
+/*
 	    let rotx= [ [1.,	0.,		0.,		0.],
 		    [0.,((src.1).0).cos(), -((src.1).0).sin() , 0.],
 		    [0.,((src.1).0).sin()  , ((src.1).0).cos(), 0.],
 		    [0.,     	0. ,              0.,           1.] ];
 
-	    let roty= [ [((src.1).1).sin()	, 0.,	((src.1).1).cos(), 0.],
-		    [0.			, 1., 		0. 	 , 0.],
-		    [((src.1).1).cos()	, 0., -((src.1).1).sin() , 0.],
-		    [0.			, 0.,           0.	 , 1.] ];
+	    let roty =[[((src.1).1).sin()	, 0.,	((src.1).1).cos(), 0.],
+		       [0.			, 1., 		0. 	 , 0.],
+		       [((src.1).1).cos()	, 0., -((src.1).1).sin() , 0.],
+		       [0.			, 0.,           0.	 , 1.] ];
 
 	    let rotz= [ [((src.1).2).cos(), -((src.1).2).sin() , 0., 0.],
 		    [((src.1).2).sin()  , ((src.1).2).cos(), 0., 0.],
 		    [0.,     	0. ,              1.,           0.] ,
 		    [0.,     	0. ,              0.,           1.]];
 		let rots = produit_matrix(rotx, produit_matrix(roty, rotz));
+*/
+/*
 		let translation = [ [1.,0.,0.,(src.0).0],
 				  [0.,1.,0.,(src.0).1],
 				  [0.,0.,1.,(src.0).2],
 					  [0.,0.,0.,1.]];
-let aggrandissement = 0.005;
-            dest.world_transformation = scalar_product(produit_matrix(translation, rots), aggrandissement);
+*/
+		let translation = Matrix4::new(
+			1.,0.,0.,(src.0).0,
+			0.,1.,0.,(src.0).1,
+			0.,0.,1.,(src.0).2,
+			0.,0.,0.,   1.    );
+		let aggr=0.0005;
+		let aggrandissement = Matrix4::new(
+			aggr,0.,0.,0.,
+			0.,aggr,0.,0.,
+			0.,0.,aggr,0.,
+			0.,0.,0.,1. );
+	let transfs =  translation*rot*aggrandissement;
+            dest.world_transformation = matrix_to_array(transfs);
         }
     }
     
     
     // the main loop
+	let mut t: f32 = 0.;
     loop
     {
+	t+= 0.01;
         graphics.camera.rotation((0., 0.01, 0.001));
+        graphics.camera.set_position((0., 0., 1.*t.cos()));
         // updating the teapots
         /*
         {

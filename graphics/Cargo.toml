@@ -18,3 +18,5 @@ rand = "0.7"
 image = "*"
 
 rayon="*"
+
+nalgebra="*"
