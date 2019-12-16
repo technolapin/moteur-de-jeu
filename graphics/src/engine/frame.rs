@@ -51,7 +51,12 @@ impl Frame
 
         match material
         {
-            Material::Textured{texture: texture} =>
+            Material::Textured{
+                texture: texture,
+                specular_color: specular,
+                specular_exponent: specular_exponent,
+                opacity: opacity
+            } =>
             {
                 self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                                   indices,
@@ -60,6 +65,11 @@ impl Frame
                                       texture: texture,
                                       view_matrix: gr.camera.get_view_matrix(),
                                       perspective_matrix: gr.camera.get_perspective_matrix(),
+                                      
+                                      specular_color: *specular,
+                                      specular_exponent: *specular_exponent,
+                                      opacity: *opacity
+                                      
                                   },
                                   &params).unwrap();
             },

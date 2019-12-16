@@ -5,7 +5,10 @@ pub enum Material
 {
     Textured // incomplets
     {
-        texture: Texture2d
+        texture: Texture2d,
+        specular_color: [f32; 3],
+        specular_exponent: f32,
+        opacity: f32
     },
     NonTextured
     {

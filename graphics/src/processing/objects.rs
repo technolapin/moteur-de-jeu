@@ -84,14 +84,14 @@ impl Objects
                     name: _,
                     ka: _,
                     kd: _,
-                    ks: _,
+                    ks: Some(specular),
                     ke: _,
                     km: _,
                     tf: _,
-                    ns: _,
+                    ns: Some(specular_exponent),
                     ni: _,
-                    tr: _,
-                    d: _,
+                    tr: transparency,
+                    d: opacity,
                     illum: _,
                     map_ka: _,
                     map_kd: Some(texture_path),
@@ -103,12 +103,21 @@ impl Objects
                     map_refl: _,
                 }                =>
                 {
+                    let opacity = opacity.unwrap_or(1.).min(
+                        1. - transparency.unwrap_or(0.)
+                    );
+
                     println!("TEXTURE PATH {}", texture_path);
                     let image = image::open(ressources_path.join(Path::new(texture_path))).unwrap().to_rgba();
                     let image_dimensions = image.dimensions();
                     let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
                     let texture = Texture2d::new(&gr.display, image).unwrap();
-                    Material::Textured{texture: texture}
+                    Material::Textured{
+                        texture: texture,
+                        specular_color: *specular,
+                        specular_exponent: *specular_exponent,
+                        opacity: opacity
+                    }
                 },
                 obj::Material {
                     name: _,

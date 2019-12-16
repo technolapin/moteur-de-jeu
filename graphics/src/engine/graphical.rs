@@ -29,20 +29,32 @@ impl Graphical
             in vec3 normal;
             in mat4 world_transformation;
             in vec2 texture;
+
             out vec2 v_tex_coords;
             out vec3 v_position;
             out vec3 v_normal;
-            out vec3 v_color;
+            out vec4 v_color;
 
             uniform mat4 view_matrix;
             uniform mat4 perspective_matrix;
 
+            uniform vec3 specular;
+            uniform float specular_exponent;
+            uniform float opacity;
+
+            const vec3 light_direction = normalize(vec3(0., 1., 1.));
+            const vec3 light_color = vec3(1., 1., 0.9);
 
             void main() {
+                vec3 camera_dir = normalize(-position);
+                vec3 half_direction = normalize(normalize(light_direction) + camera_dir);
+
+                float spec = pow(max(dot(half_direction, normalize(normal)), 0.0), specular_exponent);
+
                 v_tex_coords = texture;
                 v_position = position;
                 v_normal = normal;
-                v_color = vec3(float(gl_InstanceID) / 10000.0, 1.0, 1.0);
+                v_color = vec4(specular*spec, opacity);
                 gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
@@ -50,15 +62,18 @@ impl Graphical
             #version 140
 
             in vec3 v_normal;
-            in vec3 v_color;
+            in vec4 v_color;
             in vec2 v_tex_coords;
             out vec4 f_color;
 
+            const vec3 light_direction = normalize(vec3(0., 1., 1.));
+            const vec3 light_color = vec3(1., 1., 0.9);
 
             uniform sampler2D tex;
 
             void main() {
-              f_color = texture(tex, v_tex_coords);
+              float diffusion = max(dot(normalize(v_normal), light_direction), 0.01);
+              f_color = texture(tex, v_tex_coords)*diffusion + v_color;
             }
         ",/*
             const vec3 LIGHT = vec3(-0.2, 0.8, 0.1);
