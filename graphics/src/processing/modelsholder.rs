@@ -35,6 +35,23 @@ impl<'a> ModelsHolder
             }
         }
     }
+
+    pub fn get_whole_file(&self, file: &str) -> Option<Vec<Object>>
+    {
+        match self.wavefronts.get(file)
+        {
+            None => None,
+            Some(objects) =>
+                Some({
+                objects.objects.keys().map(
+                    |obj_name|
+                    {
+                        self.get(file, obj_name).unwrap()
+                    }
+                ).collect::<Vec<_>>()
+            })
+        }
+    }
     
     pub fn load_wavefront(&mut self,
                           gr: &Graphical,

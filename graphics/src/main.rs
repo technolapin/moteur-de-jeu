@@ -65,10 +65,16 @@ fn main() {
                           "textured_cube.obj",
                           &ressources_path);
     holden.load_wavefront(&graphics,
+                          "reds.obj",
+                          &ressources_path);
+    holden.load_wavefront(&graphics,
                           "transparent_sphere.obj",
                           &ressources_path);
     holden.load_wavefront(&graphics,
                           "teto.obj",
+                          &ressources_path);
+    holden.load_wavefront(&graphics,
+                          "terrain.obj",
                           &ressources_path);
     
     
@@ -103,6 +109,14 @@ fn main() {
         glium::vertex::VertexBuffer::dynamic(&graphics.display, &data).unwrap()
     };
 
+
+    let map_position = glium::vertex::VertexBuffer::dynamic(
+        &graphics.display,
+        &vec![Attr{world_transformation:[[1.0, 0.0, 0.0, 0.0],
+                                         [0.0, 1.0, 0.0, 0.0],
+                                         [0.0, 0.0, 1.0, 0.0],
+                                         [0.0, -1.0, 0.0, 1.0]]}]).unwrap();
+    
     struct ToDisp<'a>
     {
         vertex_buffer: &'a glium::vertex::VertexBufferAny,
@@ -113,10 +127,11 @@ fn main() {
     println!("\n HOLDER: {:?} \n", holden);
     let sphere_mauve = holden.get("transparent_sphere", "Sphere").unwrap();
     let teto = holden.get("teto", "Lat式改変テト_mesh_Lat式改変テト").unwrap();
+    let red = holden.get("reds", "Cube_translaté_Cube.002").unwrap();
+    let zeldo = holden.get("textured_cube", "Cube.001").unwrap();
+    let map_elements = holden.get_whole_file("terrain").unwrap();
 
-
-
-    {//varaible locale aux crochets
+    {//variable locale aux crochets
         let mut mapping = per_instance.map();
         for (src, dest) in teapots.iter_mut().zip(mapping.iter_mut()) {
 		let rot = Matrix4::new_rotation(Vector3::new((src.1).0, (src.1).1, (src.1).2));
@@ -137,6 +152,8 @@ fn main() {
         }
     }
     
+
+
     
     // the main loop
     let mut t: f32 = 0.;
@@ -151,9 +168,19 @@ fn main() {
         graphics.update_dimensions();
         frame.clear();
 
-        frame.draw(&graphics, &teto, &per_instance);
-        frame.draw(&graphics, &sphere_mauve, &per_instance);
+//        frame.draw(&graphics, &teto, &per_instance);
+//        frame.draw(&graphics, &sphere_mauve, &per_instance);
+    //    frame.draw(&graphics, &map, &map_position);
+        frame.draw(&graphics, &red, &per_instance);
+        frame.draw(&graphics, &zeldo, &per_instance);
 
+        map_elements
+            .iter()
+            .for_each(
+                |ob|
+                {
+                    frame.draw(&graphics, &ob, &map_position);
+                });
         
         frame.show();
         

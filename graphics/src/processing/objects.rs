@@ -25,8 +25,8 @@ pub struct Object<'a>
 pub struct Objects
 {
 //    meshes: Vec<(VertexBufferAny, Option<String>)>,
-    objects: HashMap<String, Vec<Group>>,
-    materials: HashMap<String, Material>
+    pub objects: HashMap<String, Vec<Group>>,
+    pub materials: HashMap<String, Material>
 }
 
 use std::path::Path;
