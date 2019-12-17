@@ -1,8 +1,9 @@
 use super::camera::*;
 use super::frame::*;
 
-pub struct Graphical
+pub struct Graphical<'a>
 {
+    pub parameters: glium::draw_parameters::DrawParameters<'a>,
     pub display: glium::Display,
     pub program_textured: glium::Program,
     pub program_nontextured: glium::Program,
@@ -10,7 +11,7 @@ pub struct Graphical
     pub camera: Camera
 }
 
-impl Graphical
+impl<'a> Graphical<'a>
 {
 
     pub fn new() -> Self
@@ -19,6 +20,21 @@ impl Graphical
         let wb = glutin::WindowBuilder::new();
         let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
         let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+
+
+        let params = glium::DrawParameters
+        {
+            depth: glium::Depth {
+                test: glium::DepthTest::IfLess, // si c'est devant
+                write: true, // alors on dessine
+                .. Default::default()
+            },
+            blend: glium::Blend::alpha_blending(),
+            //color_mask: (true, false, false, true),
+            .. Default::default()
+        };
+
+        
         // les shaders, toussa
         let program_textured = glium::Program::from_source(
             &display,
@@ -46,14 +62,16 @@ impl Graphical
             const vec3 light_color = vec3(1., 1., 0.9);
 
             void main() {
-                vec3 camera_dir = normalize(-position);
-                vec3 half_direction = normalize(normalize(light_direction) + camera_dir);
+                vec3 norm = normalize((world_transformation*vec4(normal, 0.)).xyz);
+                vec3 camera_dir = normalize((-world_transformation*vec4(position, 1.0)).xyz);
+                vec3 half_direction = normalize(light_direction + camera_dir);
+                float diffusion = max(dot(norm, light_direction), -dot(norm, light_direction)*(1.-opacity));
 
-                float spec = pow(max(dot(half_direction, normalize(normal)), 0.0), specular_exponent);
+                float spec = pow(max(dot(half_direction, norm), 0.0), specular_exponent);
 
                 v_tex_coords = texture;
                 v_position = position;
-                v_normal = normal;
+                v_normal = norm;
                 v_color = vec4(specular*spec, opacity);
                 gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
@@ -110,17 +128,21 @@ impl Graphical
             uniform float opacity;
 
             const vec3 light_direction = normalize(vec3(0., 1., 1.));
+
             const vec3 light_color = vec3(1., 1., 0.9);
 
-            void main() {
-                float diffusion = max(dot(normalize(normal), light_direction), 0.);
-                vec3 camera_dir = normalize(-position);
+            void main()
+            {
+                vec3 norm = normalize((world_transformation*vec4(normal, 0.)).xyz);
+
+                float diffusion = max(dot(norm, light_direction), 0.);
+                vec3 camera_dir = normalize((-view_matrix[3] + world_transformation*vec4(position, 1.0)).xyz);
                 vec3 half_direction = normalize(normalize(light_direction) + camera_dir);
 
-                float spec = pow(max(dot(half_direction, normalize(normal)), 0.0), specular_exponent);
+                float spec = pow(max(dot(half_direction, norm), 0.0), specular_exponent);
                 v_position = position;
-                v_normal = normalize(normal);
-                v_color = vec4(ambiant*0.01 + diffuse*diffusion, opacity + specular*spec);
+                v_normal = norm;
+                v_color = vec4(ambiant*0.01 + diffuse*diffusion + specular*spec, opacity);
                 gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
@@ -182,6 +204,7 @@ impl Graphical
         
         Self
         {
+            parameters: params,
             display: display,
             program_textured: program_textured,
             program_nontextured: program_nontextured,
@@ -199,7 +222,6 @@ impl Graphical
     pub fn update_dimensions(&mut self)
     {
         let (w, h) = self.display.get_framebuffer_dimensions();
-        println!("{} {} {}", w, h, (w as f32)/(h as f32));
         self.camera.set_aspect_ratio(w as f32, h as f32);
     }
 

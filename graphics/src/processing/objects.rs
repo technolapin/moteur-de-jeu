@@ -13,6 +13,12 @@ use obj::{Obj, Mtl};
 use std::io::Cursor;
 use std::collections::HashMap;
 
+#[derive(Debug)]
+pub struct Object<'a>
+{
+    pub groups: Vec<(&'a VertexBufferAny,
+                 Option<&'a Material>)>
+}
 
 
 #[derive(Debug)]
@@ -91,7 +97,7 @@ impl Objects
                     ns: Some(specular_exponent),
                     ni: _,
                     tr: transparency,
-                    d: opacity,
+                    d: opacityy,
                     illum: _,
                     map_ka: _,
                     map_kd: Some(texture_path),
@@ -103,7 +109,7 @@ impl Objects
                     map_refl: _,
                 }                =>
                 {
-                    let opacity = opacity.unwrap_or(1.).min(
+                    let opacity = opacityy.unwrap_or(1.).min(
                         1. - transparency.unwrap_or(0.)
                     );
 
@@ -142,9 +148,11 @@ impl Objects
                     map_refl: _,
                 } =>
                 {
+                    println!("trans/opac: {:?} {:?}", transparency, opacity);
                     let opacity = opacity.unwrap_or(1.).min(
                         1. - transparency.unwrap_or(0.)
                     );
+                    println!("OPA: {}", opacity);
 
                     Material::NonTextured
                     {
@@ -284,6 +292,29 @@ impl Objects
                           }
         ).collect::<Vec<_>>()
         
+        
+    }
+    pub fn get_object_checked(&self, name: String) -> Option<Vec<(& VertexBufferAny, Option<&Material>)>>
+    {
+        match self.objects.get(&name)
+        {
+            None => None,
+            Some(groups) =>Some(
+            {
+                groups.iter().map(|group|
+                                  {
+                                      (
+                                          &group.voxels,
+                                          match &group.material
+                                          {
+                                              None => None,
+                                              Some(string) => self.materials.get(string)
+                                          }
+                                      )
+                                  }
+                ).collect::<Vec<_>>()
+            })
+        }
         
     }
 

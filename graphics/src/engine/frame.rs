@@ -1,7 +1,7 @@
 use glium::Surface;
 
 use super::graphical::*;
-
+use crate::processing::objects::*;
 use crate::processing::material::*;
 
 
@@ -30,24 +30,44 @@ impl Frame
     }
     
     pub fn draw(&mut self,
-            gr: &Graphical,
-            vertex_buffer: &glium::vertex::VertexBufferAny,
-            per_instance: &glium::VertexBuffer<Attr>,
-            material: &Material
+                       gr: &Graphical,
+                       obj: &Object,
+                       per_instance: &glium::VertexBuffer<Attr>,
+    )
+    {
+        obj.groups
+            .iter()
+            .for_each(
+                |(vertexes, maybe_material)|
+                {
+                    match maybe_material
+                    {
+                        Some(material) =>
+                        {
+                            self.draw_group(gr,
+                                            vertexes,
+                                            per_instance,
+                                            material);
+                        },
+                        None => unimplemented!()
+                    }
+                }
+            );
+
+        
+    }
+
+    
+    pub fn draw_group(
+        &mut self,
+        gr: &Graphical,
+        vertex_buffer: &glium::vertex::VertexBufferAny,
+        per_instance: &glium::VertexBuffer<Attr>,
+        material: &Material
     )
     {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-        // drawing a frame
-        let params = glium::DrawParameters
-        {
-            depth: glium::Depth {
-                test: glium::DepthTest::IfLess, // si c'est devant
-                write: true, // alors on dessine
-                .. Default::default()
-            },
-            .. Default::default()
-        };
 
         match material
         {
@@ -71,7 +91,7 @@ impl Frame
                                       opacity: *opacity
                                       
                                   },
-                                  &params).unwrap();
+                                  &gr.parameters).unwrap();
             },
             Material::NonTextured{
                 ambiant_color: ambiant,
@@ -94,7 +114,7 @@ impl Frame
                                              emission: *emission,
                                              opacity: *opacity
                                   },
-                                  &params).unwrap();
+                                  &gr.parameters).unwrap();
             }
             _ =>
             {
@@ -102,7 +122,7 @@ impl Frame
                                   indices,
                                   &gr.program_default,
                                   &uniform! {view_matrix: gr.camera.get_view_matrix() },
-                                  &params).unwrap();
+                                  &gr.parameters).unwrap();
             }
             
         }
