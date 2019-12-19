@@ -5,6 +5,7 @@ extern crate rand;
 #[allow(unused_imports)]
 use glium::{glutin, Surface};
 
+//use glutin::event_loop::EventLoop;
 
 mod processing;
 mod engine;
@@ -37,6 +38,7 @@ fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4]
 		}
 	}
 	out
+
 }
 
 
@@ -57,8 +59,11 @@ fn main() {
     // The first argument is the path that was used to call the program.
     println!("My path is {:?}.", executable_path);
     println!("Crate path is {:?}.", crate_path);
+
+
+    let mut event_loop = glutin::EventsLoop::new();
     
-    let mut graphics = Graphical::new();
+    let mut graphics = Graphical::new(&event_loop);
     let mut holden = ModelsHolder::new();
 
     holden.load_wavefront(&graphics,
@@ -109,6 +114,7 @@ fn main() {
         glium::vertex::VertexBuffer::dynamic(&graphics.display, &data).unwrap()
     };
 
+    
 
     let map_position = glium::vertex::VertexBuffer::dynamic(
         &graphics.display,
@@ -151,41 +157,173 @@ fn main() {
             dest.world_transformation = matrix_to_array(transfs);
         }
     }
+
+    use glutin::Event::DeviceEvent;
+    use glutin::KeyboardInput;
+    use glutin::VirtualKeyCode;
+
+    use glutin::ControlFlow;
     
+//    let event_loop = graphics.get_event_loop();
+
+
+    let mut camera_pos = (0., 0., 0.);
+    let mut camera_rot = (0., 0., 0.);
+
+    let mut x = 0.;
+
+    use std::collections::HashSet;
+    use std::hash::Hash;
+    let mut keys = HashSet::new();
+    let sensibility = 0.0005;
+    
+    event_loop.run_forever( |event|
+                             {
+
+                                 println!("KEYS EVENTS {:?}", keys);
+                                 
+                                 graphics.camera.relative_move(camera_pos);
+
+                                 graphics.camera.rotation(camera_rot.clone());
+                                 camera_pos = (0., 0., 0.);
+
+                                 //        println!("CAMERA IS AT {:?}", camera_pos.clone());
+
+                                 let mut frame = graphics.frame();
+                                 graphics.update_dimensions();
+                                 frame.clear();
+
+                                 //        frame.draw(&graphics, &teto, &per_instance);
+                                 //        frame.draw(&graphics, &sphere_mauve, &per_instance);
+                                 //    frame.draw(&graphics, &map, &map_position);
+                                 frame.draw(&graphics, &red, &per_instance);
+                                 frame.draw(&graphics, &zeldo, &per_instance);
+
+                                 map_elements
+                                     .iter()
+                                     .for_each(
+                                         |ob|
+                                         {
+                                             frame.draw(&graphics, &ob, &map_position);
+                                         });
+                                 
+                                 frame.show();
+
+                                 for keycode in keys.iter(){
+                                     match keycode
+                                     {
+                                         VirtualKeyCode::Z =>
+                                         {
+                                             camera_pos.0 = camera_pos.0 + 1.;
+                                         },
+                                         VirtualKeyCode::S =>
+                                         {
+                                             camera_pos.0 = camera_pos.0 - 1.;
+                                         },
+                                         VirtualKeyCode::Q =>
+                                         {
+                                             camera_pos.2 = camera_pos.2 - 1.;
+                                         },
+                                         VirtualKeyCode::D =>
+                                         {
+                                             camera_pos.2 = camera_pos.2 + 1.;
+                                         },
+                                         _ =>
+                                         {
+                                             
+
+                                         },
+                                         
+                                     };
+                                 }
+
+                             
+                                 match event
+                                   {
+                                       glutin::Event::WindowEvent { event, .. } =>
+                                           match event {
+                                               glutin::WindowEvent::CloseRequested => ControlFlow::Break,
+                                               _ => ControlFlow::Continue,
+                                           },
+                                       glutin::Event::DeviceEvent {event, ..}=>
+                                       {
+
+                                           match event
+                                           {
+                                               glutin::DeviceEvent::Key(keyboard_input) =>
+                                               {
+                                                   match keyboard_input
+                                                       .virtual_keycode
+                                                   {
+                                                       None => ControlFlow::Continue,
+                                                       Some(keycode) =>
+                                                       {
+//                                                           println!("KEY: {:?} keyboard_input: {:?}", keycode, keyboard_input);
+                                                           if keyboard_input.state == glutin::ElementState::Released
+                                                           {
+                                                               keys.remove(&keycode);
+                                                           }
+                                                           else
+                                                           {
+                                                               keys.insert(keycode);
+                                                           };
+                                                           ControlFlow::Continue
+   
+                                                       }
+
+                                                   }
+                                               },
+                                               
+                                               glutin::DeviceEvent::Motion{axis, value} =>
+                                               {
+                                                   println!("MOTION Axe:{} value:{}", axis, value);
+                                                   match axis
+                                                   {
+                                                       0 =>
+                                                       {
+                                                           camera_rot.1 += (value as f32)*sensibility;
+                                                       },
+                                                       1 =>
+                                                       {
+                                                           camera_rot.0 += (value as f32)*sensibility;
+
+                                                       },
+                                                       _ =>
+                                                       {
+    //                                                       println!("unknown axis");
+                                                       }
+                                                   }
+                                                   ControlFlow::Continue
+                                               },
+                                               _ =>
+                                               {
+      //                                             println!("DEVICE NONKEYBOARD EVENT: {:?}", event);
+                                                   ControlFlow::Continue
+                                               }
+                                           }
+                                       },
+                                       _ =>
+                                       {
+        //                                   println!("OTHER EVENT: {:?}", event);
+                                           ControlFlow::Continue
+                                       }
+                                       
+                                   }
+                                   
+                                   
+                               }
+
+    );
+
+    println!("FINALLY: {:?}", camera_pos);
+
+        // the main loop
+        
+        //graphics.camera.rotation((0., 0.01, 0.001));
+
 
 
     
-    // the main loop
-    let mut t: f32 = 0.;
-    loop
-    {
-	t+= 0.01;
-        graphics.camera.rotation((0., 0.01, 0.001));
-        graphics.camera.set_position((0., 0., 1.*t.cos()));
-        
-
-        let mut frame = graphics.frame();
-        graphics.update_dimensions();
-        frame.clear();
-
-//        frame.draw(&graphics, &teto, &per_instance);
-//        frame.draw(&graphics, &sphere_mauve, &per_instance);
-    //    frame.draw(&graphics, &map, &map_position);
-        frame.draw(&graphics, &red, &per_instance);
-        frame.draw(&graphics, &zeldo, &per_instance);
-
-        map_elements
-            .iter()
-            .for_each(
-                |ob|
-                {
-                    frame.draw(&graphics, &ob, &map_position);
-                });
-        
-        frame.show();
-        
-    }   
-
 }
 
 

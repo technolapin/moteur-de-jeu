@@ -8,18 +8,20 @@ pub struct Graphical<'a>
     pub program_textured: glium::Program,
     pub program_nontextured: glium::Program,
     pub program_default: glium::Program,
-    pub camera: Camera
+    pub camera: Camera,
+//    pub event_loop: glutin::EventsLoop
+        
 }
 
 impl<'a> Graphical<'a>
 {
 
-    pub fn new() -> Self
+    pub fn new(event_loop: &glutin::EventsLoop) -> Self
     {
-        let event_loop = glutin::EventsLoop::new();
+        //let event_loop = glutin::EventsLoop::new();
         let wb = glutin::WindowBuilder::new();
         let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
-        let display = glium::Display::new(wb, cb, &event_loop).unwrap();
+        let display = glium::Display::new(wb, cb, event_loop).unwrap();
 
 
         let params = glium::DrawParameters
@@ -136,13 +138,13 @@ impl<'a> Graphical<'a>
                 vec3 norm = normalize((world_transformation*vec4(normal, 0.)).xyz);
 
                 float diffusion = max(dot(norm, light_direction), 0.);
-                vec3 camera_dir = normalize((-view_matrix[3] + world_transformation*vec4(position, 1.0)).xyz);
+                vec3 camera_dir = normalize((-view_matrix[3]-world_transformation*vec4(position, 1.0)).xyz);
                 vec3 half_direction = normalize(normalize(light_direction) + camera_dir);
 
                 float spec = pow(max(dot(half_direction, norm), 0.0), specular_exponent);
                 v_position = position;
                 v_normal = norm;
-                v_color = vec4(ambiant*0.01 + diffuse*diffusion + specular*spec, opacity);
+                v_color = vec4(diffuse*0.01 + diffuse*diffusion + specular*spec, opacity);
                 gl_Position = perspective_matrix*view_matrix*world_transformation*vec4(position, 1.0);
             }
         ",
@@ -209,11 +211,16 @@ impl<'a> Graphical<'a>
             program_textured: program_textured,
             program_nontextured: program_nontextured,
             program_default: program_default,
-            camera: Camera::new(2.0)
+            camera: Camera::new(2.0),
+            //event_loop: event_loop
         }
     }
-
-    
+    /*
+    pub fn get_event_loop(&mut self) -> &mut glutin::EventsLoop
+    {
+        &mut self.event_loop
+    }
+*/
     pub fn frame(&mut self) -> Frame
     {
         Frame::new(self)

@@ -32,13 +32,22 @@ impl Camera
     {
         self.position = position;
     }
+    pub fn relative_move(&mut self, displacement: (f32, f32, f32))
+    {
+        let side = v_prod(self.orientation, self.up);
+        self.position = (
+            self.position.0 + self.orientation.0*displacement.0 + self.up.0*displacement.1 + side.0*displacement.2,
+            self.position.1 + self.orientation.1*displacement.0 + self.up.1*displacement.1 + side.1*displacement.2,
+            self.position.2 + self.orientation.2*displacement.0 + self.up.2*displacement.1 + side.2*displacement.2
+        );
+    }
     
     pub fn set_direction(&mut self, orientation: (f32, f32, f32))
     {
         self.orientation = normalize_vec(orientation);
     }
 
-    pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32))
+    pub fn rotation_relative(&mut self, (rx, ry, rz): (f32, f32, f32))
     {
         //on tourne de rx rad autour de l'axe 0x
         //on tourne de ry rad autour de l'axe 0y
@@ -47,6 +56,44 @@ impl Camera
         let (x, y, z) = self.orientation;
         let (ux, uy, uz) = self.up;
 
+        let (x, y, z) = ( x,
+                          y*rx.cos() + z*rx.sin(),
+                          -y*rx.sin() + z*rx.cos());
+        let (ux, uy, uz) = ( ux,
+                          uy*rx.cos() + uz*rx.sin(),
+                          -uy*rx.sin() + uz*rx.cos());
+        
+
+        let (x, y, z) = ( x*ry.cos() - z*ry.sin(),
+                          y,
+                          x*ry.sin() + z*ry.cos());
+        let (ux, uy, uz) = ( ux*ry.cos() - uz*ry.sin(),
+                          uy,
+                          ux*ry.sin() + uz*ry.cos());
+
+        
+        let (x, y, z) = ( x*rz.cos() + y*rz.sin(),
+                          -x*rz.sin() + y*rz.cos(),
+                          z);
+        let (ux, uy, uz) = ( ux*rz.cos() + uy*rz.sin(),
+                          -ux*rz.sin() + uy*rz.cos(),
+                          uz);
+        
+        self.orientation = normalize_vec((x, y, z));
+        self.up = (ux, uy, uz);
+        
+        
+    }
+    
+    pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32))
+    {
+        //on tourne de rx rad autour de l'axe 0x
+        //on tourne de ry rad autour de l'axe 0y
+        //on tourne de rz rad autour de l'axe 0z
+
+        let (x, y, z) = (0.0, 0.0, -1.);
+        let (ux, uy, uz) = (0., 1., 0.);
+        
         let (x, y, z) = ( x,
                           y*rx.cos() + z*rx.sin(),
                           -y*rx.sin() + z*rx.cos());
