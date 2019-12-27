@@ -5,11 +5,15 @@ use std::collections::HashMap;
 use glium::vertex::VertexBufferAny;
 use std::path::Path;
 
+/**
+ * Own the all Objects imported.
+ */
 #[derive(Debug)]
 pub struct ModelsHolder
 {
     wavefronts: HashMap<String, Objects>,
 }
+
 
 
 

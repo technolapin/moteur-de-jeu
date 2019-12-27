@@ -13,6 +13,10 @@ use obj::{Obj, Mtl};
 use std::io::Cursor;
 use std::collections::HashMap;
 
+/**
+ * This structure represents a 3D object.
+ * It is created by the ModelsHolder, which own the data.
+ */
 #[derive(Debug)]
 pub struct Object<'a>
 {
@@ -20,11 +24,13 @@ pub struct Object<'a>
                  Option<&'a Material>)>
 }
 
-
+/**
+ * This structure represents a set of 3D objects and their shared materials.
+ * It typicaly contains all the information a wavefront file and their associated mtl file can provide.
+ */
 #[derive(Debug)]
 pub struct Objects
 {
-//    meshes: Vec<(VertexBufferAny, Option<String>)>,
     pub objects: HashMap<String, Vec<Group>>,
     pub materials: HashMap<String, Material>
 }
