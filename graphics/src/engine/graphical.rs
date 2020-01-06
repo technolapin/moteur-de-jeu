@@ -1,5 +1,6 @@
 use super::camera::*;
 use super::frame::*;
+use crate::misc::read_file;
 
 pub struct Graphical<'a>
 {
@@ -14,6 +15,7 @@ pub struct Graphical<'a>
 
 pub struct Program
 {
+    pub programs: Vec<glium::Program>,
     pub program_textured: glium::Program,
     pub program_nontextured: glium::Program,
     pub program_default: glium::Program,
@@ -24,7 +26,9 @@ impl Program
     pub fn new(display: &Display) -> Self
     {	
 	Self
-	{ 	program_textured: glium::Program::from_source(              // A BOUGER --> structure shader
+	{ 	programs: Vec::new(),
+
+		program_textured: glium::Program::from_source(              // A BOUGER --> structure shader
 		    	&display.display,
 		    	"
 		    	#version 140
@@ -178,18 +182,34 @@ impl Program
 			    void main() {
 			      f_color = vec4(255, 0, 255, 255);
 			    }
-			",/*
-			    const vec3 LIGHT = vec3(-0.2, 0.8, 0.1);
-
-			    void main() {
-				float lum = max(dot(normalize(v_normal), normalize(LIGHT)), 0.0);
-				vec3 color = (0.3 + 0.7 * lum) * v_color;
-				f_color = vec4(color, 1.0);
-			    }
-			",*/
+			",
 			    None).unwrap(),
 
 	}
+    }
+
+    pub fn add_program(&mut self, display: Display, path_vertex: &str, path_fragment: &str, path_geometry: Option<&str>)
+    {
+
+	let pgrm = 
+	if let Some(path) = path_geometry
+	{	glium::Program::from_source(
+			    &display.display,
+			    read_file(path_vertex).as_str(),
+			    read_file(path_fragment).as_str(),
+			    Some(read_file(path).as_str()) )
+		   .unwrap()
+        } 
+	else
+	{	glium::Program::from_source(
+			    &display.display,
+			    read_file(path_vertex).as_str(),
+			    read_file(path_fragment).as_str(),
+			    None)
+		   .unwrap()
+	};
+
+	self.programs.push(pgrm);
     }
 }
 
