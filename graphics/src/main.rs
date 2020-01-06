@@ -28,20 +28,6 @@ fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
     out
 }
 
-fn get_ressources_path() -> PathBuf {
-    let args: Vec<String> = std::env::args().collect();
-    //the only relevant path we can get is the executable's since the execution dir could be anywhere
-    let executable_path = Path::new(&args[0]);
-    let crate_path = match executable_path.ancestors().nth(3) {
-        Some(root) => root,
-        None => panic!(
-            "Panic! Can't figure out where we are, did you move the executable out of its folder?"
-        ),
-    };
-    let ressources_path = crate_path.join(Path::new("ressources"));
-    ressources_path
-}
-
 fn main() {
     let ressources_path = get_ressources_path();
 

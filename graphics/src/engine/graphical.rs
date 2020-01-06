@@ -1,6 +1,10 @@
 use super::camera::*;
 use super::frame::*;
-use crate::misc::read_file;
+use crate::misc::{read_file, get_ressources_path};
+use std::path::Path;
+use std::path::PathBuf;
+
+
 
 pub struct Graphical<'a>
 {
@@ -25,10 +29,10 @@ impl Program
 {
     pub fn new(display: &Display) -> Self
     {	
-	Self
+	let mut program = Self
 	{ 	programs: Vec::new(),
 
-		program_textured: glium::Program::from_source(              // A BOUGER --> structure shader
+		program_textured: glium::Program::from_source(              
 		    	&display.display,
 		    	"
 		    	#version 140
@@ -185,19 +189,30 @@ impl Program
 			",
 			    None).unwrap(),
 
-	}
+	};
+	program.add_program(display, "textured"); 
+	program
     }
 
-    pub fn add_program(&mut self, display: Display, path_vertex: &str, path_fragment: &str, path_geometry: Option<&str>)
+    pub fn add_program(&mut self, display: &Display, program_name: &str)
     {
 
+	let ressources_path = get_ressources_path();
+	let shaders_path = ressources_path.join(Path::new("shaders"));
+	let program_path = shaders_path.join(Path::new(program_name));
+
+	let path_vertex = program_path.join(Path::new("vertex.glsl"));
+	let path_fragment = program_path.join(Path::new("fragment.glsl"));
+	let path_geometry = program_path.join(Path::new("geometry.glsl"));
+
+
 	let pgrm = 
-	if let Some(path) = path_geometry
+	if path_geometry.is_file()
 	{	glium::Program::from_source(
 			    &display.display,
 			    read_file(path_vertex).as_str(),
 			    read_file(path_fragment).as_str(),
-			    Some(read_file(path).as_str()) )
+			    Some(read_file(path_geometry).as_str()) )
 		   .unwrap()
         } 
 	else

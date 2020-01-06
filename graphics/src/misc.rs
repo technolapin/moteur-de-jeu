@@ -1,6 +1,8 @@
 use std::io::Read ;
 use std::string::String;
 use std::fs::File;
+use std::path::Path;
+use std::path::PathBuf;
 
 pub fn maybe<T>(option: Option<T>, s: &'static str) -> T
 {
@@ -25,7 +27,7 @@ pub fn v_prod(u: (f32, f32, f32), v: (f32, f32, f32)) -> (f32, f32, f32)
 }
 
 
-pub fn read_file(file_name: &str) -> String
+pub fn read_file(file_name: PathBuf) -> String
 {
 	let mut f = match File::open(file_name)
 	{
@@ -42,4 +44,20 @@ pub fn read_file(file_name: &str) -> String
 	buffer
 }
 
+
+
+
+pub fn get_ressources_path() -> PathBuf {
+    let args: Vec<String> = std::env::args().collect();
+    //the only relevant path we can get is the executable's since the execution dir could be anywhere
+    let executable_path = Path::new(&args[0]);
+    let crate_path = match executable_path.ancestors().nth(3) {
+        Some(root) => root,
+        None => panic!(
+            "Panic! Can't figure out where we are, did you move the executable out of its folder?"
+        ),
+    };
+    let ressources_path = crate_path.join(Path::new("ressources"));
+    ressources_path
+}
 
