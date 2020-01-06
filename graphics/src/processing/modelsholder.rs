@@ -60,16 +60,29 @@ impl<'a> ModelsHolder
     pub fn load_wavefront(&mut self,
                           gr: &Graphical,
                           filename: &str,
-                          ressources_path: &Path)
+                          ressources_path: &Path) -> Result<(), &'static str>
     {
         let path_to_wavefront = Path::new(filename);
-        let stem = path_to_wavefront.file_stem().unwrap().to_str().unwrap().to_string();
+        let stem = match path_to_wavefront.file_stem()
+        {
+            Some(st) => st,
+            _ => return Err("cannot parse stem, is the address empty?")
+
+        };
+        let stem = match stem.to_str()
+        {
+            Some(st) => st,
+            _ => return Err("cannot parse stem, is the address empty?")
+
+        };
+        let stem = stem.to_string();
         let path_to_mtl = path_to_wavefront.with_extension("mtl");
 
         println!("stem: {:?}", stem);
         println!("mtl: {:?}", path_to_mtl);
 
         self.wavefronts.insert(stem.clone(), Objects::new(gr, path_to_wavefront, &path_to_mtl, ressources_path));
+        Ok(())
     }
     
 }
