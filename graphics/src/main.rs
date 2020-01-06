@@ -8,56 +8,53 @@ use glium::{glutin, Surface};
 pub mod engine;
 pub mod misc;
 pub mod processing;
-
 use engine::*;
 use misc::*;
 use processing::*;
+use std::io;
 
 use nalgebra::base::*;
 
-use rayon::iter::*;
-use rayon::prelude::*;
-
-//use std::sync::mpsc::channel;
-//use std::thread;
-
 use std::path::Path;
+use std::path::PathBuf;
 
 fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
     let mut out = [[0.; 4]; 4];
     for i in 0..4 {
         for j in 0..4 {
-            out[j][i] = *mat.get(i + 4 * j).unwrap();
+            out[j][i] = *mat.get(i + 4 * j).unwrap(); // guaranteed
         }
     }
     out
 }
 
-fn main() {
+fn get_ressources_path() -> PathBuf {
     let args: Vec<String> = std::env::args().collect();
+    //the only relevant path we can get is the executable's since the execution dir could be anywhere
     let executable_path = Path::new(&args[0]);
-    let crate_path = executable_path
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap();
+    let crate_path = match executable_path.ancestors().nth(3) {
+        Some(root) => root,
+        None => panic!(
+            "Panic! Can't figure out where we are, did you move the executable out of its folder?"
+        ),
+    };
     let ressources_path = crate_path.join(Path::new("ressources"));
-    // The first argument is the path that was used to call the program.
-    println!("My path is {:?}.", executable_path);
-    println!("Crate path is {:?}.", crate_path);
+    ressources_path
+}
+
+fn main() {
+    let ressources_path = get_ressources_path();
 
     let mut event_loop = glutin::EventsLoop::new();
 
     let mut graphics = Graphical::new(&event_loop);
-    let mut holden = ModelsHolder::new();
+    let mut holder = ModelsHolder::new();
 
-    holden.load_wavefront(&graphics, "textured_cube.obj", &ressources_path);
-    holden.load_wavefront(&graphics, "reds.obj", &ressources_path);
-    holden.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path);
-    holden.load_wavefront(&graphics, "teto.obj", &ressources_path);
-    holden.load_wavefront(&graphics, "terrain.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "textured_cube.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "reds.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "teto.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "terrain.obj", &ressources_path);
 
     // list of teapots with position and direction
     let mut teapots = (0..30)
@@ -102,20 +99,15 @@ fn main() {
     )
     .unwrap();
 
-    struct ToDisp<'a> {
-        vertex_buffer: &'a glium::vertex::VertexBufferAny,
-        material: Option<&'a processing::material::Material>,
-    }
-
     graphics.camera.set_position((0., 0., 0.));
-    println!("\n HOLDER: {:?} \n", holden);
-    let sphere_mauve = holden.get("transparent_sphere", "Sphere").unwrap();
-    let teto = holden
+    println!("\n HOLDER: {:?} \n", holder);
+    let sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
+    let teto = holder
         .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
         .unwrap();
-    let red = holden.get("reds", "Cube_translaté_Cube.002").unwrap();
-    let zeldo = holden.get("textured_cube", "Cube.001").unwrap();
-    let map_elements = holden.get_whole_file("terrain").unwrap();
+    let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
+    let zeldo = holder.get("textured_cube", "Cube.001").unwrap();
+    let map_elements = holder.get_whole_file("terrain").unwrap();
 
     {
         //variable locale aux crochets
@@ -161,14 +153,10 @@ fn main() {
     let mut camera_pos = (0., 0., 0.);
     let mut camera_rot = (0., 0., 0.);
 
-    let mut x = 0.;
-
     use std::collections::HashSet;
     use std::hash::Hash;
     let mut keys = HashSet::new();
     let sensibility = 0.0005;
-
-    let mut control_flow = ControlFlow::Continue;
 
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner
@@ -189,6 +177,7 @@ fn main() {
 
         frame.draw(&graphics, &red, &per_instance);
         frame.draw(&graphics, &zeldo, &per_instance);
+        //frame.draw(&graphics, &teto, &per_instance);
 
         map_elements.iter().for_each(|ob| {
             frame.draw(&graphics, &ob, &map_position);
