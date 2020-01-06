@@ -12,6 +12,7 @@ pub struct Camera
 
 impl Camera
 {
+    /** Constructor of Frame  */
     pub fn new(aspect_ratio: f32) -> Self
     {
         Self
@@ -19,10 +20,10 @@ impl Camera
             position: (0., 0., 0.),
             orientation: (0., 0., -1.),
             up: (0., 1., 0.),
-            aspect_ratio: aspect_ratio
+            aspect_ratio: aspect_ratio // Ratio for the printing on the screen
         }
     }
-
+    
     pub fn set_aspect_ratio(&mut self, width: f32, height: f32)
     {
         self.aspect_ratio = height/width;
@@ -32,6 +33,8 @@ impl Camera
     {
         self.position = position;
     }
+
+    /** Update the position of the Camera */
     pub fn relative_move(&mut self, displacement: (f32, f32, f32))
     {
         let side = v_prod(self.orientation, self.up);
@@ -47,6 +50,7 @@ impl Camera
         self.orientation = normalize_vec(orientation);
     }
 
+    /** Rotation of the Camera around its axis */
     pub fn rotation_relative(&mut self, (rx, ry, rz): (f32, f32, f32))
     {
         //on tourne de rx rad autour de l'axe 0x
@@ -84,7 +88,8 @@ impl Camera
         
         
     }
-    
+
+    /** Rotation of the Camera around axis x y and z of the Scene */    
     pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32))
     {
         //on tourne de rx rad autour de l'axe 0x
@@ -123,7 +128,7 @@ impl Camera
         
     }
     
-    
+    /** Move the Objects of the scene according to the rotation of the Camera, Return the matrix of the view */
     pub fn get_view_matrix(&self) -> [[f32; 4]; 4]
     {
         let f = self.orientation;
@@ -149,6 +154,7 @@ impl Camera
         
     }
 
+    /** Return the matrix of the perspective */
     pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4]
     {
         //let (width, height) = target.get_dimensions();

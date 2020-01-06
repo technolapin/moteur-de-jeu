@@ -83,11 +83,11 @@ fn main() {
             })
             .collect::<Vec<_>>();
 
-        glium::vertex::VertexBuffer::dynamic(&graphics.display, &data).unwrap()
+        glium::vertex::VertexBuffer::dynamic(&graphics.display.display, &data).unwrap()
     };
 
     let map_position = glium::vertex::VertexBuffer::dynamic(
-        &graphics.display,
+        &graphics.display.display,
         &vec![Attr {
             world_transformation: [
                 [1.0, 0.0, 0.0, 0.0],

@@ -123,7 +123,7 @@ impl Objects
                     let image = image::open(ressources_path.join(Path::new(texture_path))).unwrap().to_rgba();
                     let image_dimensions = image.dimensions();
                     let image = RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-                    let texture = Texture2d::new(&gr.display, image).unwrap();
+                    let texture = Texture2d::new(&gr.display.display, image).unwrap();
                     Material::Textured{
                         texture: texture,
                         specular_color: *specular,
@@ -263,7 +263,7 @@ impl Objects
                 groups.push(
                     Group
                     {
-                        voxels: VertexBuffer::new(&gr.display, &mesh).unwrap()
+                        voxels: VertexBuffer::new(&gr.display.display, &mesh).unwrap()
                             .into_vertex_buffer_any(),
                         material: match &group.material
                         {

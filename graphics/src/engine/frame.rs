@@ -21,18 +21,21 @@ pub struct Frame
 
 impl Frame
 {
-    pub fn new(gr: &Graphical) -> Self
+    /** Constructor of Frame  */
+    pub fn new(gr: &Graphical) -> Self 
     {
         Self
         {
-            frame: gr.display.draw()
+            frame: gr.display.display.draw()
         }
     }
     
-    pub fn draw(&mut self,
-                       gr: &Graphical,
+
+    /** Draw an Object in the Frame at positions contained by per_instance, call fn draw_group for each group of Object */
+    pub fn draw(&mut self,  
+                       gr: &Graphical, 
                        obj: &Object,
-                       per_instance: &glium::VertexBuffer<Attr>,
+                       per_instance: &glium::VertexBuffer<Attr>, // position
     )
     {
         obj.groups
@@ -57,8 +60,8 @@ impl Frame
         
     }
 
-    
-    pub fn draw_group(
+    /** Draw a group of Object (part of the Object) in the Frame, called by fn draw */
+    pub fn draw_group(  
         &mut self,
         gr: &Graphical,
         vertex_buffer: &glium::vertex::VertexBufferAny,
@@ -80,7 +83,7 @@ impl Frame
             {
                 self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                                   indices,
-                                  &gr.program_textured,
+                                  &gr.program.program_textured,
                                   &uniform! {
                                       texture: texture,
                                       view_matrix: gr.camera.get_view_matrix(),
@@ -91,7 +94,7 @@ impl Frame
                                       opacity: *opacity
                                       
                                   },
-                                  &gr.parameters).unwrap();
+                                  &gr.parameters.parameters).unwrap();
             },
             Material::NonTextured{
                 ambiant_color: ambiant,
@@ -104,7 +107,7 @@ impl Frame
             {
                 self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                                   indices,
-                                  &gr.program_nontextured,
+                                  &gr.program.program_nontextured,
                                   &uniform! {view_matrix: gr.camera.get_view_matrix(),
                                              perspective_matrix: gr.camera.get_perspective_matrix(),
                                              ambiant: *ambiant,
@@ -114,15 +117,15 @@ impl Frame
                                              emission: *emission,
                                              opacity: *opacity
                                   },
-                                  &gr.parameters).unwrap();
+                                  &gr.parameters.parameters).unwrap();
             }
             _ =>
             {
                 self.frame.draw( (vertex_buffer, per_instance.per_instance().unwrap()),
                                   indices,
-                                  &gr.program_default,
+                                  &gr.program.program_default,
                                   &uniform! {view_matrix: gr.camera.get_view_matrix() },
-                                  &gr.parameters).unwrap();
+                                  &gr.parameters.parameters).unwrap();
             }
             
         }
@@ -132,13 +135,15 @@ impl Frame
 
         
     }
-    
-    pub fn clear(&mut self)
+   
+    /** Reset the Frame */
+    pub fn clear(&mut self) 
     {
         self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
     }
     
-    pub fn show(self)
+    /** Send the Frame to the Graphical Card */
+    pub fn show(self) 
     {
         self.frame.finish().unwrap();
     }
