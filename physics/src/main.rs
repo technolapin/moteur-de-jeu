@@ -93,6 +93,8 @@ enum MeshType {
     Triangle(Triangle)
 }
 
+// On implémente le trait Copy à la structure
+#[derive(Copy, Clone)]
 struct Coordinates{
     x: f32,
     y: f32,
@@ -207,7 +209,7 @@ fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> RigidBod
     return rb;
 }
 
-fn process_Cuboid(cuboid: Cuboid, position: Coordinates) -> RigidBody<f32>{
+fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> RigidBody<f32>{
     // Coordonnées et rayon du Cuboid
     let x = position.x;
     let y = position.y;
@@ -341,31 +343,32 @@ fn process_triangle(triangle: Triangle, position: Coordinates) -> RigidBody<f32>
 }
 
 // Print shit atm
-fn process_mesh(event: MeshType) {
+fn process_mesh(event: MeshType, objet: &Objet) -> RigidBody<f32> {
     match event {
-        MeshType::Ball(Ball) => println!("Ball"),
-        MeshType::Capsule(Capsule) => println!("Capsule"),
-        MeshType::Compound(Compound) => println!("Compound"),
-        MeshType::ConvexHull(ConvexHull) => println!("ConvexHull"),
-        MeshType::Cuboid(Cuboid) => println!("Cuboid"),
-        MeshType::HeightField(HeightField) => println!("HeightField"),
-        MeshType::Plane(Plane) => println!("Plane"),
-        MeshType::Polyline(Polyline) => println!("Polyline"),
-        MeshType::Segment(Segment) => println!("Segment"),
-        MeshType::TriMesh(TriMesh) => println!("TriMesh"),
-        MeshType::Triangle(Triangle) => println!("Triangle"),
+        MeshType::Ball(Ball) => return process_ball(Ball, objet.position),
+        MeshType::Capsule(Capsule) => return process_capsule(Capsule, objet.position),
+        MeshType::Compound(Compound) => return process_compound(Compound, objet.position),
+        MeshType::ConvexHull(ConvexHull) => return process_convexhull(ConvexHull, objet.position),
+        MeshType::Cuboid(Cuboid) => return process_cuboid(Cuboid, objet.position),
+        MeshType::HeightField(HeightField) => return process_heightfield(HeightField, objet.position),
+        MeshType::Plane(Plane) => return process_plane(Plane, objet.position),
+        MeshType::Polyline(Polyline) => return process_polyline(Polyline, objet.position),
+        MeshType::Segment(Segment) => return process_segment(Segment, objet.position),
+        MeshType::TriMesh(TriMesh) => return process_trimesh(TriMesh, objet.position),
+        MeshType::Triangle(Triangle) => return process_triangle(Triangle, objet.position),
     }
 }
 
-// Fait des trucs inutiles pour le moment
+// Fait rien pour le moment
 fn main() {
+    // MechanicalWorld with a gravity vector
     let mut mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
-    let mut geometrical_world = DefaultGeometricalWorld::new();
+    let mut geometrical_world = DefaultGeometricalWorld::<f32>::new();
 
     let mut bodies = DefaultBodySet::new();
-    let mut colliders = DefaultColliderSet::new();
-    let mut joint_constraints = DefaultJointConstraintSet::new();
-    let mut force_generators = DefaultForceGeneratorSet::new();
+    let mut colliders = DefaultColliderSet::<f32>::new();
+    let mut joint_constraints = DefaultJointConstraintSet::<f32>::new();
+    let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
 
     /*
@@ -392,7 +395,7 @@ fn main() {
 
     // On itère sur le set d'objets
     for objet in &obj_set.tab{
-        let rb = process_mesh(objet.mesh); 
+        let rb = process_mesh(objet.mesh, objet); 
         // Ajout du RigidBody au set de RigidBody
         let rb_handle = bodies.insert(rb);
     }
@@ -401,27 +404,8 @@ fn main() {
 
 
 
-    let itsaball  = MeshType::Ball(Ball(0 as f32));
-    /*let itsacapsule  = MeshType::Capsule(0 as f32);
-    let itsacompound  = MeshType::Compound;
-    let itsaconvexhull  = MeshType::ConvexHull;
-    let itsacuboid  = MeshType::Cuboid(Vector3<(0 as f32, 0 as f32, 0 as f32)>);
-    let itsaheightfield  = MeshType::HeightField;
-    let itsaplane  = MeshType::Plane;
-    let itsapolyline  = MeshType::Polyline;
-    let itsasegment  = MeshType::Segment;
-    let itsatrimesh  = MeshType::TriMesh;
-    let itsatriangle  = MeshType::Triangle;*/
+    //let itsaball  = MeshType::Ball(Ball{radius: 1 as f32});
 
-    process_mesh(itsaball);
-    /*process_mesh(itsacapsule);
-    process_mesh(itsacompound);
-    process_mesh(itsaconvexhull);
-    process_mesh(itsacuboid);
-    process_mesh(itsaheightfield);
-    process_mesh(itsaplane);
-    process_mesh(itsapolyline);
-    process_mesh(itsasegment);
-    process_mesh(itsatrimesh);
-    process_mesh(itsatriangle);*/
+    // Il faut aussi passer un objet
+    //process_mesh(itsaball );
 }
