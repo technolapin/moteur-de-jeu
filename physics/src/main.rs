@@ -2,68 +2,91 @@ extern crate nalgebra as na;
 
 ////use std::env; // Pour récupérer les arguments de la commande
 use std::vec::Vec;
+
 use na::Vector3;
 use na::base::{Unit, DMatrix};
 use na::geometry::{Point2, Point3};
-use nphysics3d::object::{DefaultBodySet, DefaultColliderSet};
+
+use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, RigidBody, BodyPartHandle, ColliderDesc};
 use nphysics3d::force_generator::DefaultForceGeneratorSet;
 use nphysics3d::joint::DefaultJointConstraintSet;
 use nphysics3d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};
+
 use ncollide3d::shape::ShapeHandle;
 use ncollide3d::shape;
-use nphysics3d::object::{RigidBodyDesc, RigidBody};
 use ncollide3d::math::{Point, Isometry};
 
 
+
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Ball
 {
     radius: f32
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Capsule
 {
     half_height: f32,
     radius: f32
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Compound
 {
     shapes: Vec<(Isometry<f32>, ShapeHandle<f32>)>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct ConvexHull
 {
     points: Vec<Point<f32>>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Cuboid
 {
     vector: Vector3<f32>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct HeightField
 {
     heights: DMatrix<f32>,
     scale: Vector3<f32>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Plane
 {
     normal: Unit<Vector3<f32>>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Polyline
 {
     points: Vec<Point<f32>>,
     indices: Option<Vec<Point2<usize>>>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Segment
 {
     a: Point<f32>,
     b: Point<f32>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct TriMesh
 {
     points: Vec<Point<f32>>,
@@ -71,6 +94,8 @@ struct TriMesh
     uvs: Option<Vec<Point2<f32>>>
 }
 
+// We implement the Clone trait to the structure
+#[derive(Clone)]
 struct Triangle
 {
     a: Point<f32>,
@@ -78,7 +103,8 @@ struct Triangle
     c: Point<f32>
 }
 
-// On fait une énum pour répertorier tous les types de Mesh qu'on peut créer avec ncollide
+// We create an enum with all the shapes of mesh we can create with ncollide3d
+#[derive(Clone)]
 enum MeshType {
     Ball(Ball),
     Capsule(Capsule),
@@ -93,7 +119,7 @@ enum MeshType {
     Triangle(Triangle)
 }
 
-// On implémente le trait Copy à la structure
+// We implement the Copy trait to the structure
 #[derive(Copy, Clone)]
 struct Coordinates{
     x: f32,
@@ -101,29 +127,30 @@ struct Coordinates{
     z: f32
 }
 
-struct Objet {
+struct Object {
     position: Coordinates,
     speed: f32,
     mass: f32,
     can_move: bool,
-    mesh: MeshType
+    mesh: MeshType,
+    density: f32
 }
 
 struct ObjSet{
-    tab: Vec<Objet>,
+    tab: Vec<Object>,
     length: f32
 }
 
 
 
 // ### À compléter ###
-fn build_object_table() -> Vec<Objet>{
+fn build_object_table() -> Vec<Object>{
     // Fo mèt du cod
     let tab = Vec::new();
     return tab;
 }
 
-fn build_obj_set(tab: Vec<Objet>, length: f32) -> ObjSet{
+fn build_obj_set(tab: Vec<Object>, length: f32) -> ObjSet{
     ObjSet {
         tab,
         length
@@ -133,177 +160,213 @@ fn build_obj_set(tab: Vec<Objet>, length: f32) -> ObjSet{
 
 
 /* 
- Fonction appelée par process_mesh si c'est une Ball
- Retourne un RigidBody correspondant à la Ball
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Ball
  */
-fn process_ball(ball: Ball, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon de la Ball
+fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates and radius of the Ball
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let radius = ball.radius;
 
-    // Création d'une Ball
+    // Creation of a Ball
     let Ball = ShapeHandle::new(shape::Ball::new(radius));
 
-    // Création du RigidBody de la Ball
+    // Creation of the Ball's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Ball);
 }
 
-fn process_capsule(capsule: Capsule, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon de la Capsule
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Capsule
+ */
+fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates, half-height and radius of the Capsule
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let half_height = capsule.half_height;
     let radius = capsule.radius;
 
-    // Création d'une Capsule
+    // Creation of a Capsule
     let Capsule = ShapeHandle::new(shape::Capsule::new(half_height, radius));
 
-    // Création du RigidBody de la Capsule
+    // Creation of the Capsule's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Capsule);
 }
 
-fn process_compound(compound: Compound, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du Compound
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Compound
+ */
+fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates and shapes of the Compound
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let shapes = compound.shapes; 
 
-    // Création d'un Compound
+    // Creation of a Compound
     let Compound = ShapeHandle::new(shape::Compound::new(shapes));
 
-    // Création du RigidBody du Compound
+    // Creation of the Compound's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Compound);
 }
 
-fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du ConvexHull
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the ConvexHull
+ */
+fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordonnées and points of the ConvexHull
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let points = convexhull.points;
 
-    // Création d'un ConvexHull
+    // Creation of a ConvexHull
     let ConvexHull = ShapeHandle::new(shape::ConvexHull::try_from_points(&points).unwrap());
 
-    // Création du RigidBody du ConvexHull
+    // Creation of the ConvexHull's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, ConvexHull);
 }
 
-fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du Cuboid
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Cuboid
+ */
+fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordonnées and vector of the Cuboid
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let vector = cuboid.vector;
 
-    // Création d'un Cuboid
+    // Creation of a Cuboid
     let Cuboid = ShapeHandle::new(shape::Cuboid::new(vector));
 
-    // Création du RigidBody du Cuboid
+    // Creation of the Cuboid's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Cuboid);
 }
 
-fn process_heightfield(heightfield: HeightField, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du HeightField
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the HeightField
+ */
+fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates, height and scale of the HeightField
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let heights = heightfield.heights;
     let scale = heightfield.scale;
 
-    // Création d'un HeightField
+    // Creation of a HeightField
     let HeightField = ShapeHandle::new(shape::HeightField::new(heights, scale));
 
-    // Création du RigidBody du HeightField
+    // Creation of the HeightField's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, HeightField);
 }
 
-fn process_plane(plane: Plane, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du Plane
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Plane
+ */
+fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates and normal of the Plane
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let normal = plane.normal;
 
-    // Création d'un Plane
+    // Creation of a Plane
     let Plane = ShapeHandle::new(shape::Plane::new(normal));
 
-    // Création du RigidBody du Plane
+    // Creation of the Plane's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Plane);
 }
 
-fn process_polyline(polyline: Polyline, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon de la Polyline
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Polyline
+ */
+fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates, points and indices of the Polyline
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let points = polyline.points;
     let indices = polyline.indices;
 
-    // Création d'une Polyline
+    // Creation of a Polyline
     let Polyline = ShapeHandle::new(shape::Polyline::new(points, indices));
 
-    // Création du RigidBody de la Polyline
+    // Creation of the Polyline's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Polyline);
 }
 
-fn process_segment(segment: Segment, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du Segment
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Segment
+ */
+fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates and points of the Segment
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let a = segment.a;
     let b = segment.b; 
 
-    // Création d'un Segment
+    // Creation of a Segment
     let Segment = ShapeHandle::new(shape::Segment::new(a, b));
 
-    // Création du RigidBody du Segment
+    // Creation of the Segment's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Segment);
 }
 
-fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon de la TriMesh
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the TriMesh
+ */
+fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates, points, indices and uvs of the TriMesh
     let x = position.x;
     let y = position.y;
     let z = position.z;
@@ -311,19 +374,23 @@ fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> RigidBody<f32>{
     let indices = trimesh.indices;
     let uvs = trimesh.uvs;
 
-    // Création d'une TriMesh
+    // Creation of a TriMesh
     let TriMesh = ShapeHandle::new(shape::TriMesh::new(points, indices, uvs));
 
-    // Création du RigidBody de la TriMesh
+    // Creation of the TriMesh's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, TriMesh);
 }
 
-fn process_triangle(triangle: Triangle, position: Coordinates) -> RigidBody<f32>{
-    // Coordonnées et rayon du Triangle
+/* 
+ This function will be called by process_mesh and returns a RigidBody
+ corresponding to the Triangle
+ */
+fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
+    // Coordinates and points of the Triangle
     let x = position.x;
     let y = position.y;
     let z = position.z;
@@ -331,31 +398,31 @@ fn process_triangle(triangle: Triangle, position: Coordinates) -> RigidBody<f32>
     let b = triangle.b;
     let c = triangle.c;
 
-    // Création d'un Triangle
+    // Creation of a Triangle
     let Triangle = ShapeHandle::new(shape::Triangle::new(a, b, c));
 
-    // Création du RigidBody du Triangle
+    // Creation of the Triangle's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return rb;
+    return (rb, Triangle);
 }
 
-// Print shit atm
-fn process_mesh(event: MeshType, objet: &Objet) -> RigidBody<f32> {
+// Print shit at the moment
+fn process_mesh(event: MeshType, objet: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
     match event {
-        MeshType::Ball(Ball) => return process_ball(Ball, objet.position),
-        MeshType::Capsule(Capsule) => return process_capsule(Capsule, objet.position),
-        MeshType::Compound(Compound) => return process_compound(Compound, objet.position),
-        MeshType::ConvexHull(ConvexHull) => return process_convexhull(ConvexHull, objet.position),
-        MeshType::Cuboid(Cuboid) => return process_cuboid(Cuboid, objet.position),
-        MeshType::HeightField(HeightField) => return process_heightfield(HeightField, objet.position),
-        MeshType::Plane(Plane) => return process_plane(Plane, objet.position),
-        MeshType::Polyline(Polyline) => return process_polyline(Polyline, objet.position),
-        MeshType::Segment(Segment) => return process_segment(Segment, objet.position),
-        MeshType::TriMesh(TriMesh) => return process_trimesh(TriMesh, objet.position),
-        MeshType::Triangle(Triangle) => return process_triangle(Triangle, objet.position),
+        MeshType::Ball(ball) => return process_ball(ball, objet.position),
+        MeshType::Capsule(capsule) => return process_capsule(capsule, objet.position),
+        MeshType::Compound(compound) => return process_compound(compound, objet.position),
+        MeshType::ConvexHull(convexhull) => return process_convexhull(convexhull, objet.position),
+        MeshType::Cuboid(cuboid) => return process_cuboid(cuboid, objet.position),
+        MeshType::HeightField(heightfield) => return process_heightfield(heightfield, objet.position),
+        MeshType::Plane(plane) => return process_plane(plane, objet.position),
+        MeshType::Polyline(polyline) => return process_polyline(polyline, objet.position),
+        MeshType::Segment(segment) => return process_segment(segment, objet.position),
+        MeshType::TriMesh(trimesh) => return process_trimesh(trimesh, objet.position),
+        MeshType::Triangle(triangle) => return process_triangle(triangle, objet.position),
     }
 }
 
@@ -370,42 +437,33 @@ fn main() {
     let mut joint_constraints = DefaultJointConstraintSet::<f32>::new();
     let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
-
-    /*
-    ### Marche pas ###
-
-    // Vérifie qu'il y a le bon nombre d'arguments
-    let mut c = 0;
-    for argument in env::args() {
-        c += 1;
-        if c==1{
-            let obj_set = env::args(c);
-        }    
-    }
-    if c!=2{
-        println!("Wrong number of argument: {} \n Expected 2", c);
-    }
-    */
-
     let tab = build_object_table();
     let length = 0 as f32; // Demander à Clément comment on a la taille d'un vec
     let obj_set = build_obj_set(tab, length); 
 
 
 
-    // On itère sur le set d'objets
-    for objet in &obj_set.tab{
-        let rb = process_mesh(objet.mesh, objet); 
-        // Ajout du RigidBody au set de RigidBody
+    // For every object in obj_set
+    for object in &obj_set.tab{
+        let tuple = process_mesh(object.mesh.clone(), object);
+        let rb = tuple.0; 
+        // We add the RigidBody to the RigidBodySet
         let rb_handle = bodies.insert(rb);
+        let collider = ColliderDesc::new(tuple.1)
+        .density(object.density)
+        .build(BodyPartHandle(rb_handle, 0));
+        
+        colliders.insert(collider);
     }
 
-    
-
-
-
-    //let itsaball  = MeshType::Ball(Ball{radius: 1 as f32});
-
-    // Il faut aussi passer un objet
-    //process_mesh(itsaball );
+    loop {
+        // The universe is now running/ticking
+        mechanical_world.step(
+            &mut geometrical_world,
+            &mut bodies,
+            &mut colliders,
+            &mut joint_constraints,
+            &mut force_generators
+        );
+    }
 }
