@@ -1,5 +1,9 @@
 use glium::texture::Texture2d;
 
+/**
+The Material datas.
+Is owned by the Objects structure
+*/
 #[derive(Debug)]
 pub enum Material
 {

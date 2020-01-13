@@ -6,7 +6,8 @@ use glium::vertex::VertexBufferAny;
 use std::path::Path;
 
 /**
- * Own the all Objects imported.
+Owns the all Objects imported.
+This is what the user is supposed to use.
  */
 #[derive(Debug)]
 pub struct ModelsHolder
@@ -27,16 +28,16 @@ impl<'a> ModelsHolder
         }
     }
 
+    /**
+    Check if the corresponding source of object is known and then tries to fetch an Object struct.
+     */
     pub fn get(&self, file: &str, model_name: &str) -> Option<Object>
     {
         match self.wavefronts.get(file)
         {
             None => None,
-            Some(wavefront) => match wavefront.get_object_checked(model_name.to_string())
-            {
-                None => None,
-                Some(groups) => Some(Object{groups: groups})
-            }
+            Some(wavefront) =>
+                wavefront.get_object_checked(model_name.to_string())
         }
     }
 
@@ -56,7 +57,10 @@ impl<'a> ModelsHolder
             })
         }
     }
-    
+
+    /**
+    Tries to import a wavefront.
+     */
     pub fn load_wavefront(&mut self,
                           gr: &Graphical,
                           filename: &str,
