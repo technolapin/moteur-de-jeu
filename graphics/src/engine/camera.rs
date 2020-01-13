@@ -1,19 +1,16 @@
 use crate::misc::*;
 
 #[derive(Default)]
-pub struct Camera
-{
+pub struct Camera {
     position: (f32, f32, f32),
     up: (f32, f32, f32),
     orientation: (f32, f32, f32),
     aspect_ratio: f32,
 }
 
-impl Camera
-{
+impl Camera {
     /** Constructor of Frame  */
-    pub fn new(aspect_ratio: f32) -> Self
-    {
+    pub fn new(aspect_ratio: f32) -> Self {
         Self {
             position: (0., 0., 0.),
             orientation: (0., 0., -1.),
@@ -22,19 +19,16 @@ impl Camera
         }
     }
 
-    pub fn set_aspect_ratio(&mut self, width: f32, height: f32)
-    {
+    pub fn set_aspect_ratio(&mut self, width: f32, height: f32) {
         self.aspect_ratio = height / width;
     }
 
-    pub fn set_position(&mut self, position: (f32, f32, f32))
-    {
+    pub fn set_position(&mut self, position: (f32, f32, f32)) {
         self.position = position;
     }
 
     /** Update the position of the Camera */
-    pub fn relative_move(&mut self, displacement: (f32, f32, f32))
-    {
+    pub fn relative_move(&mut self, displacement: (f32, f32, f32)) {
         let side = v_prod(self.orientation, self.up);
         self.position = (
             self.position.0
@@ -52,14 +46,12 @@ impl Camera
         );
     }
 
-    pub fn set_direction(&mut self, orientation: (f32, f32, f32))
-    {
+    pub fn set_direction(&mut self, orientation: (f32, f32, f32)) {
         self.orientation = normalize_vec(orientation);
     }
 
     /** Rotation of the Camera around its axis */
-    pub fn rotation_relative(&mut self, (rx, ry, rz): (f32, f32, f32))
-    {
+    pub fn rotation_relative(&mut self, (rx, ry, rz): (f32, f32, f32)) {
         //on tourne de rx rad autour de l'axe 0x
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
@@ -93,8 +85,7 @@ impl Camera
     }
 
     /** Rotation of the Camera around axis x y and z of the Scene */
-    pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32))
-    {
+    pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32)) {
         //on tourne de rx rad autour de l'axe 0x
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
@@ -128,8 +119,7 @@ impl Camera
     }
 
     /** Move the Objects of the scene according to the rotation of the Camera, Return the matrix of the view */
-    pub fn get_view_matrix(&self) -> [[f32; 4]; 4]
-    {
+    pub fn get_view_matrix(&self) -> [[f32; 4]; 4] {
         let f = self.orientation;
         //let u = (0., 1., 0.);
         //let u = normalize_vec((-f.1, -f.2, f.0));
@@ -151,8 +141,7 @@ impl Camera
     }
 
     /** Return the matrix of the perspective */
-    pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4]
-    {
+    pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4] {
         //let (width, height) = target.get_dimensions();
 
         let fov: f32 = 3.141592 / 3.0;

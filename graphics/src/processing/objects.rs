@@ -17,7 +17,7 @@ It is created by the ModelsHolder, which owns the data.
  */
 #[derive(Debug)]
 pub struct Object<'a> {
-    pub groups: Vec<(&'a VertexBufferAny, Option<&'a Material>)>,
+    pub groups: Vec<(&'a VertexBufferAny, &'a Material)>,
 }
 
 /**
@@ -46,47 +46,34 @@ impl Objects {
     ) -> Self {
         use genmesh::{Polygon, Quad, Triangle};
 
+        // try to load the files
         let path_to_wavefront = ressources_path.join(path_to_wavefront);
         let path_to_mtl = ressources_path.join(path_to_mtl);
-
         let file = File::open(path_to_wavefront).expect("Can't open wavefront");
-
         let mut bufreader = ::std::io::BufReader::new(file);
-
         let obj = Obj::load_buf(&mut bufreader).unwrap();
         let file = File::open(path_to_mtl).unwrap();
         let mut bufreader = ::std::io::BufReader::new(file);
-
         let mtl = Mtl::load(&mut bufreader);
+
+        /*
+        parsing the materials from the .mtl
+        several kind of material are supported for now: Textured, NonTextured
+        and Default (constructed according to what is being found in the mtl)
+        */
         let mut materials = HashMap::new();
 
         for material in mtl.materials.iter() {
             let mat = match &material {
                 obj::Material {
-                    name: _,
-                    ka: _,
-                    kd: _,
                     ks: Some(specular),
-                    ke: _,
-                    km: _,
-                    tf: _,
                     ns: Some(specular_exponent),
-                    ni: _,
                     tr: transparency,
                     d: opacityy,
-                    illum: _,
-                    map_ka: _,
                     map_kd: Some(texture_path),
-                    map_ks: _,
-                    map_ke: _,
-                    map_ns: _,
-                    map_d: _,
-                    map_bump: _,
-                    map_refl: _,
+                    ..
                 } => {
                     let opacity = opacityy.unwrap_or(1.).min(1. - transparency.unwrap_or(0.));
-
-                    println!("TEXTURE PATH {}", texture_path);
                     let image = image::open(ressources_path.join(Path::new(texture_path)))
                         .unwrap()
                         .to_rgba();
@@ -102,26 +89,15 @@ impl Objects {
                     }
                 }
                 obj::Material {
-                    name: _,
                     ka: Some(ambiant),
                     kd: Some(diffuse),
                     ks: Some(specular),
                     ke: Some(emission),
-                    km: _,
-                    tf: _,
                     ns: Some(specular_exponent),
-                    ni: _,
                     tr: transparency,
                     d: opacity,
-                    illum: _,
-                    map_ka: _,
                     map_kd: None,
-                    map_ks: _,
-                    map_ke: _,
-                    map_ns: _,
-                    map_d: _,
-                    map_bump: _,
-                    map_refl: _,
+                    ..
                 } => {
                     println!("trans/opac: {:?} {:?}", transparency, opacity);
                     let opacity = opacity.unwrap_or(1.).min(1. - transparency.unwrap_or(0.));
@@ -142,6 +118,7 @@ impl Objects {
             materials.insert(material.name.clone(), mat);
         }
 
+        // starting to parse the .obj and to construct the Objects structure
         let mut objects = Objects {
             objects: HashMap::new(),
             materials: materials,
@@ -153,6 +130,7 @@ impl Objects {
                 let mut mesh = Vec::new();
 
                 for polygon in group.polys.iter() {
+                    // polygons may be triangles or quads
                     match polygon {
                         &Polygon::PolyTri(Triangle {
                             x: v1,
@@ -212,6 +190,8 @@ impl Objects {
                     }
                 }
 
+                // adding the group of voxel just constated and the name of its associed material
+                // this is fine since one is not supposed to access the material very often
                 groups.push(Group {
                     voxels: VertexBuffer::new(&gr.display.display, &mesh)
                         .unwrap()
@@ -222,6 +202,7 @@ impl Objects {
                     },
                 });
             }
+            // the object is finished and added to the Objects structure
             objects.objects.insert(object.name.clone(), groups);
         }
 
@@ -241,8 +222,10 @@ impl Objects {
                     (
                         &group.voxels,
                         match &group.material {
-                            None => None,
-                            Some(string) => self.materials.get(string),
+                            None => &Material::Default,
+                            Some(string) => {
+                                self.materials.get(string).unwrap_or(&Material::Default)
+                            }
                         },
                     )
                 })
@@ -263,8 +246,10 @@ impl Objects {
                         (
                             &group.voxels,
                             match &group.material {
-                                None => None,
-                                Some(string) => self.materials.get(string),
+                                None => &Material::Default,
+                                Some(string) => {
+                                    self.materials.get(string).unwrap_or(&Material::Default)
+                                }
                             },
                         )
                     })

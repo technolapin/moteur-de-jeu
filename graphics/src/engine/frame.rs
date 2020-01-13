@@ -5,22 +5,18 @@ use crate::processing::material::*;
 use crate::processing::objects::*;
 
 #[derive(Copy, Clone)]
-pub struct Attr
-{
+pub struct Attr {
     pub world_transformation: [[f32; 4]; 4],
 }
 implement_vertex!(Attr, world_transformation);
 
-pub struct Frame
-{
+pub struct Frame {
     frame: glium::Frame,
 }
 
-impl Frame
-{
+impl Frame {
     /** Constructor of Frame  */
-    pub fn new(gr: &Graphical) -> Self
-    {
+    pub fn new(gr: &Graphical) -> Self {
         Self {
             frame: gr.display.display.draw(),
         }
@@ -32,20 +28,14 @@ impl Frame
         gr: &Graphical,
         obj: &Object,
         per_instance: &glium::VertexBuffer<Attr>, // position
-    )
-    {
+    ) {
         obj.groups
             .iter()
-            .for_each(|(vertexes, maybe_material)| match maybe_material
-            {
-                Some(material) =>
-                {
-                    self.draw_group(gr, vertexes, per_instance, material);
-                }
-                None => unimplemented!(),
-            });
+            .for_each(|(vertexes, material)|
+                      self.draw_group(gr, vertexes, per_instance, material)
+            );
     }
-
+    
     /** Draw a group of Object (part of the Object) in the Frame, called by fn draw */
     pub fn draw_group(
         &mut self,
@@ -53,19 +43,16 @@ impl Frame
         vertex_buffer: &glium::vertex::VertexBufferAny,
         per_instance: &glium::VertexBuffer<Attr>,
         material: &Material,
-    )
-    {
+    ) {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-        match material
-        {
+        match material {
             Material::Textured {
                 texture,
                 specular_color,
                 specular_exponent,
                 opacity,
-            } =>
-            {
+            } => {
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
@@ -92,8 +79,7 @@ impl Frame
                 specular_exponent,
                 emission_color,
                 opacity,
-            } =>
-            {
+            } => {
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
@@ -112,8 +98,7 @@ impl Frame
                     )
                     .unwrap();
             }
-            _ =>
-            {
+            _ => {
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
@@ -128,14 +113,12 @@ impl Frame
     }
 
     /** Reset the Frame */
-    pub fn clear(&mut self)
-    {
+    pub fn clear(&mut self) {
         self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
     }
 
     /** Send the Frame to the Graphical Card */
-    pub fn show(self)
-    {
+    pub fn show(self) {
         self.frame.finish().unwrap();
     }
 }
