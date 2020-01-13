@@ -87,6 +87,18 @@ impl<'a> ModelsHolder
         self.wavefronts.insert(stem.clone(), Objects::new(gr, path_to_wavefront, &path_to_mtl, ressources_path));
         Ok(())
     }
-    
+	
+
+    /** remove from the graphical memory a file**/
+    pub fn unload( &mut self,filename: &str) ->    Result<(), &'static str>
+    {
+	 if (self.wavefronts.contains_key(filename))
+        	{self.wavefronts.remove(filename);
+		 return Ok(()); }
+	 else
+		{return Err("file not found");}
+    }
+
 }
 
+	
