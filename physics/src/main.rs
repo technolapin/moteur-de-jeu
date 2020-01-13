@@ -129,16 +129,16 @@ struct Coordinates{
 
 struct Object {
     position: Coordinates,
-    speed: f32,
-    mass: f32,
-    can_move: bool,
+    //speed: f32,
+    //mass: f32,
+    //can_move: bool,
     mesh: MeshType,
     density: f32
 }
 
 struct ObjSet{
     tab: Vec<Object>,
-    length: f32
+    length: usize
 }
 
 
@@ -150,11 +150,16 @@ fn build_object_table() -> Vec<Object>{
     return tab;
 }
 
-fn build_obj_set(tab: Vec<Object>, length: f32) -> ObjSet{
+fn build_obj_set(tab: Vec<Object>, length: usize) -> ObjSet{
     ObjSet {
         tab,
         length
     }
+}
+
+// Prints the coordinates given in parameter
+fn print_coords(coords: Coordinates){
+    println!("({}, {}, {})", coords.x, coords.y, coords.z);
 }
 
 
@@ -171,14 +176,14 @@ fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHand
     let radius = ball.radius;
 
     // Creation of a Ball
-    let Ball = ShapeHandle::new(shape::Ball::new(radius));
+    let bal = ShapeHandle::new(shape::Ball::new(radius));
 
     // Creation of the Ball's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Ball);
+    return (rb, bal);
 }
 
 /* 
@@ -194,14 +199,14 @@ fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, 
     let radius = capsule.radius;
 
     // Creation of a Capsule
-    let Capsule = ShapeHandle::new(shape::Capsule::new(half_height, radius));
+    let caps = ShapeHandle::new(shape::Capsule::new(half_height, radius));
 
     // Creation of the Capsule's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Capsule);
+    return (rb, caps);
 }
 
 /* 
@@ -216,14 +221,14 @@ fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32
     let shapes = compound.shapes; 
 
     // Creation of a Compound
-    let Compound = ShapeHandle::new(shape::Compound::new(shapes));
+    let comp = ShapeHandle::new(shape::Compound::new(shapes));
 
     // Creation of the Compound's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Compound);
+    return (rb, comp);
 }
 
 /* 
@@ -238,14 +243,14 @@ fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBo
     let points = convexhull.points;
 
     // Creation of a ConvexHull
-    let ConvexHull = ShapeHandle::new(shape::ConvexHull::try_from_points(&points).unwrap());
+    let convexh = ShapeHandle::new(shape::ConvexHull::try_from_points(&points).unwrap());
 
     // Creation of the ConvexHull's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, ConvexHull);
+    return (rb, convexh);
 }
 
 /* 
@@ -260,14 +265,14 @@ fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, Sha
     let vector = cuboid.vector;
 
     // Creation of a Cuboid
-    let Cuboid = ShapeHandle::new(shape::Cuboid::new(vector));
+    let cub = ShapeHandle::new(shape::Cuboid::new(vector));
 
     // Creation of the Cuboid's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Cuboid);
+    return (rb, cub);
 }
 
 /* 
@@ -283,14 +288,14 @@ fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (Rigi
     let scale = heightfield.scale;
 
     // Creation of a HeightField
-    let HeightField = ShapeHandle::new(shape::HeightField::new(heights, scale));
+    let heightf = ShapeHandle::new(shape::HeightField::new(heights, scale));
 
     // Creation of the HeightField's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, HeightField);
+    return (rb, heightf);
 }
 
 /* 
@@ -305,14 +310,14 @@ fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeH
     let normal = plane.normal;
 
     // Creation of a Plane
-    let Plane = ShapeHandle::new(shape::Plane::new(normal));
+    let pla = ShapeHandle::new(shape::Plane::new(normal));
 
     // Creation of the Plane's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Plane);
+    return (rb, pla);
 }
 
 /* 
@@ -328,14 +333,14 @@ fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32
     let indices = polyline.indices;
 
     // Creation of a Polyline
-    let Polyline = ShapeHandle::new(shape::Polyline::new(points, indices));
+    let polyl = ShapeHandle::new(shape::Polyline::new(points, indices));
 
     // Creation of the Polyline's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Polyline);
+    return (rb, polyl);
 }
 
 /* 
@@ -351,14 +356,14 @@ fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, 
     let b = segment.b; 
 
     // Creation of a Segment
-    let Segment = ShapeHandle::new(shape::Segment::new(a, b));
+    let seg = ShapeHandle::new(shape::Segment::new(a, b));
 
     // Creation of the Segment's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Segment);
+    return (rb, seg);
 }
 
 /* 
@@ -375,14 +380,14 @@ fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, 
     let uvs = trimesh.uvs;
 
     // Creation of a TriMesh
-    let TriMesh = ShapeHandle::new(shape::TriMesh::new(points, indices, uvs));
+    let trim = ShapeHandle::new(shape::TriMesh::new(points, indices, uvs));
 
     // Creation of the TriMesh's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, TriMesh);
+    return (rb, trim);
 }
 
 /* 
@@ -399,14 +404,14 @@ fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32
     let c = triangle.c;
 
     // Creation of a Triangle
-    let Triangle = ShapeHandle::new(shape::Triangle::new(a, b, c));
+    let tri = ShapeHandle::new(shape::Triangle::new(a, b, c));
 
     // Creation of the Triangle's RigidBody
     let rb = RigidBodyDesc::new()
         .translation(Vector3::new(x, y, z))
         .build();
 
-    return (rb, Triangle);
+    return (rb, tri);
 }
 
 // Print shit at the moment
@@ -426,35 +431,82 @@ fn process_mesh(event: MeshType, objet: &Object) -> (RigidBody<f32>, ShapeHandle
     }
 }
 
-// Fait rien pour le moment
+
+
 fn main() {
     // MechanicalWorld with a gravity vector
     let mut mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
     let mut geometrical_world = DefaultGeometricalWorld::<f32>::new();
 
+    // Where we store all the RigidBody object
     let mut bodies = DefaultBodySet::new();
+    // Where we store all the Collider object
     let mut colliders = DefaultColliderSet::<f32>::new();
     let mut joint_constraints = DefaultJointConstraintSet::<f32>::new();
     let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
-    let tab = build_object_table();
-    let length = 0 as f32; // Demander à Clément comment on a la taille d'un vec
+    // We create the tab of the Obj_set
+    let mut tab = build_object_table();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ### On créé un objet pour tester ###
+
+    let coords = Coordinates{
+        x: 0 as f32,
+        y: 0 as f32,
+        z: 0 as f32
+    };
+
+    let mesh = MeshType::Ball(Ball{ radius: 1.0 as f32});
+
+    let obj = Object {
+        position: coords,
+        mesh: mesh,
+        density: 1.0 as f32
+    };
+
+    tab[0] = obj;
+
+
+
+
+
+
+
+    // Length of tab
+    let length = tab.len();
+    // We create the Obj_set
     let obj_set = build_obj_set(tab, length); 
-
-
 
     // For every object in obj_set
     for object in &obj_set.tab{
         let tuple = process_mesh(object.mesh.clone(), object);
+        // The RigidBody associated to the object is at position 0 of the tuple
         let rb = tuple.0; 
         // We add the RigidBody to the RigidBodySet
         let rb_handle = bodies.insert(rb);
+        // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
         let collider = ColliderDesc::new(tuple.1)
         .density(object.density)
         .build(BodyPartHandle(rb_handle, 0));
         
+        // We add the Collider to the set of colliders
         colliders.insert(collider);
     }
+
+    println!("Tab length: {}", obj_set.length);
 
     loop {
         // The universe is now running/ticking
@@ -465,5 +517,6 @@ fn main() {
             &mut joint_constraints,
             &mut force_generators
         );
+        print_coords(obj_set.tab[0].position);
     }
 }
