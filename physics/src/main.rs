@@ -446,7 +446,13 @@ fn main() {
     let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
     // We create the tab of the Obj_set
-    let mut tab = build_object_table();
+    let mut obj_tab = build_object_table();
+
+    /* 
+     We create a tab to store the handle of every collider so we can
+     get their position and material.
+     */
+    let mut coll_tab = Vec::new();
 
 
 
@@ -458,37 +464,52 @@ fn main() {
 
 
 
+    // ### TESTING ###
 
+    // BALL
+    let coords_ball = Coordinates{
+        x: 0 as f32,
+        y: 5 as f32,
+        z: 0 as f32
+    };
 
+    let mesh_ball = MeshType::Ball(Ball{ radius: 1.0 as f32});
 
-    // ### On créé un objet pour tester ###
+    let ball = Object {
+        position: coords_ball,
+        mesh: mesh_ball,
+        density: 1.0 as f32
+    };
 
-    let coords = Coordinates{
+    obj_tab.push(ball);
+
+    // GROUND
+
+    let coords_ground = Coordinates{
         x: 0 as f32,
         y: 0 as f32,
         z: 0 as f32
     };
 
-    let mesh = MeshType::Ball(Ball{ radius: 1.0 as f32});
+    let vec_ground = Vector3::new(3.0, 0.2, 3.0);
 
-    let obj = Object {
-        position: coords,
-        mesh: mesh,
+    let mesh_ground = MeshType::Cuboid(Cuboid{vector: vec_ground});
+
+    let ground = Object {
+        position: coords_ground,
+        mesh: mesh_ground,
         density: 1.0 as f32
     };
 
-    tab[0] = obj;
-
-
-
+    obj_tab.push(ground);
 
 
 
 
     // Length of tab
-    let length = tab.len();
+    let length = obj_tab.len();
     // We create the Obj_set
-    let obj_set = build_obj_set(tab, length); 
+    let obj_set = build_obj_set(obj_tab, length); 
 
     // For every object in obj_set
     for object in &obj_set.tab{
@@ -503,7 +524,14 @@ fn main() {
         .build(BodyPartHandle(rb_handle, 0));
         
         // We add the Collider to the set of colliders
-        colliders.insert(collider);
+        let coll_handle = colliders.insert(collider);
+
+        // Wa add the handle to the coll_tab
+        coll_tab.push(coll_handle);
+
+        // ### FOR TESTING PURPOSE ONLY ###
+        if(coll_tab.len() == 2){
+            colliders.get(coll_tab[1]).unwrap().anchor();}
     }
 
     println!("Tab length: {}", obj_set.length);
@@ -517,6 +545,7 @@ fn main() {
             &mut joint_constraints,
             &mut force_generators
         );
-        print_coords(obj_set.tab[0].position);
+        // Prints the object's coordinates ### FOR TESTING ONLY ###
+        println!("{}", colliders.get(coll_tab[0]).unwrap().position())
     }
 }
