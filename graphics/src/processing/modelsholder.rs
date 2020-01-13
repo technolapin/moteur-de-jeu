@@ -2,7 +2,6 @@ use super::{Objects, Object};
 use crate::engine::Graphical;
 
 use std::collections::HashMap;
-use glium::vertex::VertexBufferAny;
 use std::path::Path;
 
 /**

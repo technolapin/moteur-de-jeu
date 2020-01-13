@@ -11,12 +11,8 @@ pub mod processing;
 use engine::*;
 use misc::*;
 use processing::*;
-use std::io;
-
 use nalgebra::base::*;
 
-use std::path::Path;
-use std::path::PathBuf;
 
 fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
     let mut out = [[0.; 4]; 4];
@@ -28,7 +24,7 @@ fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
     out
 }
 
-fn main() {
+fn main() -> Result<(), &'static str> {
     let ressources_path = get_ressources_path();
 
     let mut event_loop = glutin::EventsLoop::new();
@@ -36,11 +32,11 @@ fn main() {
     let mut graphics = Graphical::new(&event_loop);
     let mut holder = ModelsHolder::new();
 
-    holder.load_wavefront(&graphics, "textured_cube.obj", &ressources_path);
-    holder.load_wavefront(&graphics, "reds.obj", &ressources_path);
-    holder.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path);
-    holder.load_wavefront(&graphics, "teto.obj", &ressources_path);
-    holder.load_wavefront(&graphics, "terrain.obj", &ressources_path);
+    holder.load_wavefront(&graphics, "textured_cube.obj", &ressources_path)?;
+    holder.load_wavefront(&graphics, "reds.obj", &ressources_path)?;
+    holder.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path)?;
+    holder.load_wavefront(&graphics, "teto.obj", &ressources_path)?;
+    holder.load_wavefront(&graphics, "terrain.obj", &ressources_path)?;
 
     // list of teapots with position and direction
     let mut teapots = (0..30)
@@ -72,6 +68,7 @@ fn main() {
         glium::vertex::VertexBuffer::dynamic(&graphics.display.display, &data).unwrap()
     };
 
+    
     let map_position = glium::vertex::VertexBuffer::dynamic(
         &graphics.display.display,
         &vec![Attr {
@@ -87,8 +84,8 @@ fn main() {
 
     graphics.camera.set_position((0., 0., 0.));
     println!("\n HOLDER: {:?} \n", holder);
-    let sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
-    let teto = holder
+    let _sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
+    let _teto = holder
         .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
         .unwrap();
     let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
@@ -128,11 +125,7 @@ fn main() {
         }
     }
 
-    use glutin::Event::DeviceEvent;
-    use glutin::KeyboardInput;
     use glutin::VirtualKeyCode;
-
-    use glutin::ControlFlow;
 
     //    let event_loop = graphics.get_event_loop();
 
@@ -140,7 +133,6 @@ fn main() {
     let mut camera_rot = (0., 0., 0.);
 
     use std::collections::HashSet;
-    use std::hash::Hash;
     let mut keys = HashSet::new();
     let sensibility = 0.0005;
 
@@ -237,4 +229,5 @@ fn main() {
             };
         }
     }
+    Ok(())
 }

@@ -1,7 +1,6 @@
 use super::group::*;
 use super::material::*;
 use super::vertex::*;
-use crate::misc::*;
 
 use crate::engine::graphical::*;
 
@@ -11,7 +10,6 @@ use glium::vertex::{VertexBuffer, VertexBufferAny};
 use obj::{Mtl, Obj};
 use std::collections::HashMap;
 use std::fs::File;
-use std::io::Cursor;
 
 /**
 This structure represents a 3D object.
@@ -27,6 +25,7 @@ This structure represents a set of 3D objects and their shared materials.
 It typicaly contains all the information a wavefront file and their associated mtl file can provide.
 It is owned by the ModelsHolder struct.
  */
+
 #[derive(Debug)]
 pub struct Objects {
     pub objects: HashMap<String, Vec<Group>>,
@@ -54,7 +53,7 @@ impl Objects {
 
         let mut bufreader = ::std::io::BufReader::new(file);
 
-        let mut obj = Obj::load_buf(&mut bufreader).unwrap();
+        let obj = Obj::load_buf(&mut bufreader).unwrap();
         let file = File::open(path_to_mtl).unwrap();
         let mut bufreader = ::std::io::BufReader::new(file);
 
