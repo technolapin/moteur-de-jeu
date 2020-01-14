@@ -535,7 +535,7 @@ fn main() {
     
 
     loop {
-        // The universe is now running/ticking
+        // The universe is now running/ticking 60 times per second
         mechanical_world.step(
             &mut geometrical_world,
             &mut bodies,
