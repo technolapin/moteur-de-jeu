@@ -7,7 +7,7 @@ use na::Vector3;
 use na::base::{Unit, DMatrix};
 use na::geometry::{Point2, Point3};
 
-use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, RigidBody, BodyPartHandle, ColliderDesc};
+use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, RigidBody, BodyPartHandle, ColliderDesc, BodyStatus};
 use nphysics3d::force_generator::DefaultForceGeneratorSet;
 use nphysics3d::joint::DefaultJointConstraintSet;
 use nphysics3d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};
@@ -155,11 +155,6 @@ fn build_obj_set(tab: Vec<Object>, length: usize) -> ObjSet{
         tab,
         length
     }
-}
-
-// Prints the coordinates given in parameter
-fn print_coords(coords: Coordinates){
-    println!("({}, {}, {})", coords.x, coords.y, coords.z);
 }
 
 
@@ -414,20 +409,20 @@ fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32
     return (rb, tri);
 }
 
-// Print shit at the moment
-fn process_mesh(event: MeshType, objet: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
+// Create a RigidBody corresponding to the MeshType of the object
+fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
     match event {
-        MeshType::Ball(ball) => return process_ball(ball, objet.position),
-        MeshType::Capsule(capsule) => return process_capsule(capsule, objet.position),
-        MeshType::Compound(compound) => return process_compound(compound, objet.position),
-        MeshType::ConvexHull(convexhull) => return process_convexhull(convexhull, objet.position),
-        MeshType::Cuboid(cuboid) => return process_cuboid(cuboid, objet.position),
-        MeshType::HeightField(heightfield) => return process_heightfield(heightfield, objet.position),
-        MeshType::Plane(plane) => return process_plane(plane, objet.position),
-        MeshType::Polyline(polyline) => return process_polyline(polyline, objet.position),
-        MeshType::Segment(segment) => return process_segment(segment, objet.position),
-        MeshType::TriMesh(trimesh) => return process_trimesh(trimesh, objet.position),
-        MeshType::Triangle(triangle) => return process_triangle(triangle, objet.position),
+        MeshType::Ball(ball) => return process_ball(ball, object.position),
+        MeshType::Capsule(capsule) => return process_capsule(capsule, object.position),
+        MeshType::Compound(compound) => return process_compound(compound, object.position),
+        MeshType::ConvexHull(convexhull) => return process_convexhull(convexhull, object.position),
+        MeshType::Cuboid(cuboid) => return process_cuboid(cuboid, object.position),
+        MeshType::HeightField(heightfield) => return process_heightfield(heightfield, object.position),
+        MeshType::Plane(plane) => return process_plane(plane, object.position),
+        MeshType::Polyline(polyline) => return process_polyline(polyline, object.position),
+        MeshType::Segment(segment) => return process_segment(segment, object.position),
+        MeshType::TriMesh(trimesh) => return process_trimesh(trimesh, object.position),
+        MeshType::Triangle(triangle) => return process_triangle(triangle, object.position),
     }
 }
 
@@ -464,12 +459,11 @@ fn main() {
 
 
 
-    // ### TESTING ###
-
+    // ### FOR TESTING PURPOSE ONLY ###
     // BALL
     let coords_ball = Coordinates{
         x: 0 as f32,
-        y: 5 as f32,
+        y: 500 as f32,
         z: 0 as f32
     };
 
@@ -502,7 +496,7 @@ fn main() {
     };
 
     obj_tab.push(ground);
-
+    // ### END OF TESTING ###
 
 
 
@@ -518,6 +512,14 @@ fn main() {
         let rb = tuple.0; 
         // We add the RigidBody to the RigidBodySet
         let rb_handle = bodies.insert(rb);
+
+        // ### FOR TESTING PURPOSE ONLY ###
+        if object.position.y == 0 as f32 {
+            let rb = bodies.get_mut(rb_handle).expect("Rigid-body not found.");
+            rb.set_status(BodyStatus::Kinematic);
+        }
+        // ### END OF TESTING ###
+
         // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
         let collider = ColliderDesc::new(tuple.1)
         .density(object.density)
@@ -528,13 +530,9 @@ fn main() {
 
         // Wa add the handle to the coll_tab
         coll_tab.push(coll_handle);
-
-        // ### FOR TESTING PURPOSE ONLY ###
-        if(coll_tab.len() == 2){
-            colliders.get(coll_tab[1]).unwrap().anchor();}
     }
 
-    println!("Tab length: {}", obj_set.length);
+    
 
     loop {
         // The universe is now running/ticking
@@ -545,7 +543,9 @@ fn main() {
             &mut joint_constraints,
             &mut force_generators
         );
-        // Prints the object's coordinates ### FOR TESTING ONLY ###
-        println!("{}", colliders.get(coll_tab[0]).unwrap().position())
+        // ### FOR TESTING PURPOSE ONLY ###
+        // Prints the object's coordinates (Ball)
+        println!("{}", colliders.get(coll_tab[0]).unwrap().position());
+        // ### END OF TESTING ###
     }
 }
