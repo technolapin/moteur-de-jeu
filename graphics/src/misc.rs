@@ -4,6 +4,8 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 
+use nalgebra::base::Matrix4;
+
 
 /// used for debug, will be discarded eventually.
 pub fn maybe<T>(option: Option<T>, s: &'static str) -> T
@@ -65,3 +67,14 @@ pub fn get_ressources_path() -> PathBuf {
     ressources_path
 }
 
+
+/// Sometimes we need an array and not a matrix
+pub fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
+    let mut out = [[0.; 4]; 4];
+    for i in 0..4 {
+        for j in 0..4 {
+            out[j][i] = *mat.get(i + 4 * j).unwrap(); // guaranteed
+        }
+    }
+    out
+}

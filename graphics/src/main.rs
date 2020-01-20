@@ -14,15 +14,6 @@ use processing::*;
 use nalgebra::base::*;
 
 
-fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
-    let mut out = [[0.; 4]; 4];
-    for i in 0..4 {
-        for j in 0..4 {
-            out[j][i] = *mat.get(i + 4 * j).unwrap(); // guaranteed
-        }
-    }
-    out
-}
 
 fn main() -> Result<(), &'static str> {
     let ressources_path = get_ressources_path();
@@ -60,7 +51,7 @@ fn main() -> Result<(), &'static str> {
         // créé un vecteur de 10000 vertex (un point par object)
         let data = teapots
             .iter()
-            .map(|_| Attr {
+            .map(|_| Similarity {
                 world_transformation: [[0.; 4]; 4],
             })
             .collect::<Vec<_>>();
@@ -71,7 +62,7 @@ fn main() -> Result<(), &'static str> {
     
     let map_position = glium::vertex::VertexBuffer::dynamic(
         &graphics.display.display,
-        &vec![Attr {
+        &vec![Similarity {
             world_transformation: [
                 [1.0, 0.0, 0.0, 0.0],
                 [0.0, 1.0, 0.0, 0.0],
