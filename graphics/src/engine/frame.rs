@@ -10,19 +10,26 @@ pub struct Attr {
 }
 implement_vertex!(Attr, world_transformation);
 
+
+/**
+Where the scene is being constructed.
+Destroyed uppon displaying.
+*/
 pub struct Frame {
     frame: glium::Frame,
 }
 
 impl Frame {
-    /** Constructor of Frame  */
+    /// Constructor of Frame
     pub fn new(gr: &Graphical) -> Self {
         Self {
             frame: gr.display.display.draw(),
         }
     }
 
-    /** Draw an Object in the Frame at positions contained by per_instance, call fn draw_group for each group of Object */
+    /** Draws several instances of an Object in the Frame using the similarities contained by the VBO per_instance.
+    Calls fn draw_group for each group of Object.
+     */
     pub fn draw(
         &mut self,
         gr: &Graphical,
@@ -36,7 +43,7 @@ impl Frame {
             );
     }
     
-    /** Draw a group of Object (part of the Object) in the Frame, called by fn draw */
+    /// Draws a group of Object (part of the Object) in the Frame, called by fn draw
     pub fn draw_group(
         &mut self,
         gr: &Graphical,
@@ -112,12 +119,15 @@ impl Frame {
         }
     }
 
-    /** Reset the Frame */
+    /// Resets the Frame
     pub fn clear(&mut self) {
         self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
     }
 
-    /** Send the Frame to the Graphical Card */
+    /**
+    Sends the Frame to the Graphical Card.
+    The frame then cannot be used anymore
+     */
     pub fn show(self) {
         self.frame.finish().unwrap();
     }

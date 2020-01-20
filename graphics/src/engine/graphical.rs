@@ -5,17 +5,10 @@ use std::path::Path;
 
 
 
-pub struct Graphical<'a>
-{
-    pub parameters: Params<'a>,
-    pub display: Display,
-    pub program: Program,
-    pub camera: Camera,
-//    pub event_loop: glutin::EventsLoop
-        
-}
-
-
+/**
+The various registered shaders programs.
+For now it has some shaders hard-coded but those will eventually be dissmissed.
+*/
 pub struct Program
 {
     pub programs: Vec<glium::Program>,
@@ -193,6 +186,10 @@ impl Program
 	program
     }
 
+    /**
+    Loads a program from source files.
+    The name of the program is the name of the folder containing its various shaders.
+    */
     pub fn add_program(&mut self, display: &Display, program_name: &str)
     {
 
@@ -228,6 +225,9 @@ impl Program
 }
 
 
+/**
+Wrapper around the "Display" struct from glium
+*/
 pub struct Display
 {    
     pub display: glium::Display,
@@ -251,6 +251,9 @@ impl Display
 
 
 
+/**
+Owns the rendering parameters.
+ */
 pub struct Params<'a>
 {
     pub parameters: glium::draw_parameters::DrawParameters<'a>,
@@ -325,6 +328,18 @@ impl<'a> Params<'a>
 
 
 
+/**
+Owns the various components needed to display things on the screen.
+*/
+pub struct Graphical<'a>
+{
+    pub parameters: Params<'a>,
+    pub display: Display,
+    pub program: Program,
+    pub camera: Camera,
+}
+
+
 impl<'a> Graphical<'a>
 {
     /** Constructor of Graphical */
@@ -345,13 +360,6 @@ impl<'a> Graphical<'a>
             //event_loop: event_loop
         }
     }
-
-/*
-    pub fn get_event_loop(&mut self) -> &mut glutin::EventsLoop
-    {
-        &mut self.event_loop
-    }
-*/
 
     pub fn frame(&mut self) -> Frame
     {

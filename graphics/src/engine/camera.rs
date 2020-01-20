@@ -1,5 +1,9 @@
 use crate::misc::*;
 
+
+/**
+A simple camera
+*/
 #[derive(Default)]
 pub struct Camera {
     position: (f32, f32, f32),
@@ -27,7 +31,7 @@ impl Camera {
         self.position = position;
     }
 
-    /** Update the position of the Camera */
+    /// Displace the camera
     pub fn relative_move(&mut self, displacement: (f32, f32, f32)) {
         let side = v_prod(self.orientation, self.up);
         self.position = (
@@ -50,7 +54,7 @@ impl Camera {
         self.orientation = normalize_vec(orientation);
     }
 
-    /** Rotation of the Camera around its axis */
+    /// Rotation of the Camera around its axises
     pub fn rotation_relative(&mut self, (rx, ry, rz): (f32, f32, f32)) {
         //on tourne de rx rad autour de l'axe 0x
         //on tourne de ry rad autour de l'axe 0y
@@ -84,7 +88,7 @@ impl Camera {
         self.up = (ux, uy, uz);
     }
 
-    /** Rotation of the Camera around axis x y and z of the Scene */
+    /// Rotation of the Camera around axis x y and z of the Scene
     pub fn rotation(&mut self, (rx, ry, rz): (f32, f32, f32)) {
         //on tourne de rx rad autour de l'axe 0x
         //on tourne de ry rad autour de l'axe 0y
@@ -119,6 +123,10 @@ impl Camera {
     }
 
     /** Move the Objects of the scene according to the rotation of the Camera, Return the matrix of the view */
+    /**
+    returns the view matrix of the camera
+    It will be used by the shaders to displace the objects of the scene to put them at the right place, with the right orientation and size.
+     */
     pub fn get_view_matrix(&self) -> [[f32; 4]; 4] {
         let f = self.orientation;
         //let u = (0., 1., 0.);
@@ -140,7 +148,7 @@ impl Camera {
         ]
     }
 
-    /** Return the matrix of the perspective */
+    /// Return the matrix of the perspective
     pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4] {
         //let (width, height) = target.get_dimensions();
 

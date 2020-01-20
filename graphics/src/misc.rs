@@ -4,19 +4,22 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 
+
+/// used for debug, will be discarded eventually.
 pub fn maybe<T>(option: Option<T>, s: &'static str) -> T
 {
     assert!(option.is_some(), s);
     option.unwrap()
 }
 
-
+/// Normalize a vector. Will be eventually be discarted.
 pub fn normalize_vec(v: (f32, f32, f32)) -> (f32, f32, f32)
 {
     let norm = (v.0*v.0 + v.1*v.1 + v.2*v.2).sqrt();
     (v.0/norm, v.1/norm, v.2/norm)
 }
 
+/// Some vector product. Will eventually be discarted
 pub fn v_prod(u: (f32, f32, f32), v: (f32, f32, f32)) -> (f32, f32, f32)
 {
     (
@@ -26,7 +29,7 @@ pub fn v_prod(u: (f32, f32, f32), v: (f32, f32, f32)) -> (f32, f32, f32)
     )
 }
 
-
+/// Reads a file and returns its content
 pub fn read_file(file_name: PathBuf) -> String
 {
 	let mut f = match File::open(file_name)
@@ -47,6 +50,7 @@ pub fn read_file(file_name: PathBuf) -> String
 
 
 
+/// Finds the path of the ressources folder
 pub fn get_ressources_path() -> PathBuf {
     let args: Vec<String> = std::env::args().collect();
     //the only relevant path we can get is the executable's since the execution dir could be anywhere
