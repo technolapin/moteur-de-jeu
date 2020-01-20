@@ -111,6 +111,9 @@ struct Triangle
 
 // We create an enum with all the shapes of mesh we can create with ncollide3d
 #[derive(Clone)]
+/**
+ * Different types of shape an object can take
+*/
 enum MeshType {
     Ball(Ball),
     Capsule(Capsule),
@@ -133,6 +136,9 @@ struct Coordinates{
     z: f32
 }
 
+/**
+ * An object with different features
+*/
 struct Object {
     position: Coordinates,
     //speed: f32,
@@ -144,6 +150,9 @@ struct Object {
     friction: f32,
 }
 
+/**
+ * A set that contains many 'Object'
+*/
 struct ObjSet{
     tab: Vec<Object>,
     length: usize
@@ -151,13 +160,17 @@ struct ObjSet{
 
 
 
-// ### À compléter ###
+/**
+ * Creates an empty Vec that can store 'Object'
+*/
 fn build_object_table() -> Vec<Object>{
-    // We want to fill the table with all the objects that'll be in the world
     let tab = Vec::new();
     return tab;
 }
 
+/**
+ * Creates an 'ObjSet' with the tab and length given as parameters
+*/
 fn build_obj_set(tab: Vec<Object>, length: usize) -> ObjSet{
     ObjSet {
         tab,
@@ -167,9 +180,8 @@ fn build_obj_set(tab: Vec<Object>, length: usize) -> ObjSet{
 
 
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Ball
+/** 
+ Creates and returns a RigidBody corresponding to the 'Ball' type
 */
 fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and radius of the Ball
@@ -189,9 +201,8 @@ fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHand
     return (rb, bal);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Capsule
+/** 
+ Creates and returns a RigidBody corresponding to the 'Capsule' type
 */
 fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, half-height and radius of the Capsule
@@ -212,9 +223,8 @@ fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, 
     return (rb, caps);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Compound
+/** 
+ Creates and returns a RigidBody corresponding to the 'Compound' type
 */
 fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and shapes of the Compound
@@ -234,9 +244,8 @@ fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32
     return (rb, comp);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the ConvexHull
+/** 
+ Creates and returns a RigidBody corresponding to the 'ConvexHull' type
 */
 fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordonnées and points of the ConvexHull
@@ -256,9 +265,8 @@ fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBo
     return (rb, convexh);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Cuboid
+/** 
+ Creates and returns a RigidBody corresponding to the 'Cuboid' type
 */
 fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordonnées and vector of the Cuboid
@@ -278,9 +286,8 @@ fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, Sha
     return (rb, cub);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the HeightField
+/** 
+ Creates and returns a RigidBody corresponding to the 'HeightField' type
 */
 fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, height and scale of the HeightField
@@ -301,9 +308,8 @@ fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (Rigi
     return (rb, heightf);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Plane
+/** 
+ Creates and returns a RigidBody corresponding to the 'Plane' type
 */
 fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and normal of the Plane
@@ -323,9 +329,8 @@ fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeH
     return (rb, pla);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Polyline
+/** 
+ Creates and returns a RigidBody corresponding to the 'Polyline' type
 */
 fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, points and indices of the Polyline
@@ -346,9 +351,8 @@ fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32
     return (rb, polyl);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Segment
+/** 
+ Creates and returns a RigidBody corresponding to the 'Segment' type
 */
 fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and points of the Segment
@@ -369,9 +373,8 @@ fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, 
     return (rb, seg);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the TriMesh
+/** 
+ Creates and returns a RigidBody corresponding to the 'TriMesh' type
 */
 fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, points, indices and uvs of the TriMesh
@@ -393,9 +396,8 @@ fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, 
     return (rb, trim);
 }
 
-/* 
- This function will be called by process_mesh and returns a RigidBody
- corresponding to the Triangle
+/** 
+ Creates and returns a RigidBody corresponding to the 'Triangle' type
 */
 fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and points of the Triangle
@@ -417,7 +419,11 @@ fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32
     return (rb, tri);
 }
 
-// Create a RigidBody corresponding to the MeshType of the object
+/** 
+ Creates and returns a Tuple containing: 
+    -A RigidBody corresponding to the object's shape (mesh)
+    -The position of the RigidBody
+*/
 fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
     match event {
         MeshType::Ball(ball) => return process_ball(ball, object.position),
@@ -435,7 +441,9 @@ fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeHandl
 }
 
 
-
+/** 
+ Creates the world, colliders and ticks the world. Some of these tasks will be ensured by other functions in a later release.
+*/
 fn main() {
     // MechanicalWorld with a gravity vector
     let mut mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
