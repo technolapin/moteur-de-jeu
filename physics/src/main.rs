@@ -1,6 +1,11 @@
+/* 
+########################################################################
+ EVERYTHING BETWEEN "### FOR TESTING PURPOSE ONLY ###" and 
+ "### END OF TESTING ###" must be utlimately removed
+########################################################################
+*/
 extern crate nalgebra as na;
 
-////use std::env; // Pour récupérer les arguments de la commande
 use std::vec::Vec;
 
 use na::Vector3;
@@ -11,6 +16,7 @@ use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, Rigi
 use nphysics3d::force_generator::DefaultForceGeneratorSet;
 use nphysics3d::joint::DefaultJointConstraintSet;
 use nphysics3d::world::{DefaultMechanicalWorld, DefaultGeometricalWorld};
+use nphysics3d::material::{MaterialHandle, BasicMaterial};
 
 use ncollide3d::shape::ShapeHandle;
 use ncollide3d::shape;
@@ -133,7 +139,9 @@ struct Object {
     //mass: f32,
     //can_move: bool,
     mesh: MeshType,
-    density: f32
+    density: f32,
+    restitution: f32,
+    friction: f32,
 }
 
 struct ObjSet{
@@ -145,7 +153,7 @@ struct ObjSet{
 
 // ### À compléter ###
 fn build_object_table() -> Vec<Object>{
-    // Fo mèt du cod
+    // We want to fill the table with all the objects that'll be in the world
     let tab = Vec::new();
     return tab;
 }
@@ -162,7 +170,7 @@ fn build_obj_set(tab: Vec<Object>, length: usize) -> ObjSet{
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Ball
- */
+*/
 fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and radius of the Ball
     let x = position.x;
@@ -184,7 +192,7 @@ fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, ShapeHand
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Capsule
- */
+*/
 fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, half-height and radius of the Capsule
     let x = position.x;
@@ -207,7 +215,7 @@ fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f32>, 
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Compound
- */
+*/
 fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and shapes of the Compound
     let x = position.x;
@@ -229,7 +237,7 @@ fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody<f32
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the ConvexHull
- */
+*/
 fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordonnées and points of the ConvexHull
     let x = position.x;
@@ -251,7 +259,7 @@ fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBo
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Cuboid
- */
+*/
 fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordonnées and vector of the Cuboid
     let x = position.x;
@@ -273,7 +281,7 @@ fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, Sha
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the HeightField
- */
+*/
 fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, height and scale of the HeightField
     let x = position.x;
@@ -296,7 +304,7 @@ fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (Rigi
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Plane
- */
+*/
 fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and normal of the Plane
     let x = position.x;
@@ -318,7 +326,7 @@ fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, ShapeH
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Polyline
- */
+*/
 fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, points and indices of the Polyline
     let x = position.x;
@@ -341,7 +349,7 @@ fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody<f32
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Segment
- */
+*/
 fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and points of the Segment
     let x = position.x;
@@ -364,7 +372,7 @@ fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f32>, 
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the TriMesh
- */
+*/
 fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates, points, indices and uvs of the TriMesh
     let x = position.x;
@@ -388,7 +396,7 @@ fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f32>, 
 /* 
  This function will be called by process_mesh and returns a RigidBody
  corresponding to the Triangle
- */
+*/
 fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
     // Coordinates and points of the Triangle
     let x = position.x;
@@ -446,16 +454,8 @@ fn main() {
     /* 
      We create a tab to store the handle of every collider so we can
      get their position and material.
-     */
+    */
     let mut coll_tab = Vec::new();
-
-
-
-
-
-
-
-
 
 
 
@@ -472,7 +472,9 @@ fn main() {
     let ball = Object {
         position: coords_ball,
         mesh: mesh_ball,
-        density: 1.0 as f32
+        density: 1.0 as f32,
+        restitution: 0.8 as f32,
+        friction: 0.8 as f32,
     };
 
     obj_tab.push(ball);
@@ -492,7 +494,9 @@ fn main() {
     let ground = Object {
         position: coords_ground,
         mesh: mesh_ground,
-        density: 1.0 as f32
+        density: 1.0 as f32,
+        restitution: 0.0 as f32,
+        friction: 0.5 as f32,
     };
 
     obj_tab.push(ground);
@@ -520,9 +524,12 @@ fn main() {
         }
         // ### END OF TESTING ###
 
+        // We create the collider relative to the shape of 'object'
         // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
         let collider = ColliderDesc::new(tuple.1)
         .density(object.density)
+        // Permet de définir si l'objet rebondit (restitution, friction)
+        .material(MaterialHandle::new(BasicMaterial::new(object.restitution, object.friction)))
         .build(BodyPartHandle(rb_handle, 0));
         
         // We add the Collider to the set of colliders
@@ -531,8 +538,6 @@ fn main() {
         // Wa add the handle to the coll_tab
         coll_tab.push(coll_handle);
     }
-
-    
 
     loop {
         // The universe is now running/ticking 60 times per second
