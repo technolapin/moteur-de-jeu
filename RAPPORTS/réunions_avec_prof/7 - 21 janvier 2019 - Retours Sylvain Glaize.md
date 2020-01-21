@@ -1,0 +1,78 @@
+Suite à la lecture des Notes du 21 Janvier, voici quelques retours.
+
+## OpenGL
+
+Le « monde qui se déplace » est une manière de voir les choses en effet, mais qui me semble
+assez peu intuitive. La « view matrix » est un changement de repère : on passe des coordonnées « monde »,
+dans une base orthonormée de référence pour la scène, à des coordonnées dans la base orthonormée de la caméra.
+
+En affichage, il est important de comprendre la « vie » d'une coordonnées dams les différents repères
+(local, monde, caméra, écran).
+
+Chose intéressante dans l'exploration que vous faite : s'il y a plein de choses
+à changer en transformant la manière dont est gêrée la Camera, c'est qu'il
+manquait une architecture solide à ce niveau ; l'implémentation a « leakée »
+dans le reste du code.
+
+L'analyse qui est que cela
+vient d'un truc rapide en début de projet est intéressante car ça a un nom :
+de la dette technique. Cela peut être un choix tout à fait volontaire et valable
+(avec de bonnes raisons). Mais ce qui est certain, c'est qu'il faut payer la dette (ou une partie) lorsqu'il
+faut retoucher à la partie.
+
+## nalgebra
+
+Je n'ai pas utilisé nalgebra « en vrai », mais en fouillant la documentation, il me semble
+il y avoir tout ce qu'il faut pour gérer ce qui vous est nécessaire.
+
+A propos de C++ et des pointeurs ; d'après ce que je vois (mais encore
+une fois, sans avoir utilisé), le storage derrière Matrix est publique et
+peut fournir un slice. Reste à savoir effectvement si le storage de la
+Matrix est dans le « bon sens » vis à vis de glium.
+
+## Justifier les choix
+
+Je suis absolument d'accord. Cela va être important pour votre soutenance.
+
+## Moteurs Open Source
+
+J'ai regardé un peu parmi ce qui peut faire référence par difficulté d'étude croissante :
+
+  * raylib (C) : c'est inspiré par XNA (donc MonoGame), c'est assez léger.
+  * MonoGame (C#) : à part quelques outils de conversion, c'est un moteur assez « simple » et complet. Probablement plus accessible.
+  * Panda3D (C++/Python) : je l'ai souvent croisé mais jamais vraiment utilisé. Ça à l'air assez imposant.
+  * Godot (C++) : c'est un gros morceau, car c'est non seulement un moteur mais un environement intégré.
+  
+## Stack Overflow
+
+Attention à Stack Overflow de manière générale. On y trouve des réponses pratiques
+de temps en temps, d'excellente réponses détaillées parfois, mais il y a aussi
+beaucoup, vraiment beaucoup, de déchêts.
+
+Cela est du en partie à la persistance des réponses, par rapport à une
+technologie qui évolue : les réponses trouvées ne sont plus les bonnes, mais
+les entrées ne sont pas mises à jour.
+
+Il arrive aussi qu'une « bidouille » fonctionne... à peu près, soit up-votée,
+mais ne soit pas la bonne solution, et donc s'écroule peu après.
+
+Mon conseil lorsque l'on va chercher sur Stack Overflow, c'est de croiser
+avec d'autres sources (pas celles qui recopient S.O...), d'aller vérifier si ce qui est dit est cohérent avec
+la documentation (lorsqu'elle existe) ou tout simplement l'expérience.
+
+Certaines réponses sont parfois dangeureuses. Récemment, je cherchais comment
+résoudre un problème avec PowerShell et son système de protection de lancement
+de scripts. Un certain nombre de réponses upvotées (y compris sur d'autres forums)
+était de simplement tout autoriser au niveau système, c'est-à-dire de virer
+complètement la protection...  
+
+Méfiance donc.
+
+Mieux vaut trouver un article de blog qui décrit la démarche et donne des
+liens vers les justifications (cela arrive aussi dans d'excellentes réponses
+que l'on peut trouver sur S.O.)
+
+## L'avancée du projet
+
+J'ai pu voir de bonnes avancées et du nettoyage. Il y a des progrès notables
+de la base de code depuis mes derniers commentaires.
