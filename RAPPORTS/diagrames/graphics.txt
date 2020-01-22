@@ -1,0 +1,80 @@
+@startuml
+skinparam style strictuml
+
+
+class Similarity
+
+package Engine
+{
+	class Graphical
+	class Frame
+	class Camera
+	class Programs
+	class Display
+	class Params
+
+}
+
+package Processing
+{
+	class Vertex
+	class Group
+	class Material
+	class ModelsHolder
+	class Object
+	class Objects
+	class Scene
+	class Vertex
+}
+
+/'
+package glium
+{
+	package vertex
+	{
+		class VertexBufferAny
+		class VertexBuffer
+	}
+	package texture
+	{
+		class Texture2D
+		class RawImage2D
+	}
+	class DrawParameters
+	class Display
+	class Program
+	class glium::Frame
+}
+'/
+
+/'package glutin
+{
+	class EventsLoop
+	class WindowBuilder
+	class ContextBuilder
+}'/
+
+ModelsHolder --> Objects
+Object ..> Material
+Objects --> Group
+Objects --> Material
+
+Graphical --> Camera
+Graphical --> Params
+Graphical --> Display
+Graphical --> Programs
+
+
+Scene ..> Object
+Scene -> Similarity
+
+'Group --> VertexBufferAny
+'Material -->Texture2D
+'Params --> DrawParameters
+'Programs -> Program
+'Frame --> glium::Frame
+
+Frame ..> Display
+
+
+@enduml
