@@ -51,6 +51,7 @@ Pourquoi c’est exactement ça ? Parce que cette fonction est repompée sur Int
 - Ecrire le code,
 - Utiliser librairie, exemple : GLM (OpenGL Math), librairie pour faire les calculs maths, mais on utilise Naglebra, qui est la librairie standard en Rust,
 - Repomper sur Internet, Nabil n’aime pas trop. (Perso, Stack Overflow, c’est la vie. :D ) => On prend des pièces de construction en ligne. Nabil veut qu’on comprenne le code, c’est logique.
+[EDIT DE CLÉMENT]: le premier qui fait ça je lui fait récrire 
 
 On n’a pas le temps pour aller jusqu’au bout, c’est pour ça qu’on doit comprendre l’architecture. Mais les trucs détaillés, pas besoin de le comprendre ni d’écrire le code.
 
