@@ -1,4 +1,4 @@
-﻿---
+---
 
 Nous avons choisis Rust pour ses avantages comparés à C++.
 Ne disposant pas d'une équipe de développeur chevronés, nous ne pouvons nous permettre de perdre du temps sur des erreures de pointeur, d'allocation mémoire, ou de messages peu clairs de la part du compilateur.
