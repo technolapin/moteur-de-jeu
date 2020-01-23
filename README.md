@@ -1,18 +1,23 @@
 # Projet E4 : Construction d'un moteur de Jeu Vidéo
 
-Encadrants :
+Encadrant·e·s :
 - Sylvain GLAIZE, UBISOFT
 - Nabil MUSTAFA, ESIEE Paris
 
-Participants :
-- Clément CHOMICKI / `Chef de projet`
-- Alexandre LEBLON /
-- Maÿlis MONTANI `Uniquement au semestre 1`
-- Barbara PARE `Uniquement au semestre 1`
-- Amaury BARUZY /
+Participant·e·s aux semestres 1 et 2 :
+- Clément CHOMICKI `Chef de projet`
+- Alexandre LEBLON
+- Amaury BARUZY
 - Nicolas GOISLARD
-- Sébastien ZHOU `Uniquement au semestre 2`
-- Hugo DELADRIERE `Uniquement au semestre 2`
+
+Participant·e·s uniquement au semestre 1 :
+- Maÿlis MONTANI
+- Barbara PARE
+
+Participant·e·s uniquement au semestre 2 :
+- Sébastien ZHOU
+- Hugo DELADRIERE
+- Aymeric SALLET
 
 ## Sujet du Projet
 
