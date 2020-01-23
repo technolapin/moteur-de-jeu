@@ -1,10 +1,11 @@
 [package]
-name = "test_ui"
+name = "myproject"
 version = "0.1.0"
-authors = ["nicolas"]
+authors = ["bob"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sdl2 = "0.31.0"
+glium="0.25.1"
+glutin="0.21.2"
