@@ -32,7 +32,6 @@ pub struct Ball
     radius: f32
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Capsule
 {
@@ -40,28 +39,24 @@ pub struct Capsule
     radius: f32
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Compound
 {
     shapes: Vec<(Isometry<f32>, ShapeHandle<f32>)>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct ConvexHull
 {
     points: Vec<Point<f32>>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Cuboid
 {
     vector: Vector3<f32>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct HeightField
 {
@@ -69,14 +64,12 @@ pub struct HeightField
     scale: Vector3<f32>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Plane
 {
     normal: Unit<Vector3<f32>>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Polyline
 {
@@ -84,7 +77,6 @@ pub struct Polyline
     indices: Option<Vec<Point2<usize>>>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Segment
 {
@@ -92,7 +84,6 @@ pub struct Segment
     b: Point<f32>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct TriMesh
 {
@@ -101,7 +92,6 @@ pub struct TriMesh
     uvs: Option<Vec<Point2<f32>>>
 }
 
-// We implement the Clone trait to the structure
 #[derive(Clone)]
 pub struct Triangle
 {
@@ -110,7 +100,8 @@ pub struct Triangle
     c: Point<f32>
 }
 
-// We create an enum with all the shapes of mesh we can create with ncollide3d
+
+
 #[derive(Clone)]
 /// Different types of shape an object can take
 pub enum MeshType {
@@ -140,6 +131,7 @@ pub struct Object {
     position: Coordinates,
     //speed: f32,
     //mass: f32,
+    // Peut servir pour le BodyStatus
     //can_move: bool,
     mesh: MeshType,
     density: f32,
@@ -175,7 +167,7 @@ pub fn process_ball(ball: Ball, position: Coordinates) -> (RigidBody<f32>, Shape
     let z = position.z;
     let radius = ball.radius;
 
-    // Creation of a Ball
+    // Creation of a Ball we'll need later to make a Collider
     let bal = ShapeHandle::new(shape::Ball::new(radius));
 
     // Creation of the Ball's RigidBody
@@ -195,7 +187,7 @@ pub fn process_capsule(capsule: Capsule, position: Coordinates) -> (RigidBody<f3
     let half_height = capsule.half_height;
     let radius = capsule.radius;
 
-    // Creation of a Capsule
+    // Creation of a Capsule we'll need later to make a Collider
     let caps = ShapeHandle::new(shape::Capsule::new(half_height, radius));
 
     // Creation of the Capsule's RigidBody
@@ -214,7 +206,7 @@ pub fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody
     let z = position.z;
     let shapes = compound.shapes; 
 
-    // Creation of a Compound
+    // Creation of a Compound we'll need later to make a Collider
     let comp = ShapeHandle::new(shape::Compound::new(shapes));
 
     // Creation of the Compound's RigidBody
@@ -227,13 +219,13 @@ pub fn process_compound(compound: Compound, position: Coordinates) -> (RigidBody
 
 /// Creates and returns a RigidBody corresponding to the 'ConvexHull' type
 pub fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
-    // Coordonnées and points of the ConvexHull
+    // Coordinates and points of the ConvexHull
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let points = convexhull.points;
 
-    // Creation of a ConvexHull
+    // Creation of a ConvexHull we'll need later to make a Collider
     let convexh = ShapeHandle::new(shape::ConvexHull::try_from_points(&points).unwrap());
 
     // Creation of the ConvexHull's RigidBody
@@ -246,13 +238,13 @@ pub fn process_convexhull(convexhull: ConvexHull, position: Coordinates) -> (Rig
 
 /// Creates and returns a RigidBody corresponding to the 'Cuboid' type
 pub fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
-    // Coordonnées and vector of the Cuboid
+    // Coordinates and vector of the Cuboid
     let x = position.x;
     let y = position.y;
     let z = position.z;
     let vector = cuboid.vector;
 
-    // Creation of a Cuboid
+    // Creation of a Cuboid we'll need later to make a Collider
     let cub = ShapeHandle::new(shape::Cuboid::new(vector));
 
     // Creation of the Cuboid's RigidBody
@@ -272,7 +264,7 @@ pub fn process_heightfield(heightfield: HeightField, position: Coordinates) -> (
     let heights = heightfield.heights;
     let scale = heightfield.scale;
 
-    // Creation of a HeightField
+    // Creation of a HeightField we'll need later to make a Collider
     let heightf = ShapeHandle::new(shape::HeightField::new(heights, scale));
 
     // Creation of the HeightField's RigidBody
@@ -291,7 +283,7 @@ pub fn process_plane(plane: Plane, position: Coordinates) -> (RigidBody<f32>, Sh
     let z = position.z;
     let normal = plane.normal;
 
-    // Creation of a Plane
+    // Creation of a Plane we'll need later to make a Collider
     let pla = ShapeHandle::new(shape::Plane::new(normal));
 
     // Creation of the Plane's RigidBody
@@ -311,7 +303,7 @@ pub fn process_polyline(polyline: Polyline, position: Coordinates) -> (RigidBody
     let points = polyline.points;
     let indices = polyline.indices;
 
-    // Creation of a Polyline
+    // Creation of a Polyline we'll need later to make a Collider
     let polyl = ShapeHandle::new(shape::Polyline::new(points, indices));
 
     // Creation of the Polyline's RigidBody
@@ -331,7 +323,7 @@ pub fn process_segment(segment: Segment, position: Coordinates) -> (RigidBody<f3
     let a = segment.a;
     let b = segment.b; 
 
-    // Creation of a Segment
+    // Creation of a Segment we'll need later to make a Collider
     let seg = ShapeHandle::new(shape::Segment::new(a, b));
 
     // Creation of the Segment's RigidBody
@@ -352,7 +344,7 @@ pub fn process_trimesh(trimesh: TriMesh, position: Coordinates) -> (RigidBody<f3
     let indices = trimesh.indices;
     let uvs = trimesh.uvs;
 
-    // Creation of a TriMesh
+    // Creation of a TriMesh we'll need later to make a Collider
     let trim = ShapeHandle::new(shape::TriMesh::new(points, indices, uvs));
 
     // Creation of the TriMesh's RigidBody
@@ -373,7 +365,7 @@ pub fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody
     let b = triangle.b;
     let c = triangle.c;
 
-    // Creation of a Triangle
+    // Creation of a Triangle we'll need later to make a Collider
     let tri = ShapeHandle::new(shape::Triangle::new(a, b, c));
 
     // Creation of the Triangle's RigidBody
@@ -385,7 +377,7 @@ pub fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody
 }
 
 /// Creates and returns a Tuple containing: 1.A RigidBody corresponding to the object's shape (mesh); 2.The position of the RigidBody
-pub fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
+pub fn process_shape(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
     match event {
         MeshType::Ball(ball) => return process_ball(ball, object.position),
         MeshType::Capsule(capsule) => return process_capsule(capsule, object.position),
@@ -403,24 +395,34 @@ pub fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeH
 
 /// Creates the Collider of every object in the ObjSet given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
 pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet<f32>, Vec<generational_arena::Index>){
+
     // Where we store all the RigidBody object
     let mut bodies = DefaultBodySet::new();
+
     // Where we store all the Collider object
     let mut colliders = DefaultColliderSet::<f32>::new();
-    // We create a tab to store the handle of every collider so we can get their position and material later
+
+    // Where we store the handle of every collider so we can get their position and material later (used for testing only at the moment)
     let mut coll_tab = Vec::new();
 
     // For every object in obj_set
     for object in &obj_set.tab{
-        let tuple = process_mesh(object.mesh.clone(), object);
+
+        let tuple = process_shape(object.mesh.clone(), object);
+
         // The RigidBody associated to the object is at position 0 of the tuple
         let rb = tuple.0; 
+
         // We add the RigidBody to the RigidBodySet
         let rb_handle = bodies.insert(rb);
 
         // ### FOR TESTING PURPOSE ONLY ###
+        // We only have the ground at y = 0 at the moment
         if object.position.y == 0 as f32 {
+
+            // We get the ground's RigidBody 
             let rb = bodies.get_mut(rb_handle).expect("Rigid-body not found.");
+
             /*
              "BodyStatus::Kinematic" indicates the body velocity must not be altered by the physics engine
              It can be set to Disabled to indicate that the body should be completely ignored by the physics engine
@@ -430,11 +432,11 @@ pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultCollider
         }
         // ### END OF TESTING ###
 
-        // We create the collider relative to the shape of 'object'
+        // We create the Collider relative to the shape of 'object'
         // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
         let collider = ColliderDesc::new(tuple.1)
         .density(object.density)
-        // Permet de définir si l'objet rebondit (restitution, friction)
+        // Allows to define if the object bounces (restitution, friction)
         .material(MaterialHandle::new(BasicMaterial::new(object.restitution, object.friction)))
         .build(BodyPartHandle(rb_handle, 0));
         
@@ -450,10 +452,11 @@ pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultCollider
 
 /// Creates the world, colliders and ticks the world. Some of these tasks will be ensured by other functions in a later release.
 pub fn main() {
+
     // MechanicalWorld with a gravity vector
     let mut mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
-    let mut geometrical_world = DefaultGeometricalWorld::<f32>::new();
 
+    let mut geometrical_world = DefaultGeometricalWorld::<f32>::new();
     let mut joint_constraints = DefaultJointConstraintSet::<f32>::new();
     let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
@@ -511,15 +514,18 @@ pub fn main() {
     let obj_set = build_obj_set(obj_tab); 
 
     let three_uplet = build_colliders(obj_set);
+
     // Where we store all the RigidBody object
     let mut bodies = three_uplet.0;
+
     // Where we store all the Collider object
     let mut colliders = three_uplet.1;
-    // We create a tab to store the handle of every collider so we can get their position and material later
+    
+    // Where we store the handle of every collider so we can get their position and material later (used for testing only at the moment)
     let coll_tab = three_uplet.2;
 
     loop {
-        // The universe is now running/ticking 60 times per second
+        // The universe is now running and ticking 60 times per second
         mechanical_world.step(
             &mut geometrical_world,
             &mut bodies,
