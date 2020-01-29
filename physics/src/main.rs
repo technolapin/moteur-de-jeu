@@ -5,6 +5,7 @@
 ########################################################################
 */
 extern crate nalgebra as na;
+extern crate generational_arena;
 
 use std::vec::Vec;
 
@@ -400,27 +401,64 @@ pub fn process_mesh(event: MeshType, object: &Object) -> (RigidBody<f32>, ShapeH
     }
 }
 
+/// Creates the Collider of every object in the ObjSet given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
+pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet<f32>, Vec<generational_arena::Index>){
+    // Where we store all the RigidBody object
+    let mut bodies = DefaultBodySet::new();
+    // Where we store all the Collider object
+    let mut colliders = DefaultColliderSet::<f32>::new();
+    // We create a tab to store the handle of every collider so we can get their position and material later
+    let mut coll_tab = Vec::new();
+
+    // For every object in obj_set
+    for object in &obj_set.tab{
+        let tuple = process_mesh(object.mesh.clone(), object);
+        // The RigidBody associated to the object is at position 0 of the tuple
+        let rb = tuple.0; 
+        // We add the RigidBody to the RigidBodySet
+        let rb_handle = bodies.insert(rb);
+
+        // ### FOR TESTING PURPOSE ONLY ###
+        if object.position.y == 0 as f32 {
+            let rb = bodies.get_mut(rb_handle).expect("Rigid-body not found.");
+            /*
+             "BodyStatus::Kinematic" indicates the body velocity must not be altered by the physics engine
+             It can be set to Disabled to indicate that the body should be completely ignored by the physics engine
+             BodyStatus is Dynamic by default 
+            */
+            rb.set_status(BodyStatus::Kinematic);
+        }
+        // ### END OF TESTING ###
+
+        // We create the collider relative to the shape of 'object'
+        // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
+        let collider = ColliderDesc::new(tuple.1)
+        .density(object.density)
+        // Permet de définir si l'objet rebondit (restitution, friction)
+        .material(MaterialHandle::new(BasicMaterial::new(object.restitution, object.friction)))
+        .build(BodyPartHandle(rb_handle, 0));
+        
+        // We add the Collider to the set of colliders
+        let coll_handle = colliders.insert(collider);
+
+        // Wa add the handle to the coll_tab
+        coll_tab.push(coll_handle);
+    }
+    return (bodies, colliders, coll_tab);
+}
+
+
 /// Creates the world, colliders and ticks the world. Some of these tasks will be ensured by other functions in a later release.
 pub fn main() {
     // MechanicalWorld with a gravity vector
     let mut mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
     let mut geometrical_world = DefaultGeometricalWorld::<f32>::new();
 
-    // Where we store all the RigidBody object
-    let mut bodies = DefaultBodySet::new();
-    // Where we store all the Collider object
-    let mut colliders = DefaultColliderSet::<f32>::new();
     let mut joint_constraints = DefaultJointConstraintSet::<f32>::new();
     let mut force_generators = DefaultForceGeneratorSet::<f32>::new();
 
     // We create the tab of the Obj_set
     let mut obj_tab = build_object_table();
-
-    /* 
-     We create a tab to store the handle of every collider so we can
-     get their position and material.
-    */
-    let mut coll_tab = Vec::new();
 
 
 
@@ -472,35 +510,13 @@ pub fn main() {
     // We create the Obj_set
     let obj_set = build_obj_set(obj_tab); 
 
-    // For every object in obj_set
-    for object in &obj_set.tab{
-        let tuple = process_mesh(object.mesh.clone(), object);
-        // The RigidBody associated to the object is at position 0 of the tuple
-        let rb = tuple.0; 
-        // We add the RigidBody to the RigidBodySet
-        let rb_handle = bodies.insert(rb);
-
-        // ### FOR TESTING PURPOSE ONLY ###
-        if object.position.y == 0 as f32 {
-            let rb = bodies.get_mut(rb_handle).expect("Rigid-body not found.");
-            rb.set_status(BodyStatus::Kinematic);
-        }
-        // ### END OF TESTING ###
-
-        // We create the collider relative to the shape of 'object'
-        // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
-        let collider = ColliderDesc::new(tuple.1)
-        .density(object.density)
-        // Permet de définir si l'objet rebondit (restitution, friction)
-        .material(MaterialHandle::new(BasicMaterial::new(object.restitution, object.friction)))
-        .build(BodyPartHandle(rb_handle, 0));
-        
-        // We add the Collider to the set of colliders
-        let coll_handle = colliders.insert(collider);
-
-        // Wa add the handle to the coll_tab
-        coll_tab.push(coll_handle);
-    }
+    let three_uplet = build_colliders(obj_set);
+    // Where we store all the RigidBody object
+    let mut bodies = three_uplet.0;
+    // Where we store all the Collider object
+    let mut colliders = three_uplet.1;
+    // We create a tab to store the handle of every collider so we can get their position and material later
+    let coll_tab = three_uplet.2;
 
     loop {
         // The universe is now running/ticking 60 times per second
