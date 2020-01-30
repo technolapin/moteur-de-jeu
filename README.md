@@ -9,10 +9,10 @@ Participant·e·s aux semestres 1 et 2 :
 - Alexandre LEBLON
 - Amaury BARUZY
 - Nicolas GOISLARD
+- Barbara PARE
 
 Participant·e·s uniquement au semestre 1 :
 - Maÿlis MONTANI
-- Barbara PARE
 
 Participant·e·s uniquement au semestre 2 :
 - Sébastien ZHOU
