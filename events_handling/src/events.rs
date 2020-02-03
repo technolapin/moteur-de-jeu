@@ -186,9 +186,9 @@ impl Event
 	{
 		match ev {
 			glutin::DeviceEvent::Key => parse_touche_clavier( ev ),
-			glutin::DeviceEvent::MouseMotion => parse_mouvement_souris( ev ),
+			glutin::DeviceEvent::MouseMotion => parse_mouvement_souris( ev.delta ),
 			glutin::DeviceEvent::Button  => parse_bouton_souris( ev ),
-			glutin::DeviceEvent::MouseWheel => parse_scroll( ev ),
+			glutin::DeviceEvent::MouseWheel => parse_scroll( ev.delta ),
 		}
 	}
 
@@ -368,7 +368,7 @@ impl Event
 	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
 	fn parse_mouvement_souris (ev : glutin::DeviceEvent::MouseMotion ) -> Self
 	{
-		return Self::MouvementSouris ( ev.delta[0], ev.delta[1] );
+		return Self::MouvementSouris ( ev.0, ev.delta.1 );
 	}
 
 	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
@@ -384,7 +384,9 @@ impl Event
 	// https://docs.rs/glutin/0.21.2/glutin/enum.MouseScrollDelta.html
 	fn parse_scroll (ev : glutin::MouseScrollDelta ) -> Self
 	{
-		return Self::ScrollSouris ( ev.delta::LineDelta[0], ev.delta::LineDelta[1] );
+		match ev {
+			glutin::MouseScrollDelta::LineDelta => Self::ScrollSouris ( ev.0, ev.1 ),
+		}
 	}
 }
 
