@@ -1,6 +1,9 @@
 use crate::misc::*;
 use nalgebra_glm::look_at;
 use nalgebra_glm::make_vec3;
+use nalgebra_glm::rotate_x_vec3;
+use nalgebra_glm::rotate_y_vec3;
+use nalgebra_glm::rotate_z_vec3;
 
 /**
 A simple camera
@@ -61,32 +64,22 @@ impl Camera {
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
 
-        let (x, y, z) = self.orientation;
-        let (ux, uy, uz) = self.up;
+        let orientation = [self.orientation.0, self.orientation.1, self.orientation.2] ;
+        let up = [self.up.0, self.up.1, self.up.2] ;
 
-        let (x, y, z) = (x, y * rx.cos() + z * rx.sin(), -y * rx.sin() + z * rx.cos());
-        let (ux, uy, uz) = (
-            ux,
-            uy * rx.cos() + uz * rx.sin(),
-            -uy * rx.sin() + uz * rx.cos(),
-        );
+        let f = make_vec3(&orientation);
+        let u = make_vec3(&up);
 
-        let (x, y, z) = (x * ry.cos() - z * ry.sin(), y, x * ry.sin() + z * ry.cos());
-        let (ux, uy, uz) = (
-            ux * ry.cos() - uz * ry.sin(),
-            uy,
-            ux * ry.sin() + uz * ry.cos(),
-        );
+        let rotate_x_orientation = rotate_x_vec3(&f, rx) ;
+	let rotate_xy_orientation = rotate_y_vec3(&rotate_x_orientation, ry) ;
+	let rotate_xyz_orientation = rotate_z_vec3(&rotate_xy_orientation, rz) ;
 
-        let (x, y, z) = (x * rz.cos() + y * rz.sin(), -x * rz.sin() + y * rz.cos(), z);
-        let (ux, uy, uz) = (
-            ux * rz.cos() + uy * rz.sin(),
-            -ux * rz.sin() + uy * rz.cos(),
-            uz,
-        );
-
-        self.orientation = normalize_vec((x, y, z));
-        self.up = (ux, uy, uz);
+        let rotate_x_up = rotate_x_vec3(&u, rx) ;
+	let rotate_xy_up = rotate_y_vec3(&rotate_x_up, ry) ;
+	let rotate_xyz_up = rotate_z_vec3(&rotate_xy_up, rz) ;
+	
+        self.orientation = normalize_vec((rotate_xyz_orientation[0],rotate_xyz_orientation[1],rotate_xyz_orientation[2]));
+        self.up = (rotate_xyz_up[0],rotate_xyz_up[1],rotate_xyz_up[2]);
     }
 
     /// Rotation of the Camera around axis x y and z of the Scene
