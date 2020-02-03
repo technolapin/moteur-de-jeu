@@ -1,18 +1,17 @@
 #[macro_use]
-extern crate glium;
 extern crate rand;
+extern crate graphics;
+extern crate nalgebra;
 
-#[allow(unused_imports)]
-use glium::{glutin, Surface};
+use graphics::engine::*;
+use graphics::processing::*;
+use graphics::misc::*;
 
-pub mod engine;
-pub mod misc;
-pub mod processing;
-use engine::*;
-use misc::*;
-use processing::*;
 use nalgebra::base::*;
 
+
+use glutin::VirtualKeyCode;
+use std::collections::HashSet;
 
 // the holder outlives the scene
 fn make_scene<'a, 'b>(
@@ -24,18 +23,20 @@ where
 {
     let ressources_path = get_ressources_path();
 
-    let mut event_loop = glutin::EventsLoop::new();
-
-    let mut graphics = Graphical::new(&event_loop);
-    let mut holder = ModelsHolder::new();
-
     holder.load_wavefront(&graphics, "textured_cube.obj", &ressources_path)?;
     holder.load_wavefront(&graphics, "reds.obj", &ressources_path)?;
     holder.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path)?;
     holder.load_wavefront(&graphics, "teto.obj", &ressources_path)?;
     holder.load_wavefront(&graphics, "terrain.obj", &ressources_path)?;
 
-    // list of teapots with position and direction
+    let _sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
+    let _teto = holder
+        .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
+        .unwrap();
+    let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
+    let zeldo = holder.get("textured_cube", "Cube.001").unwrap();
+    let map_elements = holder.get_whole_file("terrain").unwrap();
+
     let mut teapots = (0..30)
         .map(|_| {
             let pos: (f32, f32, f32) = (
@@ -64,30 +65,6 @@ where
 
         glium::vertex::VertexBuffer::dynamic(&graphics.display.display, &data).unwrap()
     };
-
-    
-    let map_position = glium::vertex::VertexBuffer::dynamic(
-        &graphics.display.display,
-        &vec![Similarity {
-            world_transformation: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, -1.0, 0.0, 1.0],
-            ],
-        }],
-    )
-    .unwrap();
-
-    graphics.camera.set_position((0., 0., 0.));
-    println!("\n HOLDER: {:?} \n", holder);
-    let _sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
-    let _teto = holder
-        .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
-        .unwrap();
-    let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
-    let zeldo = holder.get("textured_cube", "Cube.001").unwrap();
-    let map_elements = holder.get_whole_file("terrain").unwrap();
 
     {
         //variable locale aux crochets
@@ -122,47 +99,93 @@ where
         }
     }
 
-    use glutin::VirtualKeyCode;
+    let map_position = glium::vertex::VertexBuffer::dynamic(
+        &graphics.display.display,
+        &vec![Similarity {
+            world_transformation: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, -1.0, 0.0, 1.0],
+            ],
+        }],
+    )
+    .unwrap();
 
-    //    let event_loop = graphics.get_event_loop();
+    let mut scene = Scene::new();
+
+    scene.add(vec![red, zeldo], per_instance);
+    scene.add(map_elements, map_position);
+
+    Ok(scene)
+}
+
+struct Base
+{
+    event_loop: glutin::EventsLoop,
+    holder: ModelsHolder,
+        
+}
+
+
+impl Base
+{
+    pub fn new() -> Self
+    {
+        let mut event_loop = glutin::EventsLoop::new();
+        let mut holder = ModelsHolder::new();
+        Self
+        {
+            event_loop: event_loop,
+            holder: holder
+        }
+    }
+}
+
+
+
+
+
+
+fn main() -> Result<(), &'static str> {
+    let mut base = Base::new();
+//    let mut event_loop = glutin::EventsLoop::new();
+  //  let mut holder = ModelsHolder::new();
+    let mut graphics = Graphical::new(&base.event_loop);
+    let scene = make_scene(&graphics, &mut base.holder)?;
 
     let mut camera_pos = (0., 0., 0.);
     let mut camera_rot = (0., 0., 0.);
 
-    use std::collections::HashSet;
-    let mut keys = HashSet::new();
+     let mut keys = HashSet::new();
     let sensibility = 0.0005;
+    let speed = 0.1; // parce que pourquoi pas.
 
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner
+
     let mut close = false;
     while !close {
-        println!("KEYS EVENTS {:?}", keys);
-
+        ///////////////////////////////////////////
         graphics.camera.relative_move(camera_pos);
-
         graphics.camera.rotation(camera_rot.clone());
-        camera_pos = (0., 0., 0.);
-
-        //        println!("CAMERA IS AT {:?}", camera_pos.clone());
-
         let mut frame = graphics.frame();
         graphics.update_dimensions();
         frame.clear();
-
-        frame.draw(&graphics, &red, &per_instance);
-        frame.draw(&graphics, &zeldo, &per_instance);
-        //frame.draw(&graphics, &teto, &per_instance);
-
-        map_elements.iter().for_each(|ob| {
-            frame.draw(&graphics, &ob, &map_position);
+        scene.objects.iter().for_each(|(objects, instances)| {
+            objects
+                .iter()
+                .for_each(|ob| frame.draw(&graphics, &ob, &instances))
         });
-
         frame.show();
+
+        ///////////////////////////////////////////
+
+        camera_pos = (0., 0., 0.);
 
         // on appelle une closure pour chaque évènement présent dans la file des évènements (cachée dans l'eventloop ou un truc du genre)
         // y'a moyen de faire moins de matches pour améliorer la lisibilité du code
-        event_loop.poll_events(|event| {
+        base.event_loop.poll_events(|event| {
             println!("EVENT {:?}", event);
             match event {
                 glutin::Event::WindowEvent {
@@ -210,8 +233,6 @@ where
                 _ => (),
             };
         });
-
-        let speed = 0.1; // parce que pourquoi pas.
 
         // une fois qu'on a l'ensembles des touches appuyées, on fait des trucs avec, genre bouger la camera
         for keycode in keys.iter() {
