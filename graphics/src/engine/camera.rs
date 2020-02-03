@@ -1,5 +1,6 @@
 use crate::misc::*;
-
+use nalgebra_glm::look_at;
+use nalgebra_glm::make_vec3;
 
 /**
 A simple camera
@@ -128,24 +129,20 @@ impl Camera {
     It will be used by the shaders to displace the objects of the scene to put them at the right place, with the right orientation and size.
      */
     pub fn get_view_matrix(&self) -> [[f32; 4]; 4] {
-        let f = self.orientation;
-        //let u = (0., 1., 0.);
-        //let u = normalize_vec((-f.1, -f.2, f.0));
-        let u = self.up;
 
-        let s = normalize_vec(v_prod(f, u));
-        let p = (
-            -self.position.0 * s.0 - self.position.1 * s.1 - self.position.2 * s.2,
-            -self.position.0 * u.0 - self.position.1 * u.1 - self.position.2 * u.2,
-            -self.position.0 * f.0 - self.position.1 * f.1 - self.position.2 * f.2,
-        );
+	let position = [self.position.0, self.position.1, self.position.2];
+        let center = [self.orientation.0 + self.position.0, self.orientation.1 + self.position.1, self.orientation.2 + self.position.2];
+        let up = [self.up.0, self.up.1, self.up.2];
 
-        [
-            [s.0, u.0, f.0, 0.0],
-            [s.1, u.1, f.1, 0.0],
-            [s.2, u.2, f.2, 0.0],
-            [p.0, p.1, p.2, 1.0],
-        ]
+        let f = make_vec3(&center);
+        let u = make_vec3(&up);
+	let o = make_vec3(&position);
+
+	let look_at = look_at(&o, &f, &u);
+	let view_matrix = look_at.as_ref();
+	
+	*view_matrix 
+
     }
 
     /// Return the matrix of the perspective
