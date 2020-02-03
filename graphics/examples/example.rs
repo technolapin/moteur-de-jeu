@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate rand;
 extern crate graphics;
 extern crate nalgebra;
@@ -134,8 +133,8 @@ impl Base
 {
     pub fn new() -> Self
     {
-        let mut event_loop = glutin::EventsLoop::new();
-        let mut holder = RessourcesHolder::new();
+        let event_loop = glutin::EventsLoop::new();
+        let holder = RessourcesHolder::new();
         Self
         {
             event_loop: event_loop,
@@ -158,7 +157,7 @@ fn main() -> Result<(), &'static str> {
     let mut camera_pos = Vector3::new(0., 0., 0.);
     let mut camera_rot = Vector3::new(0., 0., 0.);
 
-     let mut keys = HashSet::new();
+    let mut keys = HashSet::new();
     let sensibility = 0.0005;
     let speed = 0.1; // parce que pourquoi pas.
 

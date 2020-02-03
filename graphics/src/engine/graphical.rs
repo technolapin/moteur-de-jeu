@@ -1,8 +1,6 @@
 use super::camera::*;
 use super::frame::*;
 use super::programs::*;
-use crate::misc::{read_file, get_ressources_path};
-use std::path::Path;
 
 
 
@@ -27,9 +25,7 @@ impl Display
 		display: glium::Display::new(wb, cb, event_loop).unwrap()   
 	}
    }
-
 }
-
 
 
 

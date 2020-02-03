@@ -9,11 +9,11 @@ Owns the all Objects imported.
 This is what the user is supposed to use.
  */
 #[derive(Debug)]
-pub struct ModelsHolder {
+pub struct RessourcesHolder {
     wavefronts: HashMap<String, Objects>,
 }
 
-impl<'a> ModelsHolder {
+impl<'a> RessourcesHolder {
     pub fn new() -> Self {
         Self {
             wavefronts: HashMap::new(),

@@ -1,5 +1,4 @@
 use glium::Surface;
-use glium::implement_vertex;
 use glium::uniform;
 
 use super::graphical::*;
