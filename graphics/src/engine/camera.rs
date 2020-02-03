@@ -4,6 +4,7 @@ use nalgebra_glm::make_vec3;
 use nalgebra_glm::rotate_x_vec3;
 use nalgebra_glm::rotate_y_vec3;
 use nalgebra_glm::rotate_z_vec3;
+use nalgebra::Matrix3;
 
 /**
 A simple camera
@@ -37,22 +38,29 @@ impl Camera {
 
     /// Displace the camera
     pub fn relative_move(&mut self, displacement: (f32, f32, f32)) {
+
         let side = v_prod(self.orientation, self.up);
-        self.position = (
-            self.position.0
-                + self.orientation.0 * displacement.0
-                + self.up.0 * displacement.1
-                + side.0 * displacement.2,
-            self.position.1
-                + self.orientation.1 * displacement.0
-                + self.up.1 * displacement.1
-                + side.1 * displacement.2,
-            self.position.2
-                + self.orientation.2 * displacement.0
-                + self.up.2 * displacement.1
-                + side.2 * displacement.2,
-        );
+
+	// To get the Vec3 type for each tuple that we have --> Should be removed
+        let orientation_array = [self.orientation.0, self.orientation.1, self.orientation.2] ;
+        let up_array = [self.up.0, self.up.1, self.up.2] ;
+	let side_array = [side.0, side.1, side.2];
+
+        let orientation_vec = make_vec3(&orientation_array);
+        let up_vec = make_vec3(&up_array);
+	let side_vec = make_vec3(&side_array);
+
+	let displacement_array = [displacement.0, displacement.1, displacement.2];
+	let displacement_vec = make_vec3(&displacement_array);
+
+	// Create the transfer_matrix from the base "Scene" to the base "Camera"
+	let transfer_matrix = Matrix3::from_columns(&[orientation_vec, up_vec, side_vec]);
+
+	// Calculate the new position of the camera in the base "Scene"
+	let position_vec = transfer_matrix*displacement_vec;
+	self.position = (position_vec[0]+self.position.0, position_vec[1]+self.position.1, position_vec[2]+self.position.2);
     }
+
 
     pub fn set_direction(&mut self, orientation: (f32, f32, f32)) {
         self.orientation = normalize_vec(orientation);
@@ -64,6 +72,7 @@ impl Camera {
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
 
+	// To get the Vec3 type for each tuple that we have --> Should be removed
         let orientation = [self.orientation.0, self.orientation.1, self.orientation.2] ;
         let up = [self.up.0, self.up.1, self.up.2] ;
 
@@ -88,6 +97,7 @@ impl Camera {
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
 
+	// To get the Vec3 type for each tuple that we have --> Should be removed
         let orientation_scene = [0.0, 0.0, -1.];
         let up_scene = [0., 1., 0.];
 
