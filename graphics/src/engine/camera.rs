@@ -5,15 +5,16 @@ use nalgebra_glm::rotate_x_vec3;
 use nalgebra_glm::rotate_y_vec3;
 use nalgebra_glm::rotate_z_vec3;
 use nalgebra::Matrix3;
+use nalgebra::Vector3;
 
 /**
 A simple camera
 */
-#[derive(Default)]
+
 pub struct Camera {
-    position: (f32, f32, f32),
-    up: (f32, f32, f32),
-    orientation: (f32, f32, f32),
+    position: Vector3<f32>,
+    up: Vector3<f32>,
+    orientation: Vector3<f32>,
     aspect_ratio: f32,
 }
 
@@ -21,9 +22,9 @@ impl Camera {
     /** Constructor of Frame  */
     pub fn new(aspect_ratio: f32) -> Self {
         Self {
-            position: (0., 0., 0.),
-            orientation: (0., 0., -1.),
-            up: (0., 1., 0.),
+            position: Vector3::new(0., 0., 0.), 
+            orientation: Vector3::new(0., 0., -1.), 
+            up: Vector3::new(0., 1., 0.),
             aspect_ratio: aspect_ratio, // Ratio for the printing on the screen
         }
     }
@@ -33,37 +34,27 @@ impl Camera {
     }
 
     pub fn set_position(&mut self, position: (f32, f32, f32)) {
-        self.position = position;
+        self.position = Vector3::new(position.0, position.1, position.2);
     }
 
     /// Displace the camera
     pub fn relative_move(&mut self, displacement: (f32, f32, f32)) {
 
-        let side = v_prod(self.orientation, self.up);
-
-	// To get the Vec3 type for each tuple that we have --> Should be removed
-        let orientation_array = [self.orientation.0, self.orientation.1, self.orientation.2] ;
-        let up_array = [self.up.0, self.up.1, self.up.2] ;
-	let side_array = [side.0, side.1, side.2];
-
-        let orientation_vec = make_vec3(&orientation_array);
-        let up_vec = make_vec3(&up_array);
-	let side_vec = make_vec3(&side_array);
-
-	let displacement_array = [displacement.0, displacement.1, displacement.2];
-	let displacement_vec = make_vec3(&displacement_array);
+        let side = self.orientation.cross(&self.up);
+	let displacement_vec = Vector3::new(displacement.0, displacement.1, displacement.2);
 
 	// Create the transfer_matrix from the base "Scene" to the base "Camera"
-	let transfer_matrix = Matrix3::from_columns(&[orientation_vec, up_vec, side_vec]);
+	let transfer_matrix = Matrix3::from_columns(&[self.orientation, self.up, side]);
 
 	// Calculate the new position of the camera in the base "Scene"
 	let position_vec = transfer_matrix*displacement_vec;
-	self.position = (position_vec[0]+self.position.0, position_vec[1]+self.position.1, position_vec[2]+self.position.2);
+	self.position = Vector3::new(position_vec[0]+self.position[0], position_vec[1]+self.position[1], position_vec[2]+self.position[2]);
     }
 
 
     pub fn set_direction(&mut self, orientation: (f32, f32, f32)) {
-        self.orientation = normalize_vec(orientation);
+	let temporaire = normalize_vec(orientation);
+        self.orientation = Vector3::new(temporaire.0, temporaire.1, temporaire.2);
     }
 
     /// Rotation of the Camera around its axises
@@ -72,23 +63,14 @@ impl Camera {
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
 
-	// To get the Vec3 type for each tuple that we have --> Should be removed
-        let orientation = [self.orientation.0, self.orientation.1, self.orientation.2] ;
-        let up = [self.up.0, self.up.1, self.up.2] ;
+        self.orientation = rotate_x_vec3(&self.orientation, rx) ;
+	self.orientation = rotate_y_vec3(&self.orientation, ry) ;
+	self.orientation = rotate_z_vec3(&self.orientation, rz).normalize() ;
 
-        let f = make_vec3(&orientation);
-        let u = make_vec3(&up);
+        self.up = rotate_x_vec3(&self.up, rx) ;
+	self.up = rotate_y_vec3(&self.up, ry) ;
+	self.up = rotate_z_vec3(&self.up, rz) ;
 
-        let rotate_x_orientation = rotate_x_vec3(&f, rx) ;
-	let rotate_xy_orientation = rotate_y_vec3(&rotate_x_orientation, ry) ;
-	let rotate_xyz_orientation = rotate_z_vec3(&rotate_xy_orientation, rz) ;
-
-        let rotate_x_up = rotate_x_vec3(&u, rx) ;
-	let rotate_xy_up = rotate_y_vec3(&rotate_x_up, ry) ;
-	let rotate_xyz_up = rotate_z_vec3(&rotate_xy_up, rz) ;
-	
-        self.orientation = normalize_vec((rotate_xyz_orientation[0],rotate_xyz_orientation[1],rotate_xyz_orientation[2]));
-        self.up = (rotate_xyz_up[0],rotate_xyz_up[1],rotate_xyz_up[2]);
     }
 
     /// Rotation of the Camera around axis x y and z of the Scene
@@ -97,23 +79,17 @@ impl Camera {
         //on tourne de ry rad autour de l'axe 0y
         //on tourne de rz rad autour de l'axe 0z
 
-	// To get the Vec3 type for each tuple that we have --> Should be removed
-        let orientation_scene = [0.0, 0.0, -1.];
-        let up_scene = [0., 1., 0.];
+	let orientation_scene = Vector3::new(0., 0., -1.);
+	let up_scene = Vector3::new(0., 1., 0.);
 
-        let f = make_vec3(&orientation_scene);
-        let u = make_vec3(&up_scene);
+	self.orientation = rotate_x_vec3(&orientation_scene, rx);
+	self.orientation = rotate_y_vec3(&self.orientation, ry);
+	self.orientation = rotate_z_vec3(&self.orientation, rz).normalize();
 
-        let rotate_x_orientation = rotate_x_vec3(&f, rx) ;
-	let rotate_xy_orientation = rotate_y_vec3(&rotate_x_orientation, ry) ;
-	let rotate_xyz_orientation = rotate_z_vec3(&rotate_xy_orientation, rz) ;
+	self.up = rotate_x_vec3(&up_scene, rx);
+	self.up = rotate_y_vec3(&self.up, ry);
+	self.up = rotate_z_vec3(&self.up, rz);
 
-        let rotate_x_up = rotate_x_vec3(&u, rx) ;
-	let rotate_xy_up = rotate_y_vec3(&rotate_x_up, ry) ;
-	let rotate_xyz_up = rotate_z_vec3(&rotate_xy_up, rz) ;
-	
-        self.orientation = normalize_vec((rotate_xyz_orientation[0],rotate_xyz_orientation[1],rotate_xyz_orientation[2]));
-        self.up = (rotate_xyz_up[0],rotate_xyz_up[1],rotate_xyz_up[2]);
     }
 
 
@@ -124,15 +100,8 @@ impl Camera {
      */
     pub fn get_view_matrix(&self) -> [[f32; 4]; 4] {
 
-	let position = [self.position.0, self.position.1, self.position.2];
-        let center = [self.orientation.0 + self.position.0, self.orientation.1 + self.position.1, self.orientation.2 + self.position.2];
-        let up = [self.up.0, self.up.1, self.up.2];
-
-        let f = make_vec3(&center);
-        let u = make_vec3(&up);
-	let o = make_vec3(&position);
-
-	let look_at = look_at(&o, &f, &u);
+	let center = Vector3::new(self.orientation[0] + self.position[0], self.orientation[1] + self.position[1], self.orientation[2] + self.position[2]);
+	let look_at = look_at(&self.position, &center, &self.up);
 	let view_matrix = look_at.as_ref();
 	
 	*view_matrix 
