@@ -155,8 +155,8 @@ fn main() -> Result<(), &'static str> {
     let mut graphics = Graphical::new(&base.event_loop);
     let scene = make_scene(&graphics, &mut base.holder)?;
 
-    let mut camera_pos = (0., 0., 0.);
-    let mut camera_rot = (0., 0., 0.);
+    let mut camera_pos = Vector3::new(0., 0., 0.);
+    let mut camera_rot = Vector3::new(0., 0., 0.);
 
      let mut keys = HashSet::new();
     let sensibility = 0.0005;
@@ -182,7 +182,7 @@ fn main() -> Result<(), &'static str> {
 
         ///////////////////////////////////////////
 
-        camera_pos = (0., 0., 0.);
+        camera_pos = Vector3::new(0., 0., 0.);
 
         // on appelle une closure pour chaque évènement présent dans la file des évènements (cachée dans l'eventloop ou un truc du genre)
         // y'a moyen de faire moins de matches pour améliorer la lisibilité du code
@@ -221,10 +221,10 @@ fn main() -> Result<(), &'static str> {
                         println!("MOTION Axe:{} value:{}", axis, value);
                         match axis {
                             0 => {
-                                camera_rot.1 += (value as f32) * sensibility;
+                                camera_rot[1] += (value as f32) * sensibility;
                             }
                             1 => {
-                                camera_rot.0 += (value as f32) * sensibility;
+                                camera_rot[0] += (value as f32) * sensibility;
                             }
                             _ => (),
                         }
@@ -239,16 +239,16 @@ fn main() -> Result<(), &'static str> {
         for keycode in keys.iter() {
             match keycode {
                 VirtualKeyCode::Z => {
-                    camera_pos.0 = camera_pos.0 + speed;
+                    camera_pos[0] = camera_pos[0] + speed;
                 }
                 VirtualKeyCode::S => {
-                    camera_pos.0 = camera_pos.0 - speed;
+                    camera_pos[0] = camera_pos[0] - speed;
                 }
                 VirtualKeyCode::Q => {
-                    camera_pos.2 = camera_pos.2 - speed;
+                    camera_pos[2] = camera_pos[2] - speed;
                 }
                 VirtualKeyCode::D => {
-                    camera_pos.2 = camera_pos.2 + speed;
+                    camera_pos[2] = camera_pos[2] + speed;
                 }
                 _ => {
                     println!("NOTHING TO DO WITH {:?}", keycode);
