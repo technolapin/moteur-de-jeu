@@ -16,7 +16,6 @@ Participant·e·s uniquement au semestre 1 :
 
 Participant·e·s uniquement au semestre 2 :
 - Sébastien ZHOU
-- Hugo DELADRIERE
 - Aymeric SALLET
 
 ## Sujet du Projet
