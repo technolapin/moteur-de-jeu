@@ -1,6 +1,5 @@
 #[derive(Debug)]
-
-enum Event
+pub enum Event
 {
 	Key1,
 	Key2,
@@ -166,37 +165,51 @@ enum Event
 
 // ------------------------------------------
 
-	MouvementSouris (f64, f64),
+	MouseMove (f64, f64),
 
 // ------------------------------------------
 
-	CliqueDroit,
-	CliqueGauche,
-	CliqueCentral,
+	RightClick,
+	LeftClick,
+	CentralClick,
 
 // ------------------------------------------
 
-	ScrollSouris (f32, f32),
+	ScrollMouse (f32, f32),
+
+// ------------------------------------------
+
+	Default, // Truc par défaut
 }
 
 impl Event
 {
-	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	pub fn parse(ev : glutin::DeviceEvent) -> Self
+	// https://docs.rs/glutin/0.21.2/glutin/enum.Event.html
+	pub fn parse(ev : glutin::Event) -> Self
 	{
 		match ev {
-			glutin::DeviceEvent::Key => parse_touche_clavier( ev ),
-			glutin::DeviceEvent::MouseMotion => parse_mouvement_souris( ev.delta ),
-			glutin::DeviceEvent::Button  => parse_bouton_souris( ev ),
-			glutin::DeviceEvent::MouseWheel => parse_scroll( ev.delta ),
+			glutin::Event::DeviceEvent{ device_id : _, event } => Self::parse_device_event( event ),
+			_ => Self::Default,
+		}
+	}
+
+	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
+	fn parse_device_event(ev : glutin::DeviceEvent) -> Self
+	{
+		match ev {
+			glutin::DeviceEvent::Key( keyboard_input ) => Self::parse_touche_clavier( keyboard_input ),
+			glutin::DeviceEvent::MouseMotion{ delta } => Self::parse_mouvement_souris( delta ),
+			glutin::DeviceEvent::Button{ button, state : _ } => Self::parse_bouton_souris( button ),
+			glutin::DeviceEvent::MouseWheel{ delta } => Self::parse_scroll( delta ),
+			_ => Self::Default,
 		}
 	}
 
 	// https://docs.rs/glutin/0.21.2/glutin/struct.KeyboardInput.html
 	fn parse_touche_clavier (ev : glutin::KeyboardInput ) -> Self
 	{
-		if ( ev.virtual_keycode.is_none() ) { // Ce qui serait prblématique
-			return;
+		if ev.virtual_keycode.is_none() { // Ce qui serait problématique
+			return Self::Default;
 		}
 		
 		// https://docs.rs/glutin/0.21.2/glutin/enum.VirtualKeyCode.html
@@ -362,22 +375,26 @@ impl Event
 			glutin::VirtualKeyCode::Copy => Self::Copy,
 			glutin::VirtualKeyCode::Paste => Self::Paste,
 			glutin::VirtualKeyCode::Cut => Self::Cut,
+			
+//			_ => Self::Default,
 		}
 	}
 
 	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	fn parse_mouvement_souris (ev : glutin::DeviceEvent::MouseMotion ) -> Self
+	fn parse_mouvement_souris (ev : (f64, f64) ) -> Self
 	{
-		return Self::MouvementSouris ( ev.0, ev.delta.1 );
+		return Self::MouseMove ( ev.0, ev.1 );
 	}
 
 	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	fn parse_bouton_souris (ev : glutin::DeviceEvent::Button ) -> Self
+	fn parse_bouton_souris (ev : u32 ) -> Self
 	{
-		match ev.button {
-			1 => Self::CliqueGauche,
-			2 => Self::CliqueDroit,
-			3 => Self::CliqueCentral,
+		match ev {
+			1 => Self::LeftClick,
+			2 => Self::RightClick,
+			3 => Self::CentralClick,
+			
+			_ => Self::Default,
 		}
 	}
 
@@ -385,7 +402,9 @@ impl Event
 	fn parse_scroll (ev : glutin::MouseScrollDelta ) -> Self
 	{
 		match ev {
-			glutin::MouseScrollDelta::LineDelta => Self::ScrollSouris ( ev.0, ev.1 ),
+			glutin::MouseScrollDelta::LineDelta( x, y ) => Self::ScrollMouse ( x, y ),
+			
+			_ => Self::Default,
 		}
 	}
 }
