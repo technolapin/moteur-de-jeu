@@ -16,7 +16,7 @@ use std::collections::HashSet;
 // the holder outlives the scene
 fn make_scene<'a, 'b>(
     graphics: &Graphical,
-    holder: &'b mut ModelsHolder,
+    holder: &'b mut RessourcesHolder,
 ) -> Result<Scene<'a>, &'static str>
 where
     'b: 'a,
@@ -120,20 +120,22 @@ where
     Ok(scene)
 }
 
-struct Base
+
+
+
+
+pub struct Base
 {
     event_loop: glutin::EventsLoop,
-    holder: ModelsHolder,
-        
+    holder: RessourcesHolder,
 }
-
 
 impl Base
 {
     pub fn new() -> Self
     {
         let mut event_loop = glutin::EventsLoop::new();
-        let mut holder = ModelsHolder::new();
+        let mut holder = RessourcesHolder::new();
         Self
         {
             event_loop: event_loop,
@@ -146,11 +148,10 @@ impl Base
 
 
 
-
 fn main() -> Result<(), &'static str> {
     let mut base = Base::new();
 //    let mut event_loop = glutin::EventsLoop::new();
-  //  let mut holder = ModelsHolder::new();
+  //  let mut holder = RessourcesHolder::new();
     let mut graphics = Graphical::new(&base.event_loop);
     let scene = make_scene(&graphics, &mut base.holder)?;
 
