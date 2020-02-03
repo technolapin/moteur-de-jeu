@@ -1,5 +1,3 @@
-use crate::misc::Coordinates;
-use nphysics3d::object::{RigidBodyDesc, RigidBody};
 use ncollide3d::shape;
 use ncollide3d::shape::ShapeHandle;
 use na::Vector3;
@@ -15,21 +13,13 @@ pub struct Cuboid
 
 impl Cuboid{
     /// Creates and returns a RigidBody corresponding to the 'Cuboid' type
-    pub fn process_cuboid(cuboid: Cuboid, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
-        // Coordinates and vector of the Cuboid
-        let x = position.x;
-        let y = position.y;
-        let z = position.z;
+    pub fn process_cuboid(cuboid: Cuboid) -> ShapeHandle<f32>{
+        // Vector of the Cuboid
         let vector = cuboid.vector;
 
-        // Creation of a Cuboid we'll need later to make a Collider
+        // Creation of a Cuboid we'll need later to make a RigidBody and Collider
         let cub = ShapeHandle::new(shape::Cuboid::new(vector));
 
-        // Creation of the Cuboid's RigidBody
-        let rb = RigidBodyDesc::new()
-            .translation(Vector3::new(x, y, z))
-            .build();
-
-        return (rb, cub);
+        return cub;
     }
 }

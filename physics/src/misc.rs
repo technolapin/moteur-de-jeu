@@ -1,7 +1,20 @@
+/* 
+########################################################################
+ EVERYTHING BETWEEN "### FOR TESTING PURPOSE ONLY ###" and 
+ "### END OF TESTING ###" must be utlimately removed
+########################################################################
+*/
 use crate::shapes::*;
-use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBody, BodyPartHandle, ColliderDesc, BodyStatus};
+
+use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, BodyPartHandle, ColliderDesc, BodyStatus};
 use nphysics3d::material::{MaterialHandle, BasicMaterial};
+use nphysics3d::math::{Velocity, Inertia};
+
 use ncollide3d::shape::ShapeHandle;
+
+use na::Vector3;
+use na::Matrix3;
+use na::geometry::Point3;
 
 
 
@@ -46,6 +59,7 @@ pub struct Object {
     pub angular_prediction: f32,
     pub sensor: bool,
     pub user_data: usize,
+    pub has_gravity: bool,
 }
 
 /// A set that contains many 'Object'
@@ -71,23 +85,23 @@ impl ObjSet{
 
 
 /// Creates and returns a Tuple containing: 1. A RigidBody corresponding to the object's shape; 2. The position of the RigidBody
-pub fn process_shape(event: ShapeType, object: &Object) -> (RigidBody<f32>, ShapeHandle<f32>) {
+pub fn process_shape(event: ShapeType) -> ShapeHandle<f32>{
     match event {
-        ShapeType::Ball(ball) => return Ball::process_ball(ball, object.position),
-        ShapeType::Capsule(capsule) => return Capsule::process_capsule(capsule, object.position),
-        ShapeType::Compound(compound) => return Compound::process_compound(compound, object.position),
-        ShapeType::ConvexHull(convexhull) => return ConvexHull::process_convexhull(convexhull, object.position),
-        ShapeType::Cuboid(cuboid) => return Cuboid::process_cuboid(cuboid, object.position),
-        ShapeType::HeightField(heightfield) => return HeightField::process_heightfield(heightfield, object.position),
-        ShapeType::Plane(plane) => return Plane::process_plane(plane, object.position),
-        ShapeType::Polyline(polyline) => return Polyline::process_polyline(polyline, object.position),
-        ShapeType::Segment(segment) => return Segment::process_segment(segment, object.position),
-        ShapeType::TriMesh(trimesh) => return TriMesh::process_trimesh(trimesh, object.position),
-        ShapeType::Triangle(triangle) => return Triangle::process_triangle(triangle, object.position),
+        ShapeType::Ball(ball) => return Ball::process_ball(ball),
+        ShapeType::Capsule(capsule) => return Capsule::process_capsule(capsule),
+        ShapeType::Compound(compound) => return Compound::process_compound(compound),
+        ShapeType::ConvexHull(convexhull) => return ConvexHull::process_convexhull(convexhull),
+        ShapeType::Cuboid(cuboid) => return Cuboid::process_cuboid(cuboid),
+        ShapeType::HeightField(heightfield) => return HeightField::process_heightfield(heightfield),
+        ShapeType::Plane(plane) => return Plane::process_plane(plane),
+        ShapeType::Polyline(polyline) => return Polyline::process_polyline(polyline),
+        ShapeType::Segment(segment) => return Segment::process_segment(segment),
+        ShapeType::TriMesh(trimesh) => return TriMesh::process_trimesh(trimesh),
+        ShapeType::Triangle(triangle) => return Triangle::process_triangle(triangle),
     }
 }
 
-/// Creates the Collider of every object in the ObjSet given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
+/// Creates the RigidBody and Collider of every object in the ObjSet given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
 pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet<f32>, Vec<generational_arena::Index>){
 
     // Where we store all the RigidBody object
@@ -102,13 +116,60 @@ pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultCollider
     // For every object in obj_set
     for object in &obj_set.tab{
 
-        let tuple = process_shape(object.shape.clone(), object);
+        let x = object.position.x;
+        let y = object.position.y;
+        let z = object.position.z;
+        let shape = process_shape(object.shape.clone());
+        
+        // We create the RigidBody relative to the fields of 'object'
+        let mut rb = RigidBodyDesc::new()
+        // The rigid body translation - Default: zero vector
+        .translation(Vector3::new(x, y, z))
+        // The rigid body rotation - Default: no rotation
+        .rotation(Vector3::y() * 5.0)
+        // Whether or not this rigid body is affected by gravity - Default: true
+        .gravity_enabled(object.has_gravity)
+        // The status of this rigid body - Default: BodyStatus::Dynamic
+        .status(BodyStatus::Kinematic)
+        // The velocity of this body - Default: zero velocity
+        .velocity(Velocity::linear(1.0, 2.0, 3.0))
+        // The linear damping applied to this rigid body velocity to slow it down automatically - Default: zero (no damping at all)
+        .linear_damping(10.0)
+        // The angular damping applied to this rigid body velocity to slow down its rotation automatically - Default: zero (no damping at all)
+        .angular_damping(5.0)
+        // The maximum linear velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit)
+        .max_linear_velocity(10.0)
+        // The maximum angular velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit)
+        .max_angular_velocity(1.7)
+        // The angular inertia tensor of this rigid body, expressed on its local-space - Default: the zero matrix
+        .angular_inertia(Matrix3::from_diagonal_element(3.0))
+        // The rigid body mass - Default: 0.0
+        .mass(1.2)
+        // The mass and angular inertia of this rigid body expressed in its local-space - Default: zero
+        // Will override `.mass(...)` and `.angular_inertia(...)`.
+        .local_inertia(Inertia::new(1.0, Matrix3::from_diagonal_element(3.0)))
+        // The center of mass of this rigid body expressed in its local-space - Default: the origin
+        .local_center_of_mass(Point3::new(1.0, 2.0, 3.0))
+        // The threshold for putting this rigid body to sleep - Default: Some(ActivationStatus::default_threshold())
+        .sleep_threshold(None)
+        // The translations that will be locked for this rigid body - Default: nothing is locked (false everywhere)
+        .kinematic_translations(Vector3::new(true, false, true))
+        // The translations that will be locked for this rigid body - Default: nothing is locked (false everywhere)
+        .kinematic_rotations(Vector3::new(true, false, true))
+        // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data
+        .user_data(10)
+        // Build the rigid-body
+        .build();
 
-        // The RigidBody associated to the object is at position 0 of the tuple
-        let rb = tuple.0; 
+        // Whether this rigid body motion should be interpolated linearly during CCD resolution - Default: false (which implies non-linear interpolation)
+        rb.enable_linear_motion_interpolation(true);
 
         // We add the RigidBody to the RigidBodySet
         let rb_handle = bodies.insert(rb);
+
+
+
+
 
         // ### FOR TESTING PURPOSE ONLY ###
         // We only have the ground at y = 0 at the moment
@@ -125,15 +186,16 @@ pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultCollider
         }
         // ### END OF TESTING ###
 
+
+
+
+
         // We create the Collider relative to the fields of 'object'
-        // The shape (Ball, Triangle, ...) associated to the object is at position 1 of the tuple
-        let collider = ColliderDesc::new(tuple.1)
-        /*
+        let collider = ColliderDesc::new(shape)
         // The collider translation wrt. the body part it is attached to - Default: zero vector
-        .translation(Vector3::y() * 5.0)
+        .translation(Vector3::new(x, y, z))
         // The collider rotation wrt. the body part it is attached to - Default: no rotation
         .rotation(Vector3::y() * 5.0)
-        */
         // If non-zero the collider's mass and angular inertia will be added to the inertial properties of the body part it is attached to - Default: 0.0
         .density(object.density)
         // Allows to define if the object bounces for example (restitution, friction) - Default: (0.0, 0.5)

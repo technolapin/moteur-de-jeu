@@ -8,8 +8,9 @@ extern crate nalgebra as na;
 extern crate generational_arena;
 
 pub mod shapes;
-pub mod misc;
 use shapes::*;
+
+pub mod misc;
 use misc::*;
 
 use na::Vector3;
@@ -56,6 +57,7 @@ pub fn main() {
         angular_prediction: 0.1,
         sensor: false,
         user_data: 10,
+        has_gravity: true,
     };
 
     obj_tab.push(ball);
@@ -83,6 +85,7 @@ pub fn main() {
         angular_prediction: 0.1,
         sensor: false,
         user_data: 10,
+        has_gravity: true,
     };
 
     obj_tab.push(ground);

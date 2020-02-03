@@ -1,9 +1,6 @@
-use crate::misc::Coordinates;
-use nphysics3d::object::{RigidBodyDesc, RigidBody};
 use ncollide3d::shape;
 use ncollide3d::shape::ShapeHandle;
 use ncollide3d::math::Point;
-use na::Vector3;
 
 
 
@@ -18,23 +15,15 @@ pub struct Triangle
 
 impl Triangle{
     /// Creates and returns a RigidBody corresponding to the 'Triangle' type
-    pub fn process_triangle(triangle: Triangle, position: Coordinates) -> (RigidBody<f32>, ShapeHandle<f32>){
-        // Coordinates and points of the Triangle
-        let x = position.x;
-        let y = position.y;
-        let z = position.z;
+    pub fn process_triangle(triangle: Triangle) -> ShapeHandle<f32>{
+        // Points of the Triangle
         let a = triangle.a;
         let b = triangle.b;
         let c = triangle.c;
 
-        // Creation of a Triangle we'll need later to make a Collider
+        // Creation of a Triangle we'll need later to make a RigidBody and Collider
         let tri = ShapeHandle::new(shape::Triangle::new(a, b, c));
 
-        // Creation of the Triangle's RigidBody
-        let rb = RigidBodyDesc::new()
-            .translation(Vector3::new(x, y, z))
-            .build();
-
-        return (rb, tri);
+        return tri;
     }
 }
