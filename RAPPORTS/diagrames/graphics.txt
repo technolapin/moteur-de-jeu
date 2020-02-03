@@ -2,7 +2,6 @@
 skinparam style strictuml
 
 
-class Similarity
 
 package Engine
 {
@@ -19,12 +18,18 @@ package Processing
 {
 	class Vertex
 	class Group
-	class Material
+	enum Material {
+	     Textured
+    	     NonTextured
+	     Default
+	}
 	class ModelsHolder
 	class Object
 	class Objects
 	class Scene
 	class Vertex
+	class Similarity
+	
 }
 
 /'
@@ -56,6 +61,7 @@ package glium
 
 ModelsHolder --> Objects
 Object ..> Material
+Object ..> Group
 Objects --> Group
 Objects --> Material
 
@@ -66,7 +72,7 @@ Graphical --> Programs
 
 
 Scene ..> Object
-Scene -> Similarity
+Scene ---> Similarity
 
 'Group --> VertexBufferAny
 'Material -->Texture2D
