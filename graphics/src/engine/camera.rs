@@ -5,6 +5,7 @@ use nalgebra_glm::rotate_y_vec3;
 use nalgebra_glm::rotate_z_vec3;
 use nalgebra::Matrix3;
 use nalgebra::Vector3;
+use nalgebra::Perspective3;
 
 /**
 A simple camera
@@ -29,7 +30,7 @@ impl Camera {
     }
 
     pub fn set_aspect_ratio(&mut self, width: f32, height: f32) {
-        self.aspect_ratio = height / width;
+        self.aspect_ratio = width/height ; 
     }
 
     pub fn set_position(&mut self, position: Vector3<f32>) {
@@ -111,13 +112,8 @@ impl Camera {
         let zfar = 1024.0;
         let znear = 0.1;
 
-        let f = 1.0 / (fov / 2.0).tan();
-
-        [
-            [f * self.aspect_ratio, 0.0, 0.0, 0.0],
-            [0.0, f, 0.0, 0.0],
-            [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
-            [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
-        ]
+	let perspective = Perspective3::new(self.aspect_ratio, fov, znear, zfar);
+	let perspective_matrix = perspective.as_matrix().as_ref() ;
+	*perspective_matrix
     }
 }
