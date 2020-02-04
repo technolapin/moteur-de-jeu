@@ -27,9 +27,14 @@ impl Base
          }
     }
 
-    pub fn get_event_loop(&self) -> &glutin::EventsLoop
+    pub fn get_events_loop(&self) -> &glutin::EventsLoop
     {
         &self.events_loop
+    }
+    
+    pub fn get_events_loop_mut(&mut self) -> &mut glutin::EventsLoop
+    {
+        &mut self.events_loop
     }
 
     

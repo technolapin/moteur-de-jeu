@@ -21,3 +21,6 @@ rayon="*"
 
 nalgebra="*"
 nalgebra-glm="*"
+
+base = { path = "../base" }
+events_handling = {path = "../events_handling"}

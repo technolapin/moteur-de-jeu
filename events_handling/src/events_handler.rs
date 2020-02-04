@@ -46,7 +46,7 @@ impl<'a> EventsHandler<'a>
                         Event::ButtonPressed(button) => {self.devices.mouse_state.insert(button);},
                         Event::ButtonReleased(button) => {self.devices.mouse_state.remove(&button);},
                         Event::MouseMove(x, y) => {self.devices.mouse_move = (self.devices.mouse_move.0+x, self.devices.mouse_move.1+y);}
-                        Event::ScrollMouse(x, y) => {self.devices.mouse_scroll = (self.devices.mouse_scroll.0+x, self.devices.mouse_scroll.1+y);}
+                        Event::ScrollMouse(x, y) => {self.devices.mouse_scroll = (self.devices.mouse_scroll.0+x, self.devices.mouse_scroll.1+y);},
                         _ => ()
                     }
                 }

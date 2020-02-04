@@ -25,7 +25,7 @@ impl Event {
                 device_id: _,
                 event,
             } => Self::parse_device_event(event),
-            _ => Self::Default,
+            lol => {println!("{:?}", lol); Self::Default},
         }
     }
 

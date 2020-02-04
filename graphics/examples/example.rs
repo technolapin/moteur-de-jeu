@@ -1,13 +1,16 @@
-extern crate rand;
 extern crate graphics;
 extern crate nalgebra;
+extern crate rand;
+
+
+use base::Base;
+use events_handling::{EventsHandler, Key};
 
 use graphics::engine::*;
-use graphics::processing::*;
 use graphics::misc::*;
+use graphics::processing::*;
 
 use nalgebra::base::*;
-
 
 use glutin::VirtualKeyCode;
 use std::collections::HashSet;
@@ -119,8 +122,7 @@ where
     Ok(scene)
 }
 
-
-
+/*
 
 
 pub struct Base
@@ -143,29 +145,26 @@ impl Base
     }
 }
 
-
-
-
+*/
 
 fn main() -> Result<(), &'static str> {
     let mut base = Base::new();
-//    let mut event_loop = glutin::EventsLoop::new();
-  //  let mut holder = RessourcesHolder::new();
-    let mut graphics = Graphical::new(&base.event_loop);
-    let scene = make_scene(&graphics, &mut base.holder)?;
+    let mut holder = RessourcesHolder::new();
+    let mut graphics = Graphical::new(&base.get_events_loop());
+    let scene = make_scene(&graphics, &mut holder)?;
 
     let mut camera_pos = Vector3::new(0., 0., 0.);
     let mut camera_rot = Vector3::new(0., 0., 0.);
 
-    let mut keys = HashSet::new();
     let sensibility = 0.0005;
     let speed = 0.1; // parce que pourquoi pas.
 
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner
 
-    let mut close = false;
-    while !close {
+    let mut events_handler = EventsHandler::new(base.get_events_loop_mut());
+
+    loop {
         ///////////////////////////////////////////
         graphics.camera.relative_move(camera_pos);
         graphics.camera.rotation(camera_rot.clone());
@@ -183,76 +182,24 @@ fn main() -> Result<(), &'static str> {
 
         camera_pos = Vector3::new(0., 0., 0.);
 
-        // on appelle une closure pour chaque évènement présent dans la file des évènements (cachée dans l'eventloop ou un truc du genre)
-        // y'a moyen de faire moins de matches pour améliorer la lisibilité du code
-        base.event_loop.poll_events(|event| {
-            println!("EVENT {:?}", event);
-            match event {
-                glutin::Event::WindowEvent {
-                    event: glutin::WindowEvent::CloseRequested,
-                    ..
-                } => {
-                    close = true;
-                }
-                /*
-                                glutin::Event::WindowEvent { event, .. } => match event {
-                                    glutin::WindowEvent::CloseRequested => {
-                                        close = true;
-                                    }
-                                    _ => (),
-                                },
-                */
-                glutin::Event::DeviceEvent { event, .. } => match event {
-                    glutin::DeviceEvent::Key(keyboard_input) => {
-                        match keyboard_input.virtual_keycode {
-                            None => (),
-                            Some(keycode) => {
-                                if keyboard_input.state == glutin::ElementState::Released {
-                                    keys.remove(&keycode);
-                                } else {
-                                    keys.insert(keycode);
-                                }
-                            }
-                        }
-                    }
+        events_handler.update();
+        let devices = events_handler.state();
 
-                    glutin::DeviceEvent::Motion { axis, value } => {
-                        println!("MOTION Axe:{} value:{}", axis, value);
-                        match axis {
-                            0 => {
-                                camera_rot[1] += (value as f32) * sensibility;
-                            }
-                            1 => {
-                                camera_rot[0] += (value as f32) * sensibility;
-                            }
-                            _ => (),
-                        }
-                    }
-                    _ => (),
-                },
-                _ => (),
-            };
-        });
+        let (mouse_x, mouse_y) = devices.mouse_motion();
+        camera_rot[1] -= (mouse_x as f32) * sensibility;
+        camera_rot[0] -= (mouse_y as f32) * sensibility;
 
-        // une fois qu'on a l'ensembles des touches appuyées, on fait des trucs avec, genre bouger la camera
-        for keycode in keys.iter() {
-            match keycode {
-                VirtualKeyCode::Z => {
-                    camera_pos[0] = camera_pos[0] + speed;
-                }
-                VirtualKeyCode::S => {
-                    camera_pos[0] = camera_pos[0] - speed;
-                }
-                VirtualKeyCode::Q => {
-                    camera_pos[2] = camera_pos[2] - speed;
-                }
-                VirtualKeyCode::D => {
-                    camera_pos[2] = camera_pos[2] + speed;
-                }
-                _ => {
-                    println!("NOTHING TO DO WITH {:?}", keycode);
-                }
-            };
+        if devices.key_pressed(Key::Q) {
+            camera_pos[2] = camera_pos[2] - speed;
+        }
+        if devices.key_pressed(Key::D) {
+            camera_pos[2] = camera_pos[2] + speed;
+        }
+        if devices.key_pressed(Key::Z) {
+            camera_pos[0] = camera_pos[0] + speed;
+        }
+        if devices.key_pressed(Key::S) {
+            camera_pos[0] = camera_pos[0] - speed;
         }
     }
     Ok(())
