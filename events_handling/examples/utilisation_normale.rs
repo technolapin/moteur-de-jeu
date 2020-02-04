@@ -24,19 +24,19 @@ fn main()
         thread::sleep(step);
         while !handler.update(){}
         let devices = handler.state();
-        if devices.keyboard_state.contains(&Key::Q)
+        if devices.key_pressed(Key::Q)
         {
             pos_x-=1;
         }
-        if devices.keyboard_state.contains(&Key::D)
+        if devices.key_pressed(Key::D)
         {
             pos_x+=1;
         }
-        if devices.keyboard_state.contains(&Key::Z)
+        if devices.key_pressed(Key::Z)
         {
             pos_y-=1;
         }
-        if devices.keyboard_state.contains(&Key::S)
+        if devices.key_pressed(Key::S)
         {
             pos_y+=1;
         }
