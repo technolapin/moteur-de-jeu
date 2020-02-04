@@ -10,10 +10,22 @@ use graphics::engine::*;
 use graphics::misc::*;
 use graphics::processing::*;
 
-use nalgebra::base::*;
+use nalgebra::base::*; 
 
-use glutin::VirtualKeyCode;
-use std::collections::HashSet;
+use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4, normalize, look_at};
+fn new_transformation((tx, ty, tz): (f32, f32, f32),
+                      (rx, ry, rz): (f32, f32, f32), scale: f32) -> [[f32; 4]; 4]
+{
+    let rot =
+        rotation(rx, &vec3(1., 0., 0.)) *
+        rotation(ry, &vec3(0., 1., 0.)) *
+        rotation(rz, &vec3(0., 0., 1.));
+    let trans = translation(&vec3(tx, ty, tz));
+    let resize = TMat4::from_diagonal(&vec4(scale, scale, scale, 1.));
+    *(trans*rot*resize).as_ref()
+    //*(look_at(&vec3(0., 0., 0.), &vec3(tx, ty, tz), &normalize(&vec3(rx, ry, rz)))*scale).as_ref()
+}
+
 
 // the holder outlives the scene
 fn make_scene<'a, 'b>(
@@ -32,120 +44,45 @@ where
     holder.load_wavefront(&graphics, "terrain.obj", &ressources_path)?;
 
     let _sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
-    let _teto = holder
+    let teto = holder
         .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
         .unwrap();
     let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
     let zeldo = holder.get("textured_cube", "Cube.001").unwrap();
     let map_elements = holder.get_whole_file("terrain").unwrap();
 
-    let mut teapots = (0..30)
-        .map(|_| {
-            let pos: (f32, f32, f32) = (
-                (rand::random::<f32>()),
-                rand::random::<f32>(),
-                rand::random::<f32>(),
-            );
-            let pos = (pos.0 * 1.5 - 0.75, pos.1 * 1.5 - 0.75, pos.2 * 1.5 - 0.75);
-            let rot: (f32, f32, f32) = (rand::random(), rand::random(), rand::random());
-            let rot = (rot.0 * 6., rot.1 * 6., rot.2 * 6.);
-            let size: f32 = rand::random();
-            (pos, rot, size)
-        })
-        .collect::<Vec<_>>();
 
-    // building the vertex buffer with the attributes per instance
-    // contient les positions des objets instanciés
-    let mut per_instance = {
-        // créé un vecteur de 10000 vertex (un point par object)
-        let data = teapots
-            .iter()
-            .map(|_| Similarity {
-                world_transformation: [[0.; 4]; 4],
-            })
-            .collect::<Vec<_>>();
 
-        glium::vertex::VertexBuffer::dynamic(&graphics.display.display, &data).unwrap()
-    };
-
-    {
-        //variable locale aux crochets
-        let mut mapping = per_instance.map();
-        for (src, dest) in teapots.iter_mut().zip(mapping.iter_mut()) {
-            let rot = Matrix4::new_rotation(Vector3::new((src.1).0, (src.1).1, (src.1).2));
-            let translation = Matrix4::new(
-                1.,
-                0.,
-                0.,
-                (src.0).0,
-                0.,
-                1.,
-                0.,
-                (src.0).1,
-                0.,
-                0.,
-                1.,
-                (src.0).2,
-                0.,
-                0.,
-                0.,
-                1.,
-            );
-            let aggr = src.2 / 1000.;
-            let aggrandissement = Matrix4::new(
-                aggr, 0., 0., 0., 0., aggr, 0., 0., 0., 0., aggr, 0., 0., 0., 0., 1.,
-            );
-
-            let transfs = translation * rot * aggrandissement;
-            dest.world_transformation = matrix_to_array(transfs);
-        }
-    }
-
+    // le buffer d'instanciation pour la map
     let map_position = glium::vertex::VertexBuffer::dynamic(
         &graphics.display.display,
         &vec![Similarity {
-            world_transformation: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, -1.0, 0.0, 1.0],
-            ],
+            world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
         }],
+    ).unwrap();
+
+    
+
+    // le buffer d'instanciation pour les cubes
+    let instances = glium::vertex::VertexBuffer::dynamic(
+        &graphics.display.display,
+        &(0..30).map(|_| Similarity {
+            world_transformation: new_transformation(
+                (rand::random(), rand::random::<f32>(), rand::random::<f32>()), 
+                (rand::random(), rand::random(), rand::random()),
+                0.001)
+        }).collect::<Vec<_>>(),
     )
     .unwrap();
 
+    
     let mut scene = Scene::new();
 
-    scene.add(vec![red, zeldo], per_instance);
+    scene.add(vec![red, zeldo, teto], instances);
     scene.add(map_elements, map_position);
 
     Ok(scene)
 }
-
-/*
-
-
-pub struct Base
-{
-    event_loop: glutin::EventsLoop,
-    holder: RessourcesHolder,
-}
-
-impl Base
-{
-    pub fn new() -> Self
-    {
-        let event_loop = glutin::EventsLoop::new();
-        let holder = RessourcesHolder::new();
-        Self
-        {
-            event_loop: event_loop,
-            holder: holder
-        }
-    }
-}
-
-*/
 
 fn main() -> Result<(), &'static str> {
     let mut base = Base::new();
@@ -168,9 +105,12 @@ fn main() -> Result<(), &'static str> {
         ///////////////////////////////////////////
         graphics.camera.relative_move(camera_pos);
         graphics.camera.rotation(camera_rot.clone());
-        let mut frame = graphics.frame();
         graphics.update_dimensions();
-        frame.clear();
+
+        
+        let mut frame = graphics.frame();
+        frame.clear((0., 0.2, 0.5, 0.));
+        
         scene.objects.iter().for_each(|(objects, instances)| {
             objects
                 .iter()
@@ -182,6 +122,9 @@ fn main() -> Result<(), &'static str> {
 
         camera_pos = Vector3::new(0., 0., 0.);
 
+
+
+        
         events_handler.update();
         let devices = events_handler.state();
 
@@ -200,6 +143,9 @@ fn main() -> Result<(), &'static str> {
         }
         if devices.key_pressed(Key::S) {
             camera_pos[0] = camera_pos[0] - speed;
+        }
+        if devices.key_pressed(Key::Escape) {
+            break;
         }
     }
     Ok(())
