@@ -1,16 +1,20 @@
 extern crate events_handling;
-use events_handling::Event;
-use events_handling::EventsCollector;
+use events_handling::EventsHandler;
+
+use std::{thread, time};
+
 
 fn main()
 {
     let mut event_loop = glutin::EventsLoop::new();
-    let mut collector = EventsCollector::new(&mut event_loop);
+    let mut handler = EventsHandler::new(&mut event_loop);
+
+    let step = time::Duration::from_millis(1000/60);
 
     loop
     {
-        collector.gather();
-        collector.debug();
+        thread::sleep(step);
+        handler.debug();
     }
     
     

@@ -1,411 +1,81 @@
-#[derive(Debug)]
-pub enum Event
-{
-	Key1,
-	Key2,
-	Key3,
-	Key4,
-	Key5,
-	Key6,
-	Key7,
-	Key8,
-	Key9,
-	Key0,
-	A,
-	B,
-	C,
-	D,
-	E,
-	F,
-	G,
-	H,
-	I,
-	J,
-	K,
-	L,
-	M,
-	N,
-	O,
-	P,
-	Q,
-	R,
-	S,
-	T,
-	U,
-	V,
-	W,
-	X,
-	Y,
-	Z,
-	Escape,
-	F1,
-	F2,
-	F3,
-	F4,
-	F5,
-	F6,
-	F7,
-	F8,
-	F9,
-	F10,
-	F11,
-	F12,
-	F13,
-	F14,
-	F15,
-	F16,
-	F17,
-	F18,
-	F19,
-	F20,
-	F21,
-	F22,
-	F23,
-	F24,
-	Snapshot,
-	Scroll,
-	Pause,
-	Insert,
-	Home,
-	Delete,
-	End,
-	PageDown,
-	PageUp,
-	Left,
-	Up,
-	Right,
-	Down,
-	Back,
-	Return,
-	Space,
-	Compose,
-	Caret,
-	Numlock,
-	Numpad0,
-	Numpad1,
-	Numpad2,
-	Numpad3,
-	Numpad4,
-	Numpad5,
-	Numpad6,
-	Numpad7,
-	Numpad8,
-	Numpad9,
-	AbntC1,
-	AbntC2,
-	Add,
-	Apostrophe,
-	Apps,
-	At,
-	Ax,
-	Backslash,
-	Calculator,
-	Capital,
-	Colon,
-	Comma,
-	Convert,
-	Decimal,
-	Divide,
-	Equals,
-	Grave,
-	Kana,
-	Kanji,
-	LAlt,
-	LBracket,
-	LControl,
-	LShift,
-	LWin,
-	Mail,
-	MediaSelect,
-	MediaStop,
-	Minus,
-	Multiply,
-	Mute,
-	MyComputer,
-	NavigateForward,
-	NavigateBackward,
-	NextTrack,
-	NoConvert,
-	NumpadComma,
-	NumpadEnter,
-	NumpadEquals,
-	OEM102,
-	Period,
-	PlayPause,
-	Power,
-	PrevTrack,
-	RAlt,
-	RBracket,
-	RControl,
-	RShift,
-	RWin,
-	Semicolon,
-	Slash,
-	Sleep,
-	Stop,
-	Subtract,
-	Sysrq,
-	Tab,
-	Underline,
-	Unlabeled,
-	VolumeDown,
-	VolumeUp,
-	Wake,
-	WebBack,
-	WebFavorites,
-	WebForward,
-	WebHome,
-	WebRefresh,
-	WebSearch,
-	WebStop,
-	Yen,
-	Copy,
-	Paste,
-	Cut,
+use crate::*;
 
-// ------------------------------------------
+#[derive(Debug, Clone, Copy)]
+pub enum Event {
+    KeyPressed(Key),
+    KeyReleased(Key),
+    ButtonPressed(Button),
+    ButtonReleased(Button),
 
-	MouseMove (f64, f64),
+    // ------------------------------------------
+    MouseMove(f64, f64),
 
-// ------------------------------------------
+    // ------------------------------------------
+    ScrollMouse(f32, f32),
 
-	RightClick,
-	LeftClick,
-	CentralClick,
-
-// ------------------------------------------
-
-	ScrollMouse (f32, f32),
-
-// ------------------------------------------
-
-	Default, // Truc par défaut
+    // ------------------------------------------
+    Default, // Truc par défaut
 }
 
-impl Event
-{
-	// https://docs.rs/glutin/0.21.2/glutin/enum.Event.html
-	pub fn parse(ev : glutin::Event) -> Self
-	{
-		match ev {
-			glutin::Event::DeviceEvent{ device_id : _, event } => Self::parse_device_event( event ),
-			_ => Self::Default,
-		}
-	}
+impl Event {
+    // https://docs.rs/glutin/0.21.2/glutin/enum.Event.html
+    pub fn parse(ev: glutin::Event) -> Self {
+        match ev {
+            glutin::Event::DeviceEvent {
+                device_id: _,
+                event,
+            } => Self::parse_device_event(event),
+            _ => Self::Default,
+        }
+    }
 
-	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	fn parse_device_event(ev : glutin::DeviceEvent) -> Self
-	{
-		match ev {
-			glutin::DeviceEvent::Key( keyboard_input ) => Self::parse_touche_clavier( keyboard_input ),
-			glutin::DeviceEvent::MouseMotion{ delta } => Self::parse_mouvement_souris( delta ),
-			glutin::DeviceEvent::Button{ button, state : _ } => Self::parse_bouton_souris( button ),
-			glutin::DeviceEvent::MouseWheel{ delta } => Self::parse_scroll( delta ),
-			_ => Self::Default,
-		}
-	}
+    // https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
+    fn parse_device_event(ev: glutin::DeviceEvent) -> Self {
+        match ev {
+            glutin::DeviceEvent::Key(keyboard_input) => Self::parse_touche_clavier(keyboard_input),
+            glutin::DeviceEvent::MouseMotion { delta } => Self::parse_mouvement_souris(delta),
+            glutin::DeviceEvent::Button { button, state } => {
+                Self::parse_bouton_souris(button, state)
+            }
+            glutin::DeviceEvent::MouseWheel { delta } => Self::parse_scroll(delta),
+            _ => Self::Default,
+        }
+    }
 
-	// https://docs.rs/glutin/0.21.2/glutin/struct.KeyboardInput.html
-	fn parse_touche_clavier (ev : glutin::KeyboardInput ) -> Self
-	{
-		if ev.virtual_keycode.is_none() { // Ce qui serait problématique
-			return Self::Default;
-		}
-		
-		// https://docs.rs/glutin/0.21.2/glutin/enum.VirtualKeyCode.html
-		match ev.virtual_keycode.unwrap() {
-			glutin::VirtualKeyCode::Key1 => Self::Key1,
-			glutin::VirtualKeyCode::Key2 => Self::Key2,
-			glutin::VirtualKeyCode::Key3 => Self::Key3,
-			glutin::VirtualKeyCode::Key4 => Self::Key4,
-			glutin::VirtualKeyCode::Key5 => Self::Key5,
-			glutin::VirtualKeyCode::Key6 => Self::Key6,
-			glutin::VirtualKeyCode::Key7 => Self::Key7,
-			glutin::VirtualKeyCode::Key8 => Self::Key8,
-			glutin::VirtualKeyCode::Key9 => Self::Key9,
-			glutin::VirtualKeyCode::Key0 => Self::Key0,
-			glutin::VirtualKeyCode::A => Self::A,
-			glutin::VirtualKeyCode::B => Self::B,
-			glutin::VirtualKeyCode::C => Self::C,
-			glutin::VirtualKeyCode::D => Self::D,
-			glutin::VirtualKeyCode::E => Self::E,
-			glutin::VirtualKeyCode::F => Self::F,
-			glutin::VirtualKeyCode::G => Self::G,
-			glutin::VirtualKeyCode::H => Self::H,
-			glutin::VirtualKeyCode::I => Self::I,
-			glutin::VirtualKeyCode::J => Self::J,
-			glutin::VirtualKeyCode::K => Self::K,
-			glutin::VirtualKeyCode::L => Self::L,
-			glutin::VirtualKeyCode::M => Self::M,
-			glutin::VirtualKeyCode::N => Self::N,
-			glutin::VirtualKeyCode::O => Self::O,
-			glutin::VirtualKeyCode::P => Self::P,
-			glutin::VirtualKeyCode::Q => Self::Q,
-			glutin::VirtualKeyCode::R => Self::R,
-			glutin::VirtualKeyCode::S => Self::S,
-			glutin::VirtualKeyCode::T => Self::T,
-			glutin::VirtualKeyCode::U => Self::U,
-			glutin::VirtualKeyCode::V => Self::V,
-			glutin::VirtualKeyCode::W => Self::W,
-			glutin::VirtualKeyCode::X => Self::X,
-			glutin::VirtualKeyCode::Y => Self::Y,
-			glutin::VirtualKeyCode::Z => Self::Z,
-			glutin::VirtualKeyCode::Escape => Self::Escape,
-			glutin::VirtualKeyCode::F1 => Self::F1,
-			glutin::VirtualKeyCode::F2 => Self::F2,
-			glutin::VirtualKeyCode::F3 => Self::F3,
-			glutin::VirtualKeyCode::F4 => Self::F4,
-			glutin::VirtualKeyCode::F5 => Self::F5,
-			glutin::VirtualKeyCode::F6 => Self::F6,
-			glutin::VirtualKeyCode::F7 => Self::F7,
-			glutin::VirtualKeyCode::F8 => Self::F8,
-			glutin::VirtualKeyCode::F9 => Self::F9,
-			glutin::VirtualKeyCode::F10 => Self::F10,
-			glutin::VirtualKeyCode::F11 => Self::F11,
-			glutin::VirtualKeyCode::F12 => Self::F12,
-			glutin::VirtualKeyCode::F13 => Self::F13,
-			glutin::VirtualKeyCode::F14 => Self::F14,
-			glutin::VirtualKeyCode::F15 => Self::F15,
-			glutin::VirtualKeyCode::F16 => Self::F16,
-			glutin::VirtualKeyCode::F17 => Self::F17,
-			glutin::VirtualKeyCode::F18 => Self::F18,
-			glutin::VirtualKeyCode::F19 => Self::F19,
-			glutin::VirtualKeyCode::F20 => Self::F20,
-			glutin::VirtualKeyCode::F21 => Self::F21,
-			glutin::VirtualKeyCode::F22 => Self::F22,
-			glutin::VirtualKeyCode::F23 => Self::F23,
-			glutin::VirtualKeyCode::F24 => Self::F24,
-			glutin::VirtualKeyCode::Snapshot => Self::Snapshot,
-			glutin::VirtualKeyCode::Scroll => Self::Scroll,
-			glutin::VirtualKeyCode::Pause => Self::Pause,
-			glutin::VirtualKeyCode::Insert => Self::Insert,
-			glutin::VirtualKeyCode::Home => Self::Home,
-			glutin::VirtualKeyCode::Delete => Self::Delete,
-			glutin::VirtualKeyCode::End => Self::End,
-			glutin::VirtualKeyCode::PageDown => Self::PageDown,
-			glutin::VirtualKeyCode::PageUp => Self::PageUp,
-			glutin::VirtualKeyCode::Left => Self::Left,
-			glutin::VirtualKeyCode::Up => Self::Up,
-			glutin::VirtualKeyCode::Right => Self::Right,
-			glutin::VirtualKeyCode::Down => Self::Down,
-			glutin::VirtualKeyCode::Back => Self::Back,
-			glutin::VirtualKeyCode::Return => Self::Return,
-			glutin::VirtualKeyCode::Space => Self::Space,
-			glutin::VirtualKeyCode::Compose => Self::Compose,
-			glutin::VirtualKeyCode::Caret => Self::Caret,
-			glutin::VirtualKeyCode::Numlock => Self::Numlock,
-			glutin::VirtualKeyCode::Numpad0 => Self::Numpad0,
-			glutin::VirtualKeyCode::Numpad1 => Self::Numpad1,
-			glutin::VirtualKeyCode::Numpad2 => Self::Numpad2,
-			glutin::VirtualKeyCode::Numpad3 => Self::Numpad3,
-			glutin::VirtualKeyCode::Numpad4 => Self::Numpad4,
-			glutin::VirtualKeyCode::Numpad5 => Self::Numpad5,
-			glutin::VirtualKeyCode::Numpad6 => Self::Numpad6,
-			glutin::VirtualKeyCode::Numpad7 => Self::Numpad7,
-			glutin::VirtualKeyCode::Numpad8 => Self::Numpad8,
-			glutin::VirtualKeyCode::Numpad9 => Self::Numpad9,
-			glutin::VirtualKeyCode::AbntC1 => Self::AbntC1,
-			glutin::VirtualKeyCode::AbntC2 => Self::AbntC2,
-			glutin::VirtualKeyCode::Add => Self::Add,
-			glutin::VirtualKeyCode::Apostrophe => Self::Apostrophe,
-			glutin::VirtualKeyCode::Apps => Self::Apps,
-			glutin::VirtualKeyCode::At => Self::At,
-			glutin::VirtualKeyCode::Ax => Self::Ax,
-			glutin::VirtualKeyCode::Backslash => Self::Backslash,
-			glutin::VirtualKeyCode::Calculator => Self::Calculator,
-			glutin::VirtualKeyCode::Capital => Self::Capital,
-			glutin::VirtualKeyCode::Colon => Self::Colon,
-			glutin::VirtualKeyCode::Comma => Self::Comma,
-			glutin::VirtualKeyCode::Convert => Self::Convert,
-			glutin::VirtualKeyCode::Decimal => Self::Decimal,
-			glutin::VirtualKeyCode::Divide => Self::Divide,
-			glutin::VirtualKeyCode::Equals => Self::Equals,
-			glutin::VirtualKeyCode::Grave => Self::Grave,
-			glutin::VirtualKeyCode::Kana => Self::Kana,
-			glutin::VirtualKeyCode::Kanji => Self::Kanji,
-			glutin::VirtualKeyCode::LAlt => Self::LAlt,
-			glutin::VirtualKeyCode::LBracket => Self::LBracket,
-			glutin::VirtualKeyCode::LControl => Self::LControl,
-			glutin::VirtualKeyCode::LShift => Self::LShift,
-			glutin::VirtualKeyCode::LWin => Self::LWin,
-			glutin::VirtualKeyCode::Mail => Self::Mail,
-			glutin::VirtualKeyCode::MediaSelect => Self::MediaSelect,
-			glutin::VirtualKeyCode::MediaStop => Self::MediaStop,
-			glutin::VirtualKeyCode::Minus => Self::Minus,
-			glutin::VirtualKeyCode::Multiply => Self::Multiply,
-			glutin::VirtualKeyCode::Mute => Self::Mute,
-			glutin::VirtualKeyCode::MyComputer => Self::MyComputer,
-			glutin::VirtualKeyCode::NavigateForward => Self::NavigateForward,
-			glutin::VirtualKeyCode::NavigateBackward => Self::NavigateBackward,
-			glutin::VirtualKeyCode::NextTrack => Self::NextTrack,
-			glutin::VirtualKeyCode::NoConvert => Self::NoConvert,
-			glutin::VirtualKeyCode::NumpadComma => Self::NumpadComma,
-			glutin::VirtualKeyCode::NumpadEnter => Self::NumpadEnter,
-			glutin::VirtualKeyCode::NumpadEquals => Self::NumpadEquals,
-			glutin::VirtualKeyCode::OEM102 => Self::OEM102,
-			glutin::VirtualKeyCode::Period => Self::Period,
-			glutin::VirtualKeyCode::PlayPause => Self::PlayPause,
-			glutin::VirtualKeyCode::Power => Self::Power,
-			glutin::VirtualKeyCode::PrevTrack => Self::PrevTrack,
-			glutin::VirtualKeyCode::RAlt => Self::RAlt,
-			glutin::VirtualKeyCode::RBracket => Self::RBracket,
-			glutin::VirtualKeyCode::RControl => Self::RControl,
-			glutin::VirtualKeyCode::RShift => Self::RShift,
-			glutin::VirtualKeyCode::RWin => Self::RWin,
-			glutin::VirtualKeyCode::Semicolon => Self::Semicolon,
-			glutin::VirtualKeyCode::Slash => Self::Slash,
-			glutin::VirtualKeyCode::Sleep => Self::Sleep,
-			glutin::VirtualKeyCode::Stop => Self::Stop,
-			glutin::VirtualKeyCode::Subtract => Self::Subtract,
-			glutin::VirtualKeyCode::Sysrq => Self::Sysrq,
-			glutin::VirtualKeyCode::Tab => Self::Tab,
-			glutin::VirtualKeyCode::Underline => Self::Underline,
-			glutin::VirtualKeyCode::Unlabeled => Self::Unlabeled,
-			glutin::VirtualKeyCode::VolumeDown => Self::VolumeDown,
-			glutin::VirtualKeyCode::VolumeUp => Self::VolumeUp,
-			glutin::VirtualKeyCode::Wake => Self::Wake,
-			glutin::VirtualKeyCode::WebBack => Self::WebBack,
-			glutin::VirtualKeyCode::WebFavorites => Self::WebFavorites,
-			glutin::VirtualKeyCode::WebForward => Self::WebForward,
-			glutin::VirtualKeyCode::WebHome => Self::WebHome,
-			glutin::VirtualKeyCode::WebRefresh => Self::WebRefresh,
-			glutin::VirtualKeyCode::WebSearch => Self::WebSearch,
-			glutin::VirtualKeyCode::WebStop => Self::WebStop,
-			glutin::VirtualKeyCode::Yen => Self::Yen,
-			glutin::VirtualKeyCode::Copy => Self::Copy,
-			glutin::VirtualKeyCode::Paste => Self::Paste,
-			glutin::VirtualKeyCode::Cut => Self::Cut,
-			
-//			_ => Self::Default,
-		}
-	}
+    // https://docs.rs/glutin/0.21.2/glutin/struct.KeyboardInput.html
+    fn parse_touche_clavier(ev: glutin::KeyboardInput) -> Self {
+        let key = Key::convert_key(ev.virtual_keycode, ev.scancode);
+        match ev.state {
+            glutin::ElementState::Pressed => Self::KeyPressed(key),
+            glutin::ElementState::Released => Self::KeyReleased(key),
+        }
+    }
 
-	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	fn parse_mouvement_souris (ev : (f64, f64) ) -> Self
-	{
-		return Self::MouseMove ( ev.0, ev.1 );
-	}
+    // https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
+    fn parse_mouvement_souris(ev: (f64, f64)) -> Self {
+        return Self::MouseMove(ev.0, ev.1);
+    }
 
-	// https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
-	fn parse_bouton_souris (ev : u32 ) -> Self
-	{
-		match ev {
-			1 => Self::LeftClick,
-			2 => Self::RightClick,
-			3 => Self::CentralClick,
-			
-			_ => Self::Default,
-		}
-	}
+    // https://docs.rs/glutin/0.21.2/glutin/enum.DeviceEvent.html
+    fn parse_bouton_souris(ev: u32, state: glutin::ElementState) -> Self {
+        let button = match ev {
+            1 => Button::LeftClick,
+            2 => Button::CentralClick,
+            3 => Button::RightClick,
+            other => Button::Other(other),
+        };
+        match state {
+            glutin::ElementState::Pressed => Self::ButtonPressed(button),
+            glutin::ElementState::Released => Self::ButtonReleased(button),
+        }
+    }
 
-	// https://docs.rs/glutin/0.21.2/glutin/enum.MouseScrollDelta.html
-	fn parse_scroll (ev : glutin::MouseScrollDelta ) -> Self
-	{
-		match ev {
-			glutin::MouseScrollDelta::LineDelta( x, y ) => Self::ScrollMouse ( x, y ),
-			
-			_ => Self::Default,
-		}
-	}
+    // https://docs.rs/glutin/0.21.2/glutin/enum.MouseScrollDelta.html
+    fn parse_scroll(ev: glutin::MouseScrollDelta) -> Self {
+        match ev {
+            glutin::MouseScrollDelta::LineDelta(x, y) => Self::ScrollMouse(x, y),
+
+            _ => Self::Default,
+        }
+    }
 }
-
