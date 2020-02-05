@@ -12,7 +12,7 @@ use graphics::processing::*;
 
 use nalgebra::base::*; 
 
-use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4, normalize, look_at};
+use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4}; //, normalize, look_at};
 fn new_transformation((tx, ty, tz): (f32, f32, f32),
                       (rx, ry, rz): (f32, f32, f32), scale: f32) -> [[f32; 4]; 4]
 {
@@ -109,7 +109,7 @@ fn main() -> Result<(), &'static str> {
 
         
         let mut frame = graphics.frame();
-        frame.clear((0., 0.2, 0.5, 0.));
+        frame.clear();//(0., 0.2, 0.5, 0.));
         
         scene.objects.iter().for_each(|(objects, instances)| {
             objects
