@@ -35,7 +35,7 @@ pub fn main() {
     let mut obj_tab = ObjSet::build_object_table();
 
 
-
+    /*
     // ### FOR TESTING PURPOSE ONLY ###
     // BALL
     let coords_ball = Coordinates{
@@ -58,6 +58,11 @@ pub fn main() {
         sensor: false,
         user_data: 10,
         has_gravity: true,
+        mass: 1.0,
+        linear_damping: 0.0,
+        angular_damping: 0.0,
+        max_linear_velocity: 0.0,
+        max_angular_velocity: 0.0,
     };
 
     obj_tab.push(ball);
@@ -86,11 +91,16 @@ pub fn main() {
         sensor: false,
         user_data: 10,
         has_gravity: true,
+        mass: 0.0,
+        linear_damping: 0.0,
+        angular_damping: 0.0,
+        max_linear_velocity: 0.0,
+        max_angular_velocity: 0.0,
     };
 
     obj_tab.push(ground);
     // ### END OF TESTING ###
-
+    */
 
 
     // We create the Obj_set
