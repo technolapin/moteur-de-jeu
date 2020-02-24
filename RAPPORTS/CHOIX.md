@@ -35,3 +35,12 @@ Nous avons alors choisit pour l'instant d'utiliser glutin.
 Glutin est une lib de relativement bas niveau sur laquelle s'appuie glium (beaucoup d'objets de glium comme le contexte sont de fait des objets de glutin).
 Il se trouve que Glutin permet assez facilement de récupérer et filtrer les évènements. Assez facilement pour que chercher plus facile perde de de son intérêt.
 Nous utilisons donc Glutin pour l'instant.
+
+---
+gestion audio: librairie ears
+
+install :sudo apt install libopenal-dev libsndfile1-dev
+
+doc: https://docs.rs/ears/0.7.0/ears/struct.Music.html
+
+choix avec rg3d_sounds, écarté car ne possède pas de doc suffisante
