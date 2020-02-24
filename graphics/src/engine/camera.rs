@@ -6,6 +6,14 @@ use nalgebra::Matrix3;
 use nalgebra::Vector3;
 use nalgebra::Perspective3;
 
+
+pub struct Projection
+{
+  zfar : f32,
+  znear :f32
+    
+}
+
 /**
 A simple camera
 */
@@ -15,6 +23,8 @@ pub struct Camera {
     up: Vector3<f32>,
     orientation: Vector3<f32>,
     aspect_ratio: f32,
+    fov :f32,
+    projection : Projection
 }
 
 impl Camera {
@@ -25,6 +35,9 @@ impl Camera {
             orientation: Vector3::new(0., 0., -1.), 
             up: Vector3::new(0., 1., 0.),
             aspect_ratio: aspect_ratio, // Ratio for the printing on the screen
+	    fov:3.141592 / 3.0,
+	    projection: Projection{zfar:1024.0,znear : 0.1}
+ 	
         }
     }
 
@@ -106,12 +119,7 @@ impl Camera {
     /// Return the matrix of the perspective
     pub fn get_perspective_matrix(&self) -> [[f32; 4]; 4] {
         //let (width, height) = target.get_dimensions();
-
-        let fov: f32 = 3.141592 / 3.0;
-        let zfar = 1024.0;
-        let znear = 0.1;
-
-	let perspective = Perspective3::new(self.aspect_ratio, fov, znear, zfar);
+	let perspective = Perspective3::new(self.aspect_ratio, self.fov, self.projection.znear, 		self.projection.zfar);
 	let perspective_matrix = perspective.as_matrix().as_ref() ;
 	*perspective_matrix
     }
