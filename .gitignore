@@ -11,6 +11,8 @@
 !/physics/target/doc/physics
 !/physics/target/doc/*.*
 /ecs/target/debug
+/events_handling/Cargo.lock
+/events_handling/target/
 
 # Remove Cargo.lock from gitignore if creating an executable, leave it for libraries
 # More information here https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
