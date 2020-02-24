@@ -14,6 +14,9 @@
 /events_handling/Cargo.lock
 /events_handling/target/
 
+/state_stack/Cargo.lock
+/state_stack/target/
+
 # Remove Cargo.lock from gitignore if creating an executable, leave it for libraries
 # More information here https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
 /graphics/Cargo.lock
