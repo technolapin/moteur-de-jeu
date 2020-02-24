@@ -1,9 +1,3 @@
-/* 
-########################################################################
- EVERYTHING BETWEEN "### FOR TESTING PURPOSE ONLY ###" and 
- "### END OF TESTING ###" must be utlimately removed
-########################################################################
-*/
 extern crate nalgebra as na;
 extern crate generational_arena;
 
@@ -34,79 +28,10 @@ pub fn main() {
     // We create the tab of the Obj_set
     let mut obj_tab = ObjSet::build_object_table();
 
-
-    /*
-    // ### FOR TESTING PURPOSE ONLY ###
-    // BALL
-    let coords_ball = Coordinates{
-        x: 0 as f32,
-        y: 500 as f32,
-        z: 0 as f32
-    };
-
-    let shape_ball = ShapeType::Ball(Ball{ radius: 1.0 as f32});
-
-    let ball = Object {
-        position: coords_ball,
-        shape: shape_ball,
-        density: 1.0 as f32,
-        restitution: 0.8 as f32,
-        friction: 0.8 as f32,
-        margin: 0.02 as f32,
-        linear_prediction: 0.01,
-        angular_prediction: 0.1,
-        sensor: false,
-        user_data: 10,
-        has_gravity: true,
-        mass: 1.0,
-        linear_damping: 0.0,
-        angular_damping: 0.0,
-        max_linear_velocity: 0.0,
-        max_angular_velocity: 0.0,
-    };
-
-    obj_tab.push(ball);
-
-    // GROUND
-
-    let coords_ground = Coordinates{
-        x: 0 as f32,
-        y: 0 as f32,
-        z: 0 as f32
-    };
-
-    let vec_ground = Vector3::new(3.0, 0.2, 3.0);
-
-    let shape_ground = ShapeType::Cuboid(Cuboid{vector: vec_ground});
-
-    let ground = Object {
-        position: coords_ground,
-        shape: shape_ground,
-        density: 1.0 as f32,
-        restitution: 0.0 as f32,
-        friction: 0.5 as f32,
-        margin: 0.02 as f32,
-        linear_prediction: 0.01,
-        angular_prediction: 0.1,
-        sensor: false,
-        user_data: 10,
-        has_gravity: true,
-        mass: 0.0,
-        linear_damping: 0.0,
-        angular_damping: 0.0,
-        max_linear_velocity: 0.0,
-        max_angular_velocity: 0.0,
-    };
-
-    obj_tab.push(ground);
-    // ### END OF TESTING ###
-    */
-
-
     // We create the Obj_set
     let obj_set = ObjSet::build_obj_set(obj_tab); 
 
-    let three_uplet = build_colliders(obj_set);
+    let three_uplet = build_rb_col(obj_set);
 
     // Where we store all the RigidBody object
     let mut bodies = three_uplet.0;
@@ -126,9 +51,5 @@ pub fn main() {
             &mut joint_constraints,
             &mut force_generators
         );
-        // ### FOR TESTING PURPOSE ONLY ###
-        // Prints the object's coordinates (Ball)
-        println!("{}", colliders.get(coll_tab[0]).unwrap().position());
-        // ### END OF TESTING ###
     }
 }

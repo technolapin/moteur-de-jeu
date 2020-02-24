@@ -103,7 +103,7 @@ impl ObjSet{
 
 
 
-/// Creates and returns a Tuple containing: 1. A RigidBody corresponding to the object's shape; 2. The position of the RigidBody
+/// Creates and returns a RigidBody corresponding to the object's shape
 pub fn process_shape(event: ShapeType) -> ShapeHandle<f32>{
     match event {
         ShapeType::Ball(ball) => return Ball::process_ball(ball),
@@ -123,7 +123,7 @@ pub fn process_shape(event: ShapeType) -> ShapeHandle<f32>{
 
 
 /// Creates the RigidBody and Collider of every object in the ObjSet given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
-pub fn build_colliders(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet<f32>, Vec<generational_arena::Index>){
+pub fn build_rb_col(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet<f32>, Vec<generational_arena::Index>){
 
     // Where we store all the RigidBody object
     let mut bodies = DefaultBodySet::new();
