@@ -1,4 +1,6 @@
 use std::path::Path;
+use std::collections::HashMap;
+use std::string::String;
 
 use crate::misc::{read_file, get_ressources_path};
 
@@ -12,10 +14,11 @@ For now it has some shaders hard-coded but those will eventually be dissmissed.
 */
 pub struct Programs
 {
-    pub programs: Vec<glium::Program>,
-    pub program_textured: glium::Program,
+    pub programs: HashMap<String,glium::Program>,
+    /*pub program_textured: glium::Program,
     pub program_nontextured: glium::Program,
     pub program_default: glium::Program,
+    */
 }
 
 impl Programs
@@ -23,9 +26,15 @@ impl Programs
     pub fn new(display: &Display) -> Self
     {	
 	let mut program = Self
-	{ 	programs: Vec::new(),
+	{ 	programs: HashMap::new()  };
 
-		program_textured: glium::Program::from_source(              
+	program.add_program(display, "program_textured");
+	program.add_program(display, "program_nontextured");
+	program.add_program(display, "program_default");
+	program
+
+
+		/*program_textured: glium::Program::from_source(              
 		    	&display.display,
 		    	"
 		    	#version 140
@@ -181,9 +190,8 @@ impl Programs
 			",
 			    None).unwrap(),
 
-	};
-	program.add_program(display, "textured"); 
-	program
+	};*/
+	 
     }
 
     /**
@@ -220,7 +228,7 @@ impl Programs
 		   .unwrap()
 	};
 
-	self.programs.push(pgrm);
+	self.programs.insert(program_name.to_string(),pgrm);
     }
 }
 
