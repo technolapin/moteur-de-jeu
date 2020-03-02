@@ -28,6 +28,61 @@ impl Frame {
         }
     }
 
+
+    pub fn draw_2D(
+	&mut self,
+	gr: &Graphical,
+	(x, y, w, h): (f32, f32, f32, f32),
+	depth: f32
+	    
+    )
+    {
+	use crate::processing::vertex::Vertex;
+	use glium::vertex::VertexBuffer;
+
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+	let mesh = vec![
+	    Vertex{position: [x, y, depth], .. Default::default()},
+	    Vertex{position: [x+w, y, depth], .. Default::default()},
+	    Vertex{position: [x+w, y+h, depth], .. Default::default()},
+	    Vertex{position: [x, y, depth], .. Default::default()},
+	    Vertex{position: [x, y+h, depth], .. Default::default()},
+	    Vertex{position: [x+w, y+h, depth], .. Default::default()},
+	];
+	let instance = glium::vertex::VertexBuffer::dynamic(
+            &gr.display.display,
+            &vec![Similarity {
+		world_transformation: [[1., 0., 0., 0.],
+				       [0., 1., 0., 0.],
+				       [0., 0., 1., 0.],
+				       [0., 0., 0., 1.]]
+            }],
+	).unwrap();
+	
+	let vbo = VertexBuffer::new(&gr.display.display, &mesh).unwrap();
+
+
+	let view_matrix: [[f32; 4]; 4] =  [[1., 0., 0., 0.],
+			    [0., 1., 0., 0.],
+			    [0., 0., 1., 0.],
+			    [0., 0., 0., 1.]];
+        self.frame
+            .draw(
+                (&vbo, instance.per_instance().unwrap()),
+                &indices,
+                &gr.program.program_default,
+                &uniform! {
+		    view_matrix: view_matrix
+                },
+                &gr.parameters.parameters,
+            )
+            .unwrap();
+
+	
+    }
+
+
     /** Draws several instances of an Object in the Frame using the similarities contained by the VBO per_instance.
     Calls fn draw_group for each group of Object.
      */
@@ -120,6 +175,7 @@ impl Frame {
         }
     }
 
+    
     /// Resets the Frame
     pub fn clear(&mut self) {
         self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);

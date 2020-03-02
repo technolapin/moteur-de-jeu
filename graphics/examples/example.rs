@@ -116,6 +116,11 @@ fn main() -> Result<(), &'static str> {
                 .iter()
                 .for_each(|ob| frame.draw(&graphics, &ob, &instances))
         });
+
+        frame.show();
+	
+        let mut frame = graphics.frame();
+	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
         frame.show();
 
         ///////////////////////////////////////////

@@ -1,7 +1,7 @@
 use glium::implement_vertex;
 
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 /**
 The format of the Vertexes that will be passed to the GPU
 */
