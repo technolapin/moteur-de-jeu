@@ -1,5 +1,3 @@
----
-
 Nous avons choisis Rust pour ses avantages comparés à C++.
 Ne disposant pas d'une équipe de développeur chevronés, nous ne pouvons nous permettre de perdre du temps sur des erreures de pointeur, d'allocation mémoire, ou de messages peu clairs de la part du compilateur.
 Rust est, de plus, plus facile à aborder que C++, car quelques features du langage couvrent de nombreuses autres features de C++, ainsi que pour les raisons citées précedements.
@@ -37,10 +35,8 @@ Il se trouve que Glutin permet assez facilement de récupérer et filtrer les é
 Nous utilisons donc Glutin pour l'instant.
 
 ---
-gestion audio: librairie ears
 
-install :sudo apt install libopenal-dev libsndfile1-dev
-
-doc: https://docs.rs/ears/0.7.0/ears/struct.Music.html
-
-choix avec rg3d_sounds, écarté car ne possède pas de doc suffisante
+Gestion audio : Librairie "ears".
+Installation : `sudo apt install libopenal-dev libsndfile1-dev`
+Doc : https://docs.rs/ears/0.7.0/ears/struct.Music.html
+Choix avec rg3d_sounds, écarté car ne possède pas de doc suffisante.
