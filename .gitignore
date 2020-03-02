@@ -11,6 +11,7 @@
 
 # Fichiers temporaires d'Emacs, pour ne pas que Clément les commit
 *~
+*\#
 
 # On veut inclure certaines documentations générées par Rust
 # A ajouter aussi dans le .gitattributes
