@@ -1,2 +1,2 @@
-graphics/target/doc/* linguist-documentation
-physics/target/doc/* linguist-documentation
+graphics/target/doc/* linguist-documentation linguist-generated
+physics/target/doc/* linguist-documentation linguist-generated
