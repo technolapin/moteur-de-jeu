@@ -57,6 +57,12 @@ impl CurrentState {
     		}
     	}
     }
+    
+    pub fn set_current_state_inactive ( &mut self ) {
+    	let current_state = self.get_current_state();
+    	self.stack_of_states.pop();
+    	self.stack_of_states.push( StateContainer::InactiveState( current_state ) );
+    }
 }
 
 
