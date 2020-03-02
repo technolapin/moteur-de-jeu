@@ -7,17 +7,17 @@ pub enum States {
 	PauseMenu,
 	Parametre,
 	EtatDeBase, // Etat forcément en bas
-	None, // Par défaut, n'est utilisé que s'il n'y a pas d'état courant
+	None // Par défaut, n'est utilisé que s'il n'y a pas d'état courant
 }
 
 pub enum StateContainer {
 	ActiveState ( States ),
-	InactiveState ( States ),
+	InactiveState ( States )
 }
 
 pub struct CurrentState {
 	// Il n'y a pas de pile en Rust, on utilise un vecteur
-	stack_of_states : Vec<StateContainer>,
+	stack_of_states : Vec<StateContainer>
 }
 
 impl CurrentState {
