@@ -223,4 +223,3 @@ struct S<'a> {
 ```
 
 Ou on peut utiliser `static` pour qu'elle ne soit jamais supprimée.
-```
