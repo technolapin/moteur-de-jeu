@@ -5,7 +5,7 @@ Encadrant·e·s :
 - Nabil MUSTAFA, ESIEE Paris
 
 Participant·e·s aux semestres 1 et 2 :
-- Clément CHOMICKI `Chef de projet`
+- Clément CHOMICKI a.k.a "technolapin" `Chef de projet`
 - Alexandre LEBLON
 - Amaury BARUZY
 - Nicolas GOISLARD
