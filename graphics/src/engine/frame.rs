@@ -4,12 +4,7 @@ use glium::uniform;
 use super::graphical::*;
 use crate::processing::material::*;
 use crate::processing::objects::*;
-
-#[derive(Copy, Clone)]
-pub struct Attr {
-    pub world_transformation: [[f32; 4]; 4],
-}
-implement_vertex!(Attr, world_transformation);
+use crate::misc::Similarity;
 
 
 /**
@@ -90,7 +85,7 @@ impl Frame {
         &mut self,
         gr: &Graphical,
         obj: &Object,
-        per_instance: &glium::VertexBuffer<Attr>, // position
+        per_instance: &glium::VertexBuffer<Similarity>, // position
     ) {
         obj.groups
             .iter()
@@ -104,7 +99,7 @@ impl Frame {
         &mut self,
         gr: &Graphical,
         vertex_buffer: &glium::vertex::VertexBufferAny,
-        per_instance: &glium::VertexBuffer<Attr>,
+        per_instance: &glium::VertexBuffer<Similarity>,
         material: &Material,
     ) {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);

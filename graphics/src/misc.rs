@@ -81,3 +81,16 @@ pub fn matrix_to_array(mat: Matrix4<f32>) -> [[f32; 4]; 4] {
     }
     out
 }
+
+
+
+/**
+The matrix of a similarity.
+Used to displace, rotate and resize a 3D object.
+https://en.wikipedia.org/wiki/Similarity_(geometry)
+*/
+#[derive(Copy, Clone)]
+pub struct Similarity {
+    pub world_transformation: [[f32; 4]; 4],
+}
+implement_vertex!(Similarity, world_transformation);
