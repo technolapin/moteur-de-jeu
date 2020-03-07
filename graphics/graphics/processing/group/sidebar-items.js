@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Group","This structure represents a group of vertex and the name their associated material."]]});

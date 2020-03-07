@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Frame","Where the scene is being constructed. Destroyed uppon displaying."],["Similarity","The matrix of a similarity. Used to displace, rotate and resize a 3D object. https://en.wikipedia.org/wiki/Similarity_(geometry)"]]});

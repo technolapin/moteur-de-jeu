@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Object","This structure represents a 3D object. It is created by the ModelsHolder, which owns the data."],["Objects","This structure represents a set of 3D objects and their shared materials. It typicaly contains all the information a wavefront file and their associated mtl file can provide. It is owned by the ModelsHolder struct."]]});

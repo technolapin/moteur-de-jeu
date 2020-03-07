@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Vertex","The format of the Vertexes that will be passed to the GPU"]]});
