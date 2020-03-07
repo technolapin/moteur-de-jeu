@@ -43,6 +43,13 @@ Les étudiants devront entre autre :
 4. Optimiser le programme (CPU/GPU ainsi que mémoire).
 5. Décider et implémenter un "jeu test" pour montrer les possibilités du moteur.
 
+## Documentation générée par Rust
+De la jolie documentation sous forme de page web peut être générée à partir de certains commentaires dans notre code, ainsi que les librairies utilisées.
+
+Ces pages sont séparées dans un autre GIT, disponible à l'adresse suivante...
+
+https://github.com/734F96/moteur_jeu_video_documentation_generee
+
 ## Installation sous Linux
 Vraiment, utilisez Linux. C'est plus simple.
 Ou alors, utilisez Windows Sub-Linux (WSL), mais on risque d'être vite limité.
