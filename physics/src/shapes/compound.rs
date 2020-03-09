@@ -12,6 +12,11 @@ pub struct Compound
 }
 
 impl Compound{
+    /// Creates a Compound
+    pub fn new(shapes: Vec<(Isometry<f32>, ShapeHandle<f32>)>) -> Compound{
+        return Compound{shapes: shapes};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Compound' type
     pub fn process_compound(compound: Compound) -> ShapeHandle<f32>{
         // Shapes of the Compound

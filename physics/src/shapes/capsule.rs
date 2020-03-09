@@ -12,6 +12,11 @@ pub struct Capsule
 }
 
 impl Capsule{
+    /// Creates a Capsule
+    pub fn new(half_height: f32, radius: f32) -> Capsule{
+        return Capsule{half_height: half_height, radius: radius};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Capsule' type
     pub fn process_capsule(capsule: Capsule) -> ShapeHandle<f32>{
         // Half-height and radius of the Capsule

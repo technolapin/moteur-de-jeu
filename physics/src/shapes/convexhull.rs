@@ -12,6 +12,11 @@ pub struct ConvexHull
 }
 
 impl ConvexHull{
+    /// Creates a ConvexHull
+    pub fn new(points: Vec<Point<f32>>) -> ConvexHull{
+        return ConvexHull{points: points};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'ConvexHull' type
     pub fn process_convexhull(convexhull: ConvexHull) -> ShapeHandle<f32>{
         // Points of the ConvexHull

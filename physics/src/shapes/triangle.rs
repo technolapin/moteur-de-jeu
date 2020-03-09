@@ -14,6 +14,11 @@ pub struct Triangle
 }
 
 impl Triangle{
+    /// Creates a Triangle
+    pub fn new(a: Point<f32>, b: Point<f32>, c: Point<f32>) -> Triangle{
+        return Triangle{a: a, b: b, c: c};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Triangle' type
     pub fn process_triangle(triangle: Triangle) -> ShapeHandle<f32>{
         // Points of the Triangle

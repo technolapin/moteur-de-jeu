@@ -1,3 +1,5 @@
+extern crate nalgebra as na;
+
 use ncollide3d::shape;
 use ncollide3d::shape::ShapeHandle;
 use ncollide3d::math::Point;
@@ -15,6 +17,11 @@ pub struct TriMesh
 }
 
 impl TriMesh{
+    /// Creates a TriMesh
+    pub fn new(points: Vec<Point<f32>>, indices: Vec<Point3<usize>>, uvs: Option<Vec<Point2<f32>>>) -> TriMesh{
+        return TriMesh{points: points, indices: indices, uvs: uvs};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'TriMesh' type
     pub fn process_trimesh(trimesh: TriMesh) -> ShapeHandle<f32>{
         // Points, indices and uvs of the TriMesh

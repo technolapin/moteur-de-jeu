@@ -1,3 +1,5 @@
+extern crate nalgebra as na;
+
 use ncollide3d::shape;
 use ncollide3d::shape::ShapeHandle;
 use na::Vector3;
@@ -14,6 +16,11 @@ pub struct HeightField
 }
 
 impl HeightField{
+    /// Creates a HeightField
+    pub fn new(heights: DMatrix<f32>, scale: Vector3<f32>) -> HeightField{
+        return HeightField{heights: heights, scale: scale};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'HeightField' type
     pub fn process_heightfield(heightfield: HeightField) -> ShapeHandle<f32>{
         // Height and scale of the HeightField

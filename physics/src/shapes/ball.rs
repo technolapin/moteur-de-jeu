@@ -11,6 +11,11 @@ pub struct Ball
 }
 
 impl Ball{
+    /// Creates a Ball
+    pub fn new(radius: f32) -> Ball{
+        return Ball{radius: radius};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Ball' type
     pub fn process_ball(ball: Ball) -> ShapeHandle<f32>{
         // Radius of the Ball

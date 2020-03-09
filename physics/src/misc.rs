@@ -1,3 +1,4 @@
+extern crate nalgebra as na;
 use crate::shapes::*;
 
 use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, BodyPartHandle, ColliderDesc, BodyStatus};
@@ -12,13 +13,6 @@ use na::geometry::Point3;
 use nphysics3d::algebra::Velocity3;
 
 
-// We implement the Copy trait to the structure
-#[derive(Copy, Clone)]
-pub struct Coordinates{
-    pub x: f32,
-    pub y: f32,
-    pub z: f32
-}
 
 // We implement the Clone trait to the structure
 #[derive(Clone)]
@@ -42,7 +36,7 @@ pub struct RbData{
     pub translation: Vector3<f32>, // The rigid body translation - Default: zero vector
     pub rotation: Vector3<f32>, // The rigid body rotation - Default: no rotation
     pub gravity_enabled: bool, // Whether or not this rigid body is affected by gravity - Default: true
-    pub bodystatus: BodyStatus, // The status of this rigid body. It can be Disabled, Kinematic or Dynamic - Default: BodyStatus::Dynamic
+    pub bodystatus: BodyStatus, // The status of this rigid body. It can be Disabled, Static, Kinematic or Dynamic - Default: BodyStatus::Dynamic
     pub linear_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity
     pub angular_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity
     pub linear_damping: f32, // The linear damping applied to this rigid body velocity to slow it down automatically - Default: zero (no damping at all)
@@ -59,6 +53,50 @@ pub struct RbData{
     pub enable_linear_motion_interpolation: bool // Whether this rigid body motion should be interpolated linearly during CCD resolution - Default: false (which implies non-linear interpolation)
 }
 
+impl RbData{
+    pub fn new(
+        translation: Vector3<f32>, 
+        rotation: Vector3<f32>, 
+        gravity_enabled: bool, 
+        bodystatus: BodyStatus, 
+        linear_velocity: Vector3<f32>, 
+        angular_velocity: Vector3<f32>, 
+        linear_damping: f32, 
+        angular_damping: f32, 
+        max_linear_velocity: f32, 
+        max_angular_velocity: f32, 
+        angular_inertia: f32, 
+        mass: f32, 
+        local_center_of_mass: Point3<f32>, 
+        sleep_threshold: f32, 
+        kinematic_translations: Vector3<bool>, 
+        kinematic_rotations: Vector3<bool>, 
+        user_data: usize, 
+        enable_linear_motion_interpolation: bool) -> RbData{
+
+        RbData{
+            translation: translation, 
+            rotation: rotation, 
+            gravity_enabled: gravity_enabled, 
+            bodystatus: bodystatus, 
+            linear_velocity: linear_velocity, 
+            angular_velocity: angular_velocity, 
+            linear_damping: linear_damping, 
+            angular_damping: angular_damping, 
+            max_linear_velocity: max_linear_velocity, 
+            max_angular_velocity: max_angular_velocity, 
+            angular_inertia: angular_inertia, 
+            mass: mass, 
+            local_center_of_mass: local_center_of_mass, 
+            sleep_threshold: sleep_threshold, 
+            kinematic_translations: kinematic_translations, 
+            kinematic_rotations: kinematic_rotations, 
+            user_data: user_data, 
+            enable_linear_motion_interpolation: enable_linear_motion_interpolation 
+        }
+    }
+}
+
 /// Data needed to create a 'Collider'
 pub struct ColData{
     pub translation: Vector3<f32>, // The collider translation wrt. the body part it is attached to - Default: zero vector
@@ -73,12 +111,49 @@ pub struct ColData{
     pub user_data: usize // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data
 }
 
+impl ColData{
+    pub fn new(
+        translation: Vector3<f32>, 
+        rotation: Vector3<f32>,
+        density: f32,
+        restitution: f32,
+        friction: f32,
+        margin: f32,
+        linear_prediction: f32,
+        angular_prediction: f32,
+        sensor: bool,
+        user_data: usize) -> ColData{
+
+        ColData{
+            translation: translation, 
+            rotation: rotation,
+            density: density,
+            restitution: restitution,
+            friction: friction,
+            margin: margin,
+            linear_prediction: linear_prediction,
+            angular_prediction: angular_prediction,
+            sensor: sensor,
+            user_data: user_data
+        }
+    }
+}
+
 /// An object with different features
 pub struct Object {
-    pub position: Coordinates,
     pub shape: ShapeType,
     pub rbdata: RbData,
     pub coldata: ColData
+}
+
+impl Object{
+    pub fn new(shape: ShapeType, rbdata: RbData, coldata: ColData) -> Object{
+        Object{
+            shape: shape, 
+            rbdata: rbdata, 
+            coldata: coldata
+        }
+    }
 }
 
 /// A set that contains many 'Object'
@@ -87,17 +162,18 @@ pub struct ObjSet{
 }
 
 impl ObjSet{
-    /// Creates an empty Vec that can store 'Object'
-    pub fn build_object_table() -> Vec<Object>{
-        let tab = Vec::new();
-        return tab;
+    /// Creates an 'ObjSet'
+    pub fn new() -> ObjSet{
+
+        ObjSet {
+            tab: Vec::new()
+        }
     }
 
-    /// Creates an 'ObjSet' with the tab given as parameter
-    pub fn build_obj_set(tab: Vec<Object>,) -> ObjSet{
-        ObjSet {
-            tab
-        }
+    /// Puts tha 'Object' given in parameter in the tab of the 'ObjSet'
+    pub fn push(&mut self, obj: Object){
+
+        &mut self.tab.push(obj);
     }
 }
 
@@ -168,7 +244,7 @@ pub fn build_rb_col(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet
         // We create the Collider relative to the field coldata of 'object'
         let collider = ColliderDesc::new(shape)
         .translation(object.coldata.translation)
-        .rotation(object.rbdata.rotation)
+        .rotation(object.coldata.rotation)
         .density(object.coldata.density)
         .material(MaterialHandle::new(BasicMaterial::new(object.coldata.restitution, object.coldata.friction)))
         .margin(object.coldata.margin)

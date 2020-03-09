@@ -1,3 +1,5 @@
+extern crate nalgebra as na;
+
 use ncollide3d::shape;
 use ncollide3d::shape::ShapeHandle;
 use na::Vector3;
@@ -13,6 +15,11 @@ pub struct Plane
 }
 
 impl Plane{
+    /// Creates a Plane
+    pub fn new(normal: Unit<Vector3<f32>>) -> Plane{
+        return Plane{normal: normal};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Plane' type
     pub fn process_plane(plane: Plane) -> ShapeHandle<f32>{
         // Normal of the Plane

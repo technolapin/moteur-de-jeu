@@ -13,6 +13,11 @@ pub struct Segment
 }
 
 impl Segment{
+    /// Creates a Segment
+    pub fn new(a: Point<f32>, b: Point<f32>) -> Segment{
+        return Segment{a: a, b: b};
+    }
+
     /// Creates and returns a RigidBody corresponding to the 'Segment' type
     pub fn process_segment(segment: Segment) -> ShapeHandle<f32>{
         // Points of the Segment
