@@ -107,7 +107,8 @@ fn main() -> Result<(), &'static str> {
         graphics.camera.rotation(camera_rot.clone());
         graphics.update_dimensions();
 
-        
+
+	
         let mut frame = graphics.frame();
         frame.clear();//(0., 0.2, 0.5, 0.));
         
@@ -118,11 +119,12 @@ fn main() -> Result<(), &'static str> {
         });
 
         frame.show();
-	
+
+	/*
         let mut frame = graphics.frame();
 	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
         frame.show();
-
+*/
         ///////////////////////////////////////////
 
         camera_pos = Vector3::new(0., 0., 0.);

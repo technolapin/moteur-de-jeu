@@ -66,7 +66,7 @@ impl Frame {
             .draw(
                 (&vbo, instance.per_instance().unwrap()),
                 &indices,
-                &gr.program.program_default,
+                &gr.program.programs.get("default").unwrap(),
                 &uniform! {
 		    view_matrix: view_matrix
                 },
@@ -115,7 +115,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("program_textured").unwrap(),
+                        gr.program.programs.get("textured").unwrap(),
                         &uniform! {
                             texture: texture,
                             view_matrix: gr.camera.get_view_matrix(),
@@ -142,7 +142,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("program_nontextured").unwrap(),
+                        gr.program.programs.get("nontextured").unwrap(),
                         &uniform! {view_matrix: gr.camera.get_view_matrix(),
                                    perspective_matrix: gr.camera.get_perspective_matrix(),
                                    ambiant: *ambiant_color,
@@ -161,7 +161,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("program_default").unwrap(),
+                        gr.program.programs.get("default").unwrap(),
                         &uniform! {view_matrix: gr.camera.get_view_matrix() },
                         &gr.parameters.parameters,
                     )

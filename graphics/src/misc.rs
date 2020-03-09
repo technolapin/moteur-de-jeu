@@ -35,7 +35,7 @@ pub fn v_prod(u: (f32, f32, f32), v: (f32, f32, f32)) -> (f32, f32, f32)
 /// Reads a file and returns its content
 pub fn read_file(file_name: PathBuf) -> String
 {
-    println!("{:?}", file_name);
+    println!("OPENING {:?}", file_name);
 	let mut f = match File::open(file_name)
 	{
 		Ok(fichier) => fichier,

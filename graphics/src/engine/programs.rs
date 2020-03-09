@@ -2,6 +2,8 @@ use std::path::Path;
 use std::collections::HashMap;
 use std::string::String;
 
+use base::EngineError;
+
 use crate::misc::{read_file, get_ressources_path};
 
 
@@ -26,11 +28,13 @@ impl Programs
     pub fn new(display: &Display) -> Self
     {	
 	let mut program = Self
-	{ 	programs: HashMap::new()  };
+	{
+ 	    programs: HashMap::new()
+	};
 
-	program.add_program(display, "program_textured");
-	program.add_program(display, "program_nontextured");
-	program.add_program(display, "program_default");
+	program.add_program(display, "textured");
+	program.add_program(display, "nontextured");
+	program.add_program(display, "default");
 	program
 
 
@@ -198,7 +202,7 @@ impl Programs
     Loads a program from source files.
     The name of the program is the name of the folder containing its various shaders.
     */
-    pub fn add_program(&mut self, display: &Display, program_name: &str)
+    pub fn add_program(&mut self, display: &Display, program_name: &str) -> Result<(), EngineError>
     {
 
 	let ressources_path = get_ressources_path();
@@ -210,6 +214,11 @@ impl Programs
 	let path_geometry = program_path.join(Path::new("geometry.glsl"));
 
 
+	
+	
+	
+	println!("{:?}", path_vertex);
+	
 	let pgrm = 
 	if path_geometry.is_file()
 	{	glium::Program::from_source(
@@ -217,7 +226,7 @@ impl Programs
 			    read_file(path_vertex).as_str(),
 			    read_file(path_fragment).as_str(),
 			    Some(read_file(path_geometry).as_str()) )
-		   .unwrap()
+		?
         } 
 	else
 	{	glium::Program::from_source(
@@ -225,10 +234,11 @@ impl Programs
 			    read_file(path_vertex).as_str(),
 			    read_file(path_fragment).as_str(),
 			    None)
-		   .unwrap()
+		?
 	};
 
 	self.programs.insert(program_name.to_string(),pgrm);
+	Ok(())
     }
 }
 
