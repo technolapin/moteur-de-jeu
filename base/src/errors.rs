@@ -5,6 +5,7 @@ use std::io;
 pub enum EngineError
 {
     IOError(io::Error),
+    Misc(String),
     NoneError // experimental, not yet used
     
 }
@@ -13,6 +14,12 @@ pub enum EngineError
 impl From<io::Error> for EngineError {
     fn from(error: io::Error) -> Self {
         Self::IOError(error)
+    }
+}
+
+impl From<glium::ProgramCreationError> for EngineError {
+    fn from(error: glium::ProgramCreationError) -> Self {
+        Self::Misc(format!("{:?}", error))
     }
 }
 

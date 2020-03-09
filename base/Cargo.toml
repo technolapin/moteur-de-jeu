@@ -11,3 +11,4 @@ glutin="0.21.2"
 
 # pour les tests
 rand="*"
+glium="0.25.1"
