@@ -102,6 +102,11 @@ impl<'a> Params<'a>
 	return self
     }
 
+    pub fn always_top(mut self) -> Self
+    {
+	self.parameters.depth.test = glium::DepthTest::Overwrite;
+	self
+    }
 }
 
 

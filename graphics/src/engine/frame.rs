@@ -58,6 +58,11 @@ impl Frame {
 	let vbo = VertexBuffer::new(&gr.display.display, &mesh).unwrap();
 
 
+	let params = Params::new()
+	    .always_top();
+	    
+	
+
 	let view_matrix: [[f32; 4]; 4] =  [[1., 0., 0., 0.],
 			    [0., 1., 0., 0.],
 			    [0., 0., 1., 0.],
@@ -70,7 +75,7 @@ impl Frame {
                 &uniform! {
 		    view_matrix: view_matrix
                 },
-                &gr.parameters.parameters,
+                &params.parameters,
             )
             .unwrap();
 

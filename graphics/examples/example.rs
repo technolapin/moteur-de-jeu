@@ -117,18 +117,19 @@ fn main() -> Result<(), &'static str> {
                 .iter()
                 .for_each(|ob| frame.draw(&graphics, &ob, &instances))
         });
+	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
 
         frame.show();
+
+        ///////////////////////////////////////////
+
+        camera_pos = Vector3::new(0., 0., 0.);
 
 	/*
         let mut frame = graphics.frame();
 	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
         frame.show();
 */
-        ///////////////////////////////////////////
-
-        camera_pos = Vector3::new(0., 0., 0.);
-
 
 
         
