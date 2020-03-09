@@ -2,6 +2,7 @@ use glium::Surface;
 use glium::uniform;
 
 use super::graphical::*;
+use super::params::*;
 use crate::processing::material::*;
 use crate::processing::objects::*;
 use crate::misc::Similarity;
