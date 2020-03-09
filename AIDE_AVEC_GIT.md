@@ -28,11 +28,26 @@ A faire de temps en temps. Cela permet de récupérer toutes les modifications d
 
 ## Envoyer ses modifications
 
+Mettre à jour son dépôt local : `git fetch`
+
 Ajouter le fichier : `git add leFichier.ext`.
 On peut ajouter plusieurs fichiers, ou des répertoires.
+**Faites attention à ne pas envoyer des fichiers temporaires ou générés automatiquement !**
 
 Commit ses modifications : `git commit -m "Qu'avez vous fait ?"`.
 On peut ne faire que `git commit`. A ce moment là, votre éditeur de texte favoris s'ouvrira pour vous demander le message. La première ligne de ce message sera le titre sur GitHub.
 
 Envoyer sur le serveur ses modifications : `git push`.
 C'est comme `git pull`, mais dans l'autre sens.
+
+## Travailler dans une branche
+
+Il peut être super intéressant de travailler dans sa branche, puis faire une "Pull Request" (Par exemple, il y a d'autres méthodes, comme `git cherry-pick` ou `git merge`) pour envoyer ses modifications sur la branche `master`.
+
+Pour mettre son repos local sur une branche : `git checkout nom`.
+
+Pour créer une branche et mettre son dépôt local dessus : `git branch nom`.
+
+Un commit se fait sur la branche courrante de votre dépôt local. Par défaut, c'est la branche `master`.
+
+Lorsque vous faites des modifications sur une branche, vous devez préciser lors de l'envoi au serveur que vous travaillez sur cette branche : `git push origin nomDeLaBranche`.
