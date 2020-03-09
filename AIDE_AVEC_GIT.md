@@ -50,4 +50,11 @@ Pour créer une branche et mettre son dépôt local dessus : `git branch nom`.
 
 Un commit se fait sur la branche courrante de votre dépôt local. Par défaut, c'est la branche `master`.
 
-Lorsque vous faites des modifications sur une branche, vous devez préciser lors de l'envoi au serveur que vous travaillez sur cette branche : `git push origin nomDeLaBranche`.
+Lorsque vous faites des modifications sur une branche, vous devez préciser lors de l'envoi au serveur que vous travaillez sur cette branche : `git push origin nom_de_la_branch`.
+
+Une fois la branche sur le serveur, vous pouvez la fusionner dans master en ouvrant et en validant une "Pull Request" ! Il suffit d'aller sur l'interface web de la branche (`https://github.com/734F96/moteur_jeu_video/tree/nom_de_la_branche`) et de cliquer sur le bouton vert "Compare & Pull Request". Puis, validez là dans l'onglet "Pull requests".
+**En la validant, pensez bien à faire "Squash and merge".**
+
+La branche sera ensuite supprimée automatiquement de dépôt distant.
+
+Sur votre dépôt local, retournez sur master et faites un `git pull origin master` pour la mettre à jour.
