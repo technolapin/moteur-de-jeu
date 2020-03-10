@@ -22,6 +22,11 @@ impl From<glium::ProgramCreationError> for EngineError {
         Self::Misc(format!("{:?}", error))
     }
 }
+impl From<image::error::ImageError> for EngineError {
+    fn from(error: image::error::ImageError) -> Self {
+        Self::Misc(format!("{:?}", error))
+    }
+}
 
 /*
 // only in nightly rust

@@ -2,7 +2,9 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{Read, Write, BufReader};
 
+
 use super::errors::{EngineError, option_unwrap };
+
 
 /// Separate the engine from the files & os
 pub struct Base
@@ -67,6 +69,12 @@ impl Base
 	Ok(buffer)
     }
 
+    pub fn open_image(&self, ressource_path: PathBuf) -> Result<image::DynamicImage, EngineError>
+    {
+        Ok(image::open(self.ressources_folder_path.join(Path::new(&ressource_path)))?)
+
+    }
+    
     pub fn write_ressource(&self, ressource_path: PathBuf, content: Vec<u8>) -> Result<(), EngineError>
     {
         let path = self.ressources_folder_path.join(ressource_path);
