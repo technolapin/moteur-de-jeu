@@ -108,8 +108,8 @@ fn main() -> Result<(), &'static str> {
     let image_dimensions = image.dimensions();
     let image =
         RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-    let texture = Texture2d::new(&graphics.display.display, image).unwrap();
     
+    let texture = Texture2d::new(&graphics.display.display, image).unwrap();
 
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner

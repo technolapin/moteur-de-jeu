@@ -25,65 +25,7 @@ impl Frame {
     }
 
 
-    pub fn draw_2D(
-	&mut self,
-	gr: &Graphical,
-	(x, y, w, h): (f32, f32, f32, f32),
-	depth: f32
-	    
-    )
-    {
-	use crate::processing::vertex::Vertex;
-	use glium::vertex::VertexBuffer;
-
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
-	let mesh = vec![
-	    Vertex{position: [x, y, depth], .. Default::default()},
-	    Vertex{position: [x+w, y, depth], .. Default::default()},
-	    Vertex{position: [x+w, y+h, depth], .. Default::default()},
-	    Vertex{position: [x, y, depth], .. Default::default()},
-	    Vertex{position: [x, y+h, depth], .. Default::default()},
-	    Vertex{position: [x+w, y+h, depth], .. Default::default()},
-	];
-	let instance = glium::vertex::VertexBuffer::dynamic(
-            &gr.display.display,
-            &vec![Similarity {
-		world_transformation: [[1., 0., 0., 0.],
-				       [0., 1., 0., 0.],
-				       [0., 0., 1., 0.],
-				       [0., 0., 0., 1.]]
-            }],
-	).unwrap();
-	
-	let vbo = VertexBuffer::new(&gr.display.display, &mesh).unwrap();
-
-
-	let params = Params::new()
-	    .always_top();
-	    
-	
-
-	let view_matrix: [[f32; 4]; 4] =  [[1., 0., 0., 0.],
-			    [0., 1., 0., 0.],
-			    [0., 0., 1., 0.],
-			    [0., 0., 0., 1.]];
-        self.frame
-            .draw(
-                (&vbo, instance.per_instance().unwrap()),
-                &indices,
-                &gr.program.programs.get("default").unwrap(),
-                &uniform! {
-		    view_matrix: view_matrix
-                },
-                &params.parameters,
-            )
-            .unwrap();
-
-	
-    }
-
-    // draws a simple image over the render
+    // draws a simple image on top of the render
     pub fn draw_image_2D(
 	&mut self,
 	gr: &Graphical,
@@ -92,20 +34,19 @@ impl Frame {
 	texture: &glium::Texture2d
     )
     {
+	unsafe {texture.generate_mipmaps();}
 	use crate::processing::vertex::Vertex;
 	use glium::vertex::VertexBuffer;
 
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
-	let normal = [1., 0., 0.];
 	
 	let mesh = vec![
-	    Vertex{position: [x, y, depth], texture: [0., 0.], normal: normal.clone()},
-	    Vertex{position: [x+w, y, depth], texture: [1., 0.], normal: normal.clone()},
-	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], normal: normal.clone()},
-	    Vertex{position: [x, y, depth], texture: [0., 0.], normal: normal.clone()},
-	    Vertex{position: [x, y+h, depth], texture: [0., 1.], normal: normal.clone()},
-	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], normal: normal.clone()},
+	    Vertex{position: [x, y, depth], texture: [0., 0.], .. Default::default()},
+	    Vertex{position: [x+w, y, depth], texture: [1., 0.], .. Default::default()},
+	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], .. Default::default()},
+	    Vertex{position: [x, y, depth], texture: [0., 0.], .. Default::default()},
+	    Vertex{position: [x, y+h, depth], texture: [0., 1.], .. Default::default()},
+	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], .. Default::default()},
 	];
 	let instance = glium::vertex::VertexBuffer::dynamic(
             &gr.display.display,
@@ -172,6 +113,7 @@ impl Frame {
                 specular_exponent,
                 opacity,
             } => {
+		unsafe {texture.generate_mipmaps();}
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),

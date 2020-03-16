@@ -1,6 +1,5 @@
 #version 140
 
-in mat4 world_transformation;
 in vec3 position;
 in vec2 texture;
 
@@ -11,5 +10,5 @@ void main()
 {
 	v_tex_coords = texture;
 	v_position = position;
-	gl_Position = world_transformation*vec4(position, 1.0);
+	gl_Position = vec4(position, 1.0);
 }
