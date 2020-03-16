@@ -27,14 +27,14 @@ It is owned by the ModelsHolder struct.
  */
 
 #[derive(Debug)]
-pub struct Objects {
+pub struct Wavefront {
     pub objects: HashMap<String, Vec<Group>>,
     pub materials: HashMap<String, Material>,
 }
 
 use std::path::Path;
 
-impl Objects {
+impl Wavefront {
     /**
     Imports new wavefront file
      */
@@ -118,8 +118,8 @@ impl Objects {
             materials.insert(material.name.clone(), mat);
         }
 
-        // starting to parse the .obj and to construct the Objects structure
-        let mut objects = Objects {
+        // starting to parse the .obj and to construct the Wavefront structure
+        let mut objects = Wavefront {
             objects: HashMap::new(),
             materials: materials,
         };
@@ -202,7 +202,7 @@ impl Objects {
                     },
                 });
             }
-            // the object is finished and added to the Objects structure
+            // the object is finished and added to the Wavefront structure
             objects.objects.insert(object.name.clone(), groups);
         }
 
