@@ -83,6 +83,61 @@ impl Frame {
 	
     }
 
+    // draws a simple image over the render
+    pub fn draw_image_2D(
+	&mut self,
+	gr: &Graphical,
+	(x, y, w, h): (f32, f32, f32, f32),
+	depth: f32,
+	texture: &glium::Texture2d
+    )
+    {
+	use crate::processing::vertex::Vertex;
+	use glium::vertex::VertexBuffer;
+
+        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+	let normal = [1., 0., 0.];
+	
+	let mesh = vec![
+	    Vertex{position: [x, y, depth], texture: [0., 0.], normal: normal.clone()},
+	    Vertex{position: [x+w, y, depth], texture: [1., 0.], normal: normal.clone()},
+	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], normal: normal.clone()},
+	    Vertex{position: [x, y, depth], texture: [0., 0.], normal: normal.clone()},
+	    Vertex{position: [x, y+h, depth], texture: [0., 1.], normal: normal.clone()},
+	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], normal: normal.clone()},
+	];
+	let instance = glium::vertex::VertexBuffer::dynamic(
+            &gr.display.display,
+            &vec![Similarity {
+		world_transformation: [[1., 0., 0., 0.],
+				       [0., 1., 0., 0.],
+				       [0., 0., 1., 0.],
+				       [0., 0., 0., 1.]]
+            }],
+	).unwrap();
+	
+	let vbo = VertexBuffer::new(&gr.display.display, &mesh).unwrap();
+
+
+	let params = Params::new()
+	    .always_top();
+	    
+	
+
+        self.frame
+            .draw(
+                (&vbo, instance.per_instance().unwrap()),
+                &indices,
+                &gr.program.programs.get("textured_2d").unwrap(),
+                &uniform! {
+                    texture: texture,
+                },
+                &params.parameters,
+            )
+            .unwrap();
+    }
+
 
     /** Draws several instances of an Object in the Frame using the similarities contained by the VBO per_instance.
     Calls fn draw_group for each group of Object.

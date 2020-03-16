@@ -35,6 +35,7 @@ impl Programs
 	program.add_program(display, "textured");
 	program.add_program(display, "nontextured");
 	program.add_program(display, "default");
+	program.add_program(display, "textured_2d");
 	program
 
 

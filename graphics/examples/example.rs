@@ -10,7 +10,7 @@ use graphics::engine::*;
 use graphics::misc::*;
 use graphics::processing::*;
 
-use nalgebra::base::*; 
+use nalgebra::base::*;
 
 use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4}; //, normalize, look_at};
 fn new_transformation((tx, ty, tz): (f32, f32, f32),
@@ -96,11 +96,26 @@ fn main() -> Result<(), &'static str> {
     let sensibility = 0.0005;
     let speed = 0.1; // parce que pourquoi pas.
 
+
+
+
+    use std::path::PathBuf;
+    use glium::texture::{RawImage2d, Texture2d};
+    let image = base.open_image(PathBuf::from("edgytet.png"))
+        .unwrap()
+	.to_rgba();
+    
+    let image_dimensions = image.dimensions();
+    let image =
+        RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = Texture2d::new(&graphics.display.display, image).unwrap();
+    
+
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner
-
     let mut events_handler = EventsHandler::new(base.get_events_loop_mut());
 
+    
     loop {
         ///////////////////////////////////////////
         graphics.camera.relative_move(camera_pos);
@@ -117,19 +132,15 @@ fn main() -> Result<(), &'static str> {
                 .iter()
                 .for_each(|ob| frame.draw(&graphics, &ob, &instances))
         });
-	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
+
+	
+	frame.draw_image_2D(&graphics, (0., 0., 0.7, 0.7), 0., &texture);
 
         frame.show();
 
         ///////////////////////////////////////////
 
         camera_pos = Vector3::new(0., 0., 0.);
-
-	/*
-        let mut frame = graphics.frame();
-	frame.draw_2D(&graphics, (0., 0., 10., 10.), 0.);
-        frame.show();
-*/
 
 
         
