@@ -3,8 +3,8 @@ use glium::uniform;
 
 use super::graphical::*;
 use super::params::*;
-use crate::processing::material::*;
-use crate::processing::objects::*;
+use crate::ressource_handling::material::*;
+use crate::ressource_handling::objects::*;
 use crate::misc::Similarity;
 
 
@@ -35,7 +35,7 @@ impl Frame {
     )
     {
 	unsafe {texture.generate_mipmaps();}
-	use crate::processing::vertex::Vertex;
+	use crate::ressource_handling::vertex::Vertex;
 	use glium::vertex::VertexBuffer;
 
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);

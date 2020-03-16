@@ -10,6 +10,6 @@ extern crate glium;
 
 pub mod engine;
 pub mod misc;
-pub mod processing;
+pub mod ressource_handling;
 pub use engine::*;
 
