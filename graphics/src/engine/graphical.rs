@@ -3,6 +3,7 @@ use super::frame::*;
 use super::programs::*;
 use super::display::*;
 use super::params::*;
+use base::Base;
 
 /**
 Owns the various components needed to display things on the screen.
@@ -19,21 +20,18 @@ pub struct Graphical<'a>
 impl<'a> Graphical<'a>
 {
     /** Constructor of Graphical */
-    pub fn new(event_loop: &glutin::EventsLoop) -> Self
+    pub fn new(event_loop: &glutin::EventsLoop, base: &Base) -> Self
     {
-        //let event_loop = glutin::EventsLoop::new();                    
-
 	let display = Display::new(event_loop) ;
 	let params = Params::new();
-        let program = Programs::new(&display) ;
-        
+        let mut program = Programs::new();
+        program.update(&display, base);
         Self
         {
             parameters: params,
             display: display,
 	    program: program,
             camera: Camera::new(2.0),
-            //event_loop: event_loop
         }
     }
 

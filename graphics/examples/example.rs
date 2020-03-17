@@ -8,7 +8,7 @@ use events_handling::{EventsHandler, Key};
 
 use graphics::engine::*;
 use graphics::misc::*;
-use graphics::processing::*;
+use graphics::ressource_handling::*;
 
 use nalgebra::base::*;
 
@@ -43,13 +43,13 @@ where
     holder.load_wavefront(&graphics, "teto.obj", &ressources_path)?;
     holder.load_wavefront(&graphics, "terrain.obj", &ressources_path)?;
 
-    let _sphere_mauve = holder.get("transparent_sphere", "Sphere").unwrap();
+    let _sphere_mauve = holder.get_object("transparent_sphere", "Sphere").unwrap();
     let teto = holder
-        .get("teto", "Lat式改変テト_mesh_Lat式改変テト")
+        .get_object("teto", "Lat式改変テト_mesh_Lat式改変テト")
         .unwrap();
-    let red = holder.get("reds", "Cube_translaté_Cube.002").unwrap();
-    let zeldo = holder.get("textured_cube", "Cube.001").unwrap();
-    let map_elements = holder.get_whole_file("terrain").unwrap();
+    let red = holder.get_object("reds", "Cube_translaté_Cube.002").unwrap();
+    let zeldo = holder.get_object("textured_cube", "Cube.001").unwrap();
+    let map_elements = holder.get_whole_content("terrain").unwrap();
 
 
 
@@ -87,7 +87,9 @@ where
 fn main() -> Result<(), &'static str> {
     let mut base = Base::new();
     let mut holder = RessourcesHolder::new();
-    let mut graphics = Graphical::new(&base.get_events_loop());
+    let mut graphics = Graphical::new(&base.get_events_loop(), &base);
+
+    
     let scene = make_scene(&graphics, &mut holder)?;
 
     let mut camera_pos = Vector3::new(0., 0., 0.);
@@ -134,7 +136,7 @@ fn main() -> Result<(), &'static str> {
         });
 
 	
-	frame.draw_image_2D(&graphics, (0., 0., 0.7, 0.7), 0., &texture);
+	frame.draw_image_2d(&graphics, (0., 0., 0.7, 0.7), 0., &texture);
 
         frame.show();
 

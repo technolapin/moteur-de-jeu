@@ -1,7 +1,6 @@
 use crate::misc::Similarity;
 use glium::vertex::VertexBuffer;
 use super::Object;
-use super::vertex::Vertex;
 /**
 All the meshes and their instancings.
 */

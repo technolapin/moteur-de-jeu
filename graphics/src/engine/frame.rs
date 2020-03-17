@@ -26,7 +26,7 @@ impl Frame {
 
 
     // draws a simple image on top of the render
-    pub fn draw_image_2D(
+    pub fn draw_image_2d(
 	&mut self,
 	gr: &Graphical,
 	(x, y, w, h): (f32, f32, f32, f32),
