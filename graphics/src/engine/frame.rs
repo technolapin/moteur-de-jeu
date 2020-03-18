@@ -6,7 +6,7 @@ use super::params::*;
 use crate::ressource_handling::material::*;
 use crate::ressource_handling::objects::*;
 use crate::misc::Similarity;
-
+use super::programs::ProgramId;
 
 /**
 Where the scene is being constructed.
@@ -31,9 +31,11 @@ impl Frame {
 	gr: &Graphical,
 	(x, y, w, h): (f32, f32, f32, f32),
 	depth: f32,
-	texture: &glium::Texture2d
+	texture: &glium::Texture2d,
+	program: ProgramId
     )
     {
+	
 	unsafe {texture.generate_mipmaps();}
 	use crate::ressource_handling::vertex::Vertex;
 	use glium::vertex::VertexBuffer;
@@ -70,7 +72,7 @@ impl Frame {
             .draw(
                 (&vbo, instance.per_instance().unwrap()),
                 &indices,
-                &gr.program.programs.get("textured_2d").unwrap(),
+                &gr.program.get(program).unwrap(),
                 &uniform! {
                     texture: texture,
                 },
@@ -91,8 +93,8 @@ impl Frame {
     ) {
         obj.groups
             .iter()
-            .for_each(|(vertexes, material)|
-                      self.draw_group(gr, vertexes, per_instance, material)
+            .for_each(|(vertexes, material, program)|
+                      self.draw_group(gr, vertexes, per_instance, material, gr.program.get(*program).unwrap())
             );
     }
     
@@ -103,6 +105,7 @@ impl Frame {
         vertex_buffer: &glium::vertex::VertexBufferAny,
         per_instance: &glium::VertexBuffer<Similarity>,
         material: &Material,
+	program: &glium::Program
     ) {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -118,7 +121,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("textured").unwrap(),
+                        program,
                         &uniform! {
                             texture: texture,
                             view_matrix: gr.camera.get_view_matrix(),
@@ -145,7 +148,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("nontextured").unwrap(),
+                        program,
                         &uniform! {view_matrix: gr.camera.get_view_matrix(),
                                    perspective_matrix: gr.camera.get_perspective_matrix(),
                                    ambiant: *ambiant_color,
@@ -164,7 +167,7 @@ impl Frame {
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
-                        gr.program.programs.get("default").unwrap(),
+                        program,
                         &uniform! {view_matrix: gr.camera.get_view_matrix() },
                         &gr.parameters.parameters,
                     )

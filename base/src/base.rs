@@ -74,6 +74,16 @@ impl Base
         Ok(image::open(self.ressources_folder_path.join(Path::new(&ressource_path)))?)
 
     }
+
+    pub fn open_folder(&self, folder_path: PathBuf) -> Result<Vec<PathBuf>, EngineError>
+    {
+	let path = self.ressources_folder_path.join(folder_path);
+	Ok(path.read_dir()?
+	   .filter_map(|result| result.ok())
+	   .map(|dir_entry| dir_entry.path())
+	   .collect())
+    }
+    
     
     pub fn write_ressource(&self, ressource_path: PathBuf, content: Vec<u8>) -> Result<(), EngineError>
     {

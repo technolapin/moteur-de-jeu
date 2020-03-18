@@ -1,8 +1,12 @@
 use super::group::*;
 use super::material::*;
 use super::vertex::*;
+use super::ressources_holder::ProgramId;
 
-use crate::engine::graphical::*;
+use crate::engine::display::Display;
+//use crate::engine::programs::ProgramsHolder;
+
+use base::EngineError;
 
 use glium::texture::{RawImage2d, Texture2d};
 use glium::vertex::{VertexBuffer, VertexBufferAny};
@@ -10,6 +14,9 @@ use glium::vertex::{VertexBuffer, VertexBufferAny};
 use obj::{Mtl, Obj};
 use std::collections::HashMap;
 use std::fs::File;
+use std::path::Path;
+
+
 
 /**
 This structure represents a 3D object.
@@ -17,7 +24,7 @@ It is created by the ModelsHolder, which owns the data.
  */
 #[derive(Debug)]
 pub struct Object<'a> {
-    pub groups: Vec<(&'a VertexBufferAny, &'a Material)>,
+    pub groups: Vec<(&'a VertexBufferAny, &'a Material, ProgramId)>,
 }
 
 /**
@@ -25,21 +32,19 @@ This structure represents a set of 3D objects and their shared materials.
 It typicaly contains all the information a wavefront file and their associated mtl file can provide.
 It is owned by the ModelsHolder struct.
  */
-
 #[derive(Debug)]
 pub struct Wavefront {
     pub objects: HashMap<String, Vec<Group>>,
     pub materials: HashMap<String, Material>,
 }
 
-use std::path::Path;
 
 impl Wavefront {
     /**
     Imports new wavefront file
      */
     pub fn new(
-        gr: &Graphical,
+        disp: &Display,
         path_to_wavefront: &Path,
         path_to_mtl: &Path,
         ressources_path: &Path,
@@ -80,7 +85,7 @@ impl Wavefront {
                     let image_dimensions = image.dimensions();
                     let image =
                         RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-                    let texture = Texture2d::new(&gr.display.display, image).unwrap();
+                    let texture = Texture2d::new(&disp.display, image).unwrap();
                     Material::Textured {
                         texture: texture,
                         specular_color: *specular,
@@ -193,7 +198,7 @@ impl Wavefront {
                 // adding the group of voxel just constated and the name of its associed material
                 // this is fine since one is not supposed to access the material very often
                 groups.push(Group {
-                    voxels: VertexBuffer::new(&gr.display.display, &mesh)
+                    voxels: VertexBuffer::new(&disp.display, &mesh)
                         .unwrap()
                         .into_vertex_buffer_any(),
                     material: match &group.material {
@@ -212,49 +217,56 @@ impl Wavefront {
     /**
     Returns a displayable structure made of references of the datas stored in ModelsHolder.
      */
-    pub fn get_object(&self, name: String) -> Object {
+    pub fn get_object(&self, name: String) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError>
+    {
         let groups = self.objects.get(&name).unwrap();
-
-        Object {
-            groups: groups
-                .iter()
-                .map(|group| {
-                    (
-                        &group.voxels,
-                        match &group.material {
-                            None => &Material::Default,
-                            Some(string) => {
-                                self.materials.get(string).unwrap_or(&Material::Default)
-                            }
-                        },
-                    )
-                })
-                .collect::<Vec<_>>(),
-        }
+	let v = groups
+            .iter()
+            .map(|group| {
+		let material = match &group.material
+		{
+                    None => &Material::Default,
+                    Some(string) => {
+                        self.materials.get(string)
+			    .unwrap_or(&Material::Default)
+                    }
+                };
+		
+                (
+                    &group.voxels,
+		    material
+                )
+            })
+            .collect::<Vec<_>>();
+            Ok(v)
     }
 
+    
     /**
     Same as get_object() but cannot fail. (preferable as this isn't an operation that's supposed to be repeated a lot).
      */
-    pub fn get_object_checked(&self, name: String) -> Option<Object> {
+    pub fn get_object_checked(&self, name: String) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError> {
         match self.objects.get(&name) {
-            None => None,
-            Some(groups) => Some(Object {
-                groups: groups
+            None => Err(EngineError::NoneError),
+            Some(groups) => Ok(groups
                     .iter()
                     .map(|group| {
-                        (
+			let material = match &group.material
+			{
+                            None => &Material::Default,
+                            Some(string) => {
+				self.materials.get(string)
+				    .unwrap_or(&Material::Default)
+                            }
+			};
+			
+			(
                             &group.voxels,
-                            match &group.material {
-                                None => &Material::Default,
-                                Some(string) => {
-                                    self.materials.get(string).unwrap_or(&Material::Default)
-                                }
-                            },
-                        )
+			    material
+			)
                     })
                     .collect::<Vec<_>>(),
-            }),
+            ),
         }
     }
 }

@@ -12,20 +12,21 @@ pub struct Graphical<'a>
 {
     pub parameters: Params<'a>,
     pub display: Display,
-    pub program: Programs,
+    pub program: ProgramsHolder,
     pub camera: Camera,
 }
 
+use crate::ressource_handling::ressources_holder::RessourcesHolder;
 
 impl<'a> Graphical<'a>
 {
     /** Constructor of Graphical */
-    pub fn new(event_loop: &glutin::EventsLoop, base: &Base) -> Self
+    pub fn new(event_loop: &glutin::EventsLoop, base: &Base, holder: &mut RessourcesHolder) -> Self
     {
 	let display = Display::new(event_loop) ;
 	let params = Params::new();
-        let mut program = Programs::new();
-        program.update(&display, base);
+        let mut program = ProgramsHolder::new();
+        program.update(&display, base, holder);
         Self
         {
             parameters: params,

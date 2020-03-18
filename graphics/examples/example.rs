@@ -29,7 +29,7 @@ fn new_transformation((tx, ty, tz): (f32, f32, f32),
 
 // the holder outlives the scene
 fn make_scene<'a, 'b>(
-    graphics: &Graphical,
+    disp: & Display,
     holder: &'b mut RessourcesHolder,
 ) -> Result<Scene<'a>, &'static str>
 where
@@ -37,11 +37,11 @@ where
 {
     let ressources_path = get_ressources_path();
 
-    holder.load_wavefront(&graphics, "textured_cube.obj", &ressources_path)?;
-    holder.load_wavefront(&graphics, "reds.obj", &ressources_path)?;
-    holder.load_wavefront(&graphics, "transparent_sphere.obj", &ressources_path)?;
-    holder.load_wavefront(&graphics, "teto.obj", &ressources_path)?;
-    holder.load_wavefront(&graphics, "terrain.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "textured_cube.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "reds.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "terrain.obj", &ressources_path)?;
 
     let _sphere_mauve = holder.get_object("transparent_sphere", "Sphere").unwrap();
     let teto = holder
@@ -55,7 +55,7 @@ where
 
     // le buffer d'instanciation pour la map
     let map_position = glium::vertex::VertexBuffer::dynamic(
-        &graphics.display.display,
+        &disp.display,
         &vec![Similarity {
             world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
         }],
@@ -65,7 +65,7 @@ where
 
     // le buffer d'instanciation pour les cubes
     let instances = glium::vertex::VertexBuffer::dynamic(
-        &graphics.display.display,
+        &disp.display,
         &(0..30).map(|_| Similarity {
             world_transformation: new_transformation(
                 (rand::random(), rand::random::<f32>(), rand::random::<f32>()), 
@@ -79,7 +79,7 @@ where
     let mut scene = Scene::new();
 
     scene.add(vec![red, zeldo, teto], instances);
-    scene.add(map_elements, map_position);
+    scene.add(vec![map_elements], map_position);
 
     Ok(scene)
 }
@@ -87,10 +87,13 @@ where
 fn main() -> Result<(), &'static str> {
     let mut base = Base::new();
     let mut holder = RessourcesHolder::new();
-    let mut graphics = Graphical::new(&base.get_events_loop(), &base);
-
+    let mut gr = Graphical::new(&base.get_events_loop(), &base, &mut holder);
     
-    let scene = make_scene(&graphics, &mut holder)?;
+    println!("MARCO");
+    let program_id = holder.programs.get("textured_2d".to_string()).unwrap();
+    println!("POLO");
+    
+    let scene = make_scene(&gr.display, &mut holder)?;
 
     let mut camera_pos = Vector3::new(0., 0., 0.);
     let mut camera_rot = Vector3::new(0., 0., 0.);
@@ -111,32 +114,33 @@ fn main() -> Result<(), &'static str> {
     let image =
         RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     
-    let texture = Texture2d::new(&graphics.display.display, image).unwrap();
+    let texture = Texture2d::new(&gr.display.display, image).unwrap();
 
     // la boucle principale
     // pour l'instant on y récupère les évènements en plus de dessiner
     let mut events_handler = EventsHandler::new(base.get_events_loop_mut());
 
+
     
     loop {
         ///////////////////////////////////////////
-        graphics.camera.relative_move(camera_pos);
-        graphics.camera.rotation(camera_rot.clone());
-        graphics.update_dimensions();
+        gr.camera.relative_move(camera_pos);
+        gr.camera.rotation(camera_rot.clone());
+        gr.update_dimensions();
 
 
 	
-        let mut frame = graphics.frame();
+        let mut frame = gr.frame();
         frame.clear();//(0., 0.2, 0.5, 0.));
-        
+  
         scene.objects.iter().for_each(|(objects, instances)| {
             objects
                 .iter()
-                .for_each(|ob| frame.draw(&graphics, &ob, &instances))
+                .for_each(|ob| frame.draw(&gr, &ob, &instances))
         });
 
 	
-	frame.draw_image_2d(&graphics, (0., 0., 0.7, 0.7), 0., &texture);
+	frame.draw_image_2d(&gr, (0., 0., 0.7, 0.7), 0., &texture, program_id);
 
         frame.show();
 
