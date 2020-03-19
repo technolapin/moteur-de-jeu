@@ -1,7 +1,7 @@
 use super::group::*;
 use super::material::*;
 use super::vertex::*;
-use super::ressources_holder::ProgramId;
+pub use crate::engine::ProgramId;
 
 use crate::engine::display::Display;
 //use crate::engine::programs::ProgramsHolder;

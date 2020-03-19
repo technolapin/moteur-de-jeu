@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use std::collections::HashMap;
 use std::string::String;
 use base::Base;
 use base::EngineError;
@@ -76,7 +75,7 @@ impl ProgramsHolder
 	    {
 		Ok((id, name)) =>
 		{
-		    holder.programs.register(id.clone(), name.clone());
+		    holder.register_program(id.clone(), name.clone());
 		    println!("loaded shader program n°{:?} ({}) at {:?}", id, name, path);
 		},
 		Err(e) => println!("warning: could not load shader program {:?} ({:?})", path, e)

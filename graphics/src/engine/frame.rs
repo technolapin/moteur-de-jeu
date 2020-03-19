@@ -25,7 +25,7 @@ impl Frame {
     }
 
 
-    // draws a simple image on top of the render
+    /// draws a simple image on top of the render
     pub fn draw_image_2d(
 	&mut self,
 	gr: &Graphical,
@@ -36,7 +36,7 @@ impl Frame {
     )
     {
 	
-	unsafe {texture.generate_mipmaps();}
+	unsafe {texture.generate_mipmaps();} // necessary to bind the texture
 	use crate::ressource_handling::vertex::Vertex;
 	use glium::vertex::VertexBuffer;
 
@@ -98,7 +98,7 @@ impl Frame {
             );
     }
     
-    /// Draws a group of Object (part of the Object) in the Frame, called by fn draw
+    /// Draws a group of Object (part of the Object) in the Frame, called by fn draw, with a specific material and program
     pub fn draw_group(
         &mut self,
         gr: &Graphical,
@@ -116,7 +116,7 @@ impl Frame {
                 specular_exponent,
                 opacity,
             } => {
-		unsafe {texture.generate_mipmaps();}
+		unsafe {texture.generate_mipmaps();} // binds the texture
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
@@ -136,6 +136,7 @@ impl Frame {
                     )
                     .unwrap();
             }
+	    
             Material::NonTextured {
                 ambiant_color,
                 diffuse_color,

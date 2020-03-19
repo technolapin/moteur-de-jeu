@@ -10,9 +10,11 @@ use graphics::engine::*;
 use graphics::misc::*;
 use graphics::ressource_handling::*;
 
+use std::path::PathBuf;
+use glium::texture::{RawImage2d, Texture2d};
 use nalgebra::base::*;
+use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4};
 
-use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4}; //, normalize, look_at};
 fn new_transformation((tx, ty, tz): (f32, f32, f32),
                       (rx, ry, rz): (f32, f32, f32), scale: f32) -> [[f32; 4]; 4]
 {
@@ -23,7 +25,6 @@ fn new_transformation((tx, ty, tz): (f32, f32, f32),
     let trans = translation(&vec3(tx, ty, tz));
     let resize = TMat4::from_diagonal(&vec4(scale, scale, scale, 1.));
     *(trans*rot*resize).as_ref()
-    //*(look_at(&vec3(0., 0., 0.), &vec3(tx, ty, tz), &normalize(&vec3(rx, ry, rz)))*scale).as_ref()
 }
 
 
@@ -84,28 +85,31 @@ where
     Ok(scene)
 }
 
+
+
 fn main() -> Result<(), &'static str> {
+
+    
     let mut base = Base::new();
     let mut holder = RessourcesHolder::new();
     let mut gr = Graphical::new(&base.get_events_loop(), &base, &mut holder);
-    
-    println!("MARCO");
-    let program_id = holder.programs.get("textured_2d".to_string()).unwrap();
-    println!("POLO");
+
+    // la texture pour le rectangle de test 2d
+    let program_2d = holder.get_program("textured_2d".to_string()).unwrap();
     
     let scene = make_scene(&gr.display, &mut holder)?;
 
     let mut camera_pos = Vector3::new(0., 0., 0.);
     let mut camera_rot = Vector3::new(0., 0., 0.);
 
+
+    // des trucs au pif
     let sensibility = 0.0005;
     let speed = 0.1; // parce que pourquoi pas.
 
 
 
 
-    use std::path::PathBuf;
-    use glium::texture::{RawImage2d, Texture2d};
     let image = base.open_image(PathBuf::from("edgytet.png"))
         .unwrap()
 	.to_rgba();
@@ -116,11 +120,13 @@ fn main() -> Result<(), &'static str> {
     
     let texture = Texture2d::new(&gr.display.display, image).unwrap();
 
-    // la boucle principale
-    // pour l'instant on y récupère les évènements en plus de dessiner
+    // creating the event handler
+    // warning: it takes a mutable reference to the event loop
     let mut events_handler = EventsHandler::new(base.get_events_loop_mut());
 
 
+    // la boucle principale
+    // pour l'instant on y récupère les évènements en plus de dessiner
     
     loop {
         ///////////////////////////////////////////
@@ -140,7 +146,7 @@ fn main() -> Result<(), &'static str> {
         });
 
 	
-	frame.draw_image_2d(&gr, (0., 0., 0.7, 0.7), 0., &texture, program_id);
+	frame.draw_image_2d(&gr, (0., 0., 0.7, 0.7), 0., &texture, program_2d);
 
         frame.show();
 

@@ -4,6 +4,8 @@ pub mod objects;
 pub mod group;
 pub mod ressources_holder;
 pub mod scene;
+pub mod wavefronts_holder;
+pub mod programs_register;
 
 
 pub use vertex::*;

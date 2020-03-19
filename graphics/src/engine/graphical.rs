@@ -36,11 +36,13 @@ impl<'a> Graphical<'a>
         }
     }
 
+    /// Generates a Frame to be drawn onto
     pub fn frame(&mut self) -> Frame
     {
         Frame::new(self)
     }
 
+    /// Update the aspect ratio of the camera, taking in account the current dimension of the context
     pub fn update_dimensions(&mut self)
     {
         let (w, h) = self.display.display.get_framebuffer_dimensions();
