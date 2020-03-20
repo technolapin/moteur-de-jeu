@@ -13,3 +13,16 @@ nphysics3d = "0.13.1"
 ncollide3d = "0.21.0"
 nalgebra = "0.19.0"
 generational-arena = "0.2.7"
+
+graphics = {path = "../graphics"}
+
+rand = "0.7"
+nalgebra-glm="0.5.0"
+base = { path = "../base" }
+events_handling = {path = "../events_handling"}
+glium="0.25.1"
+glutin="0.21.2"
+genmesh = "0.6"
+obj = { version = "0.9", features = ["genmesh"] }
+image = "*"
+rayon="*"
