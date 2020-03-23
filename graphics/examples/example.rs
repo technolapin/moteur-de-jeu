@@ -12,8 +12,11 @@ use graphics::ressource_handling::*;
 
 use std::path::PathBuf;
 use glium::texture::{RawImage2d, Texture2d};
+use glium::vertex::VertexBuffer;
 use nalgebra::base::*;
 use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4};
+
+
 
 fn new_transformation((tx, ty, tz): (f32, f32, f32),
                       (rx, ry, rz): (f32, f32, f32), scale: f32) -> [[f32; 4]; 4]
@@ -55,26 +58,19 @@ where
 
 
     // le buffer d'instanciation pour la map
-    let map_position = glium::vertex::VertexBuffer::dynamic(
-        &disp.display,
-        &vec![Similarity {
-            world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
-        }],
-    ).unwrap();
+    let map_position = vec![Similarity {
+        world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
+    }];
 
     
 
     // le buffer d'instanciation pour les cubes
-    let instances = glium::vertex::VertexBuffer::dynamic(
-        &disp.display,
-        &(0..30).map(|_| Similarity {
+    let instances = (0..30).map(|_| Similarity {
             world_transformation: new_transformation(
                 (rand::random(), rand::random::<f32>(), rand::random::<f32>()), 
                 (rand::random(), rand::random(), rand::random()),
                 0.001)
-        }).collect::<Vec<_>>(),
-    )
-    .unwrap();
+        }).collect::<Vec<_>>();
 
     
     let mut scene = Scene::new();
@@ -138,13 +134,8 @@ fn main() -> Result<(), &'static str> {
 	
         let mut frame = gr.frame();
         frame.clear();//(0., 0.2, 0.5, 0.));
-  
-        scene.objects.iter().for_each(|(objects, instances)| {
-            objects
-                .iter()
-                .for_each(|ob| frame.draw(&gr, &ob, &instances))
-        });
 
+        scene.render(&gr, &mut frame);
 	
 	frame.draw_image_2d(&gr, (0., 0., 0.7, 0.7), 0., &texture, program_2d);
 

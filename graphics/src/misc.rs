@@ -6,8 +6,8 @@ use std::path::PathBuf;
 
 use nalgebra::base::Matrix4;
 use glium::implement_vertex;
-
-
+use glium::vertex::VertexBuffer;
+use crate::engine::Display;
 /// used for debug, will be discarded eventually.
 pub fn maybe<T>(option: Option<T>, s: &'static str) -> T
 {
@@ -94,3 +94,16 @@ pub struct Similarity {
     pub world_transformation: [[f32; 4]; 4],
 }
 implement_vertex!(Similarity, world_transformation);
+
+
+
+/// creates a new vertexbuffer of world positions
+pub fn new_vertexbuffer(disp: &Display, positions: &Vec<Similarity>) -> VertexBuffer<Similarity>
+{
+    VertexBuffer::dynamic(
+        &disp.display,
+        positions,
+    ).unwrap()
+
+}
+

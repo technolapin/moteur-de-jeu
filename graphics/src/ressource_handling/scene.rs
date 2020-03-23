@@ -1,12 +1,16 @@
-use crate::misc::Similarity;
+use crate::misc::{Similarity, new_vertexbuffer};
 use glium::vertex::VertexBuffer;
 use super::Object;
+use crate::engine::{Graphical, Frame};
 /**
 A scene (contain references to the RessourcesHolder)
 */
 pub struct Scene<'a> {
-    pub objects: Vec<(Vec<Object<'a>>, VertexBuffer<Similarity>)>,
+    pub objects: Vec<(Vec<Object<'a>>, Vec<Similarity>)>,
 }
+
+
+
 
 impl<'a> Scene<'a> {
     /// creates a scene
@@ -17,7 +21,7 @@ impl<'a> Scene<'a> {
     }
 
     /// Adds some objects to the scene
-    pub fn add(&mut self, meshes: Vec<Object<'a>>, instances: VertexBuffer<Similarity>) {
+    pub fn add(&mut self, meshes: Vec<Object<'a>>, instances: Vec<Similarity>) {
         self.objects.push((meshes, instances));
     }
 
@@ -28,5 +32,19 @@ impl<'a> Scene<'a> {
 	    Vertex{position: [x, y, depth], .. Default::default()}
 	];
     }
-*/
+     */
+
+    pub fn render(&self, gr: &Graphical, frame: &mut Frame)
+    {
+        self.objects.iter().for_each(|(objects, instances)| {
+            let vbo = new_vertexbuffer(&gr.display, instances);
+            objects
+                .iter()
+                .for_each(|ob|
+                          frame.draw(&gr, &ob, &vbo)
+                )
+        });
+
+    }
+    
 }
