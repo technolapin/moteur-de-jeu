@@ -12,7 +12,6 @@ use graphics::ressource_handling::*;
 
 use std::path::PathBuf;
 use glium::texture::{RawImage2d, Texture2d};
-use glium::vertex::VertexBuffer;
 use nalgebra::base::*;
 use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4};
 
