@@ -3,8 +3,7 @@ use glium::uniform;
 
 use super::graphical::*;
 use super::params::*;
-use crate::ressource_handling::material::*;
-use crate::ressource_handling::objects::*;
+use crate::ressource_handling::{Object, Material};
 use crate::misc::Similarity;
 use super::programs::ProgramId;
 
@@ -91,10 +90,10 @@ impl Frame {
         obj: &Object,
         per_instance: &glium::VertexBuffer<Similarity>, // position
     ) {
-        obj.groups
+        obj.data
             .iter()
-            .for_each(|(vertexes, material, program)|
-                      self.draw_group(gr, vertexes, per_instance, material, gr.program.get(*program).unwrap())
+            .for_each(|(group, program)|
+                      self.draw_group(gr, &group.vertexes, per_instance, &group.material, gr.program.get(*program).unwrap(), &obj.params)
             );
     }
     
@@ -105,7 +104,8 @@ impl Frame {
         vertex_buffer: &glium::vertex::VertexBufferAny,
         per_instance: &glium::VertexBuffer<Similarity>,
         material: &Material,
-	program: &glium::Program
+	program: &glium::Program,
+        params: &Params
     ) {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -132,7 +132,7 @@ impl Frame {
                             opacity: *opacity
 
                         },
-                        &gr.parameters.parameters,
+                        &params.parameters,
                     )
                     .unwrap();
             }
@@ -159,7 +159,7 @@ impl Frame {
                                    emission: *emission_color,
                                    opacity: *opacity
                         },
-                        &gr.parameters.parameters,
+                        &params.parameters,
                     )
                     .unwrap();
             }
@@ -170,7 +170,7 @@ impl Frame {
                         indices,
                         program,
                         &uniform! {view_matrix: gr.camera.get_view_matrix() },
-                        &gr.parameters.parameters,
+                        &params.parameters,
                     )
                     .unwrap();
             }

@@ -1,11 +1,12 @@
 /**
 Owns the rendering parameters.
  */
-pub struct Params<'a> {
-    pub parameters: glium::draw_parameters::DrawParameters<'a>,
+#[derive(Debug)]
+pub struct Params {
+    pub parameters: glium::draw_parameters::DrawParameters<'static>,
 }
 
-impl<'a> Params<'a> {
+impl Params {
     pub fn new() -> Self {
         Self {
             parameters: glium::DrawParameters {

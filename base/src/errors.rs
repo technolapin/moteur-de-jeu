@@ -1,48 +1,38 @@
 use std::io;
-//use std::option;
 
 #[derive(Debug)]
-pub enum EngineError
+pub struct EngineError(String);
+
+impl EngineError
 {
-    IOError(io::Error),
-    Misc(String),
-    NoneError // experimental, not yet used
-    
-}
-
-
-impl From<io::Error> for EngineError {
-    fn from(error: io::Error) -> Self {
-        Self::IOError(error)
-    }
-}
-
-impl From<glium::ProgramCreationError> for EngineError {
-    fn from(error: glium::ProgramCreationError) -> Self {
-        Self::Misc(format!("{:?}", error))
-    }
-}
-impl From<image::error::ImageError> for EngineError {
-    fn from(error: image::error::ImageError) -> Self {
-        Self::Misc(format!("{:?}", error))
-    }
-}
-
-/*
-// only in nightly rust
-impl From<option::NoneError> for EngineError {
-    fn from(error: option::NoneError) -> Self {
-        Self::NoneError
-    }
-}
-*/
-
-/// Converts option to results, permit to use the ? notation in non-nighly rust
-pub fn option_unwrap<T>(option: Option<T>) -> Result<T, EngineError>
-{
-    match option
+    pub fn new<T>(msg: &str) -> Result<T, Self>
     {
-        Some(thing) => Ok(thing),
-        None => Err(EngineError::NoneError)
+        Err(Self(String::from(msg)))
     }
 }
+
+
+macro_rules! engine_error_from {
+    ($type:path) => {
+        impl From<$type> for EngineError {
+            fn from(error: $type) -> Self
+            {
+                Self(format!("{}", error))
+            }
+        }
+    };
+    (&$type:path) => {
+        impl From<&$type> for EngineError {
+            fn from(error: &$type) -> Self
+            {
+                Self(format!("{}", error))
+            }
+        }
+    };
+}
+
+engine_error_from!(io::Error);
+engine_error_from!(image::error::ImageError);
+engine_error_from!(glium::texture::TextureCreationError);
+engine_error_from!(glium::ProgramCreationError);
+engine_error_from!(&str);

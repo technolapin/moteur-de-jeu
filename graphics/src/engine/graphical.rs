@@ -8,9 +8,9 @@ use base::Base;
 /**
 Owns the various components needed to display things on the screen.
 */
-pub struct Graphical<'a>
+pub struct Graphical
 {
-    pub parameters: Params<'a>,
+    pub parameters: Params,
     pub display: Display,
     pub program: ProgramsHolder,
     pub camera: Camera,
@@ -18,7 +18,7 @@ pub struct Graphical<'a>
 
 use crate::ressource_handling::ressources_holder::RessourcesHolder;
 
-impl<'a> Graphical<'a>
+impl Graphical
 {
     /** Constructor of Graphical */
     pub fn new(event_loop: &glutin::EventsLoop, base: &Base, holder: &mut RessourcesHolder) -> Self

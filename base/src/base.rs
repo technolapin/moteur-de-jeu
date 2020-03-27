@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{Read, Write, BufReader};
 
 
-use super::errors::{EngineError, option_unwrap };
+use super::errors::{EngineError};
 
 
 /// Separate the engine from the files & os
@@ -90,7 +90,11 @@ impl Base
         let path = self.ressources_folder_path.join(ressource_path);
         
         // checks if this is a valid location
-        let _parent = option_unwrap(path.ancestors().nth(1))?;
+        if path.ancestors().nth(1)
+            .is_none()
+        {
+            return EngineError::new("invalid location");
+        }
         
         let mut f = File::create(path)?;
         f.write_all(&content)?;

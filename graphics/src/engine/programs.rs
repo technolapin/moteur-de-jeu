@@ -59,7 +59,7 @@ impl ProgramsHolder
 	match self.programs.get(key.0)
 	{
 	    Some(thing) => Ok(thing),
-	    None => Err(EngineError::NoneError)
+	    None => EngineError::new("WRONG PROGRAM ID")
 	}
     }
     

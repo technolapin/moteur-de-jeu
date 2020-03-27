@@ -1,33 +1,47 @@
 use std::collections::HashMap;
-use base::EngineError;
-use std::path::Path;
-use super::objects::Wavefront;
-use super::material::Material;
-use crate::engine::display::Display;
-use glium::vertex::VertexBufferAny;
 
-
-/// Own the wavefront files datas
 #[derive(Debug)]
-pub struct WavefrontsHolder(HashMap<String, Wavefront>);
+pub struct Holder<T> (HashMap<String, T>);
 
-impl<'a, 'b> WavefrontsHolder {
-    /// Creates a new WavefrontsHolder
-    pub fn new() -> Self {
+impl<T> Holder<T>
+{
+    pub fn new() -> Self
+    {
         Self(HashMap::new())
     }
 
-    /**
+    pub fn get(&self, s: &str) -> Option<&T>
+    {
+        self.0.get(s)
+    }
+
+    pub fn insert(&mut self, s: String, el: T)
+    {
+        self.0.insert(s, el);
+    }
+    
+    
+}
+
+use super::Wavefront;
+
+use std::path::Path;
+use base::EngineError;
+use super::Group;
+use crate::engine::Display;
+impl Holder<Wavefront>
+{
+     /**
     Fetch the data of a 3D object
      */
     pub fn get_object(
         &self,
         file: &str,
         model_name: &str,
-    ) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError> {
-        match self.0.get(file) {
-            Some(wavefront) => wavefront.get_object_checked(model_name.to_string()),
-            None => Err(EngineError::NoneError),
+    ) -> Result<Vec<(Group)>, EngineError> {
+        match self.get(file) {
+            Some(wavefront) => wavefront.get_object(model_name.to_string()),
+            None => EngineError::new("file doesn't exist!"),
         }
     }
 
@@ -37,9 +51,9 @@ impl<'a, 'b> WavefrontsHolder {
     pub fn get_whole_content(
         &self,
         file: &str,
-    ) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError> {
-        match self.0.get(file) {
-            None => Err(EngineError::NoneError),
+    ) -> Result<Vec<Group>, EngineError> {
+        match self.get(file) {
+            None => EngineError::new("file doesn't exist!"),
             Some(wavefront) => Ok({
                 wavefront
                     .objects
@@ -75,7 +89,7 @@ impl<'a, 'b> WavefrontsHolder {
         println!("stem: {:?}", stem);
         println!("mtl: {:?}", path_to_mtl);
 
-        self.0.insert(
+        self.insert(
             stem.clone(),
             Wavefront::new(disp, path_to_wavefront, &path_to_mtl, ressources_path),
         );
@@ -91,4 +105,6 @@ impl<'a, 'b> WavefrontsHolder {
             return Err("file not found");
         }
     }
+   
 }
+

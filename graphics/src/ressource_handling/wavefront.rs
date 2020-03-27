@@ -1,31 +1,16 @@
-use super::group::*;
-use super::material::*;
-use super::vertex::*;
-pub use crate::engine::ProgramId;
-
-use crate::engine::display::Display;
-//use crate::engine::programs::ProgramsHolder;
-
+use super::{Vertex, Group, Material};
 use base::EngineError;
-
+use crate::engine::display::Display;
 use glium::texture::{RawImage2d, Texture2d};
-use glium::vertex::{VertexBuffer, VertexBufferAny};
+use glium::vertex::{VertexBuffer};
 
 use obj::{Mtl, Obj};
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
 
-
-
-/**
-This structure represents a 3D object.
-It is created by the ModelsHolder, which owns the data.
- */
-#[derive(Debug)]
-pub struct Object<'a> {
-    pub groups: Vec<(&'a VertexBufferAny, &'a Material, ProgramId)>,
-}
+use std::sync::Arc;
+use genmesh::{Polygon, Quad, Triangle};
 
 /**
 This structure represents a set of 3D objects and their shared materials.
@@ -35,7 +20,7 @@ It is owned by the ModelsHolder struct.
 #[derive(Debug)]
 pub struct Wavefront {
     pub objects: HashMap<String, Vec<Group>>,
-    pub materials: HashMap<String, Material>,
+    pub materials: HashMap<String, Arc<Material>>,
 }
 
 
@@ -49,7 +34,6 @@ impl Wavefront {
         path_to_mtl: &Path,
         ressources_path: &Path,
     ) -> Self {
-        use genmesh::{Polygon, Quad, Triangle};
 
         // try to load the files
         let path_to_wavefront = ressources_path.join(path_to_wavefront);
@@ -107,7 +91,7 @@ impl Wavefront {
                     println!("trans/opac: {:?} {:?}", transparency, opacity);
                     let opacity = opacity.unwrap_or(1.).min(1. - transparency.unwrap_or(0.));
                     println!("OPA: {}", opacity);
-
+                    
                     Material::NonTextured {
                         ambiant_color: *ambiant,
                         diffuse_color: *diffuse,
@@ -120,7 +104,7 @@ impl Wavefront {
 
                 _ => Material::Default,
             };
-            materials.insert(material.name.clone(), mat);
+            materials.insert(material.name.clone(), Arc::new(mat));
         }
 
         // starting to parse the .obj and to construct the Wavefront structure
@@ -195,20 +179,28 @@ impl Wavefront {
                     }
                 }
 
+                let default_material = Arc::new(Material::Default);
+                
                 // adding the group of voxel just constated and the name of its associed material
                 // this is fine since one is not supposed to access the material very often
+                let mat = group.material.as_ref()
+                    .map(|mat| mat.name.clone())
+                    .map(|name| objects.materials.get(&name).unwrap_or(&default_material))
+                    .unwrap_or(&default_material).clone();
                 groups.push(Group {
-                    voxels: VertexBuffer::new(&disp.display, &mesh)
-                        .unwrap()
-                        .into_vertex_buffer_any(),
-                    material: match &group.material {
-                        Some(mat) => Some(mat.name.clone()),
-                        None => None,
-                    },
+                    vertexes: Arc::new(
+                        VertexBuffer::new(&disp.display, &mesh)
+                            .unwrap()
+                            .into_vertex_buffer_any()),
+                    material: mat,
+                    
                 });
             }
             // the object is finished and added to the Wavefront structure
-            objects.objects.insert(object.name.clone(), groups);
+            objects
+                .objects
+                .insert(object.name.clone(),
+                        groups);
         }
 
         objects
@@ -217,30 +209,39 @@ impl Wavefront {
     /**
     Returns a displayable structure made of references of the datas stored in ModelsHolder.
      */
-    pub fn get_object(&self, name: String) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError>
+    pub fn get_object(&self, name: String) -> Result<Vec<Group>, EngineError>
     {
+
+        match self.objects.get(&name)
+        {
+            Some(thing) => Ok(thing.to_vec()),
+            None => EngineError::new(&format!("object '{}' does not exist", name))
+        }
+        /*
         let groups = self.objects.get(&name).unwrap();
 	let v = groups
             .iter()
             .map(|group| {
-		let material = match &group.material
+		let material: Arc<_> = match &group.material
 		{
-                    None => &Material::Default,
+                    None => Arc::new(Material::Default),
                     Some(string) => {
                         self.materials.get(string)
-			    .unwrap_or(&Material::Default)
+			    .unwrap_or(&Arc::new(Material::Default)).clone()
                     }
                 };
 		
                 (
-                    &group.voxels,
+                    group.vertexes.clone(),
 		    material
                 )
             })
             .collect::<Vec<_>>();
             Ok(v)
+*/
     }
 
+    /*
     
     /**
     Same as get_object() but cannot fail. (preferable as this isn't an operation that's supposed to be repeated a lot).
@@ -261,7 +262,7 @@ impl Wavefront {
 			};
 			
 			(
-                            &group.voxels,
+                            &group.vertexes,
 			    material
 			)
                     })
@@ -269,4 +270,5 @@ impl Wavefront {
             ),
         }
     }
+*/
 }

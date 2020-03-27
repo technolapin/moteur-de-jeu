@@ -1,18 +1,15 @@
 use crate::misc::{Similarity, new_vertexbuffer};
-use glium::vertex::VertexBuffer;
 use super::Object;
 use crate::engine::{Graphical, Frame};
 /**
 A scene (contain references to the RessourcesHolder)
 */
-pub struct Scene<'a> {
-    pub objects: Vec<(Vec<Object<'a>>, Vec<Similarity>)>,
+pub struct Scene {
+    objects: Vec<(Vec<Object>, Vec<Similarity>)>,
 }
 
 
-
-
-impl<'a> Scene<'a> {
+impl Scene {
     /// creates a scene
     pub fn new() -> Self {
         Self {
@@ -21,7 +18,7 @@ impl<'a> Scene<'a> {
     }
 
     /// Adds some objects to the scene
-    pub fn add(&mut self, meshes: Vec<Object<'a>>, instances: Vec<Similarity>) {
+    pub fn add(&mut self, meshes: Vec<Object>, instances: Vec<Similarity>) {
         self.objects.push((meshes, instances));
     }
 
