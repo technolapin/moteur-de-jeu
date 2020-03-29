@@ -1,10 +1,5 @@
-use nalgebra_glm::look_at;
-use nalgebra_glm::rotate_x_vec3;
-use nalgebra_glm::rotate_y_vec3;
-use nalgebra_glm::rotate_z_vec3;
-use nalgebra::Matrix3;
-use nalgebra::Vector3;
-use nalgebra::Perspective3;
+use nalgebra_glm::{look_at, rotate_x_vec3, rotate_y_vec3, rotate_z_vec3};
+use nalgebra::{Matrix3, Vector3, Perspective3};
 
 
 pub struct Projection

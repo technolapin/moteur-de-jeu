@@ -1,20 +1,33 @@
 use std::collections::HashMap;
+use std::path::Path;
 
+use super::{Wavefront, Group};
+use crate::engine::Display;
+use base::EngineError;
+
+
+/**
+A holder is a struct mapping somme ressources to their names
+Like a hashmap, but we can implement our own methods on it.
+*/
 #[derive(Debug)]
 pub struct Holder<T> (HashMap<String, T>);
 
 impl<T> Holder<T>
 {
+    /// Creates a new Holder.
     pub fn new() -> Self
     {
         Self(HashMap::new())
     }
 
+    /// Returns a reference to the eventual value corresponding to the given key.
     pub fn get(&self, s: &str) -> Option<&T>
     {
         self.0.get(s)
     }
 
+    /// Inserts an entry.
     pub fn insert(&mut self, s: String, el: T)
     {
         self.0.insert(s, el);
@@ -23,16 +36,11 @@ impl<T> Holder<T>
     
 }
 
-use super::Wavefront;
-
-use std::path::Path;
-use base::EngineError;
-use super::Group;
-use crate::engine::Display;
+/// Thoses methods are specific to wavefront holders
 impl Holder<Wavefront>
 {
-     /**
-    Fetch the data of a 3D object
+    /**
+    Fetch the vertex and material data of a 3D object corresponding to the given key (which is in this case the name of the object).
      */
     pub fn get_object(
         &self,
@@ -46,7 +54,7 @@ impl Holder<Wavefront>
     }
 
     /**
-    Fetch the data of all 3D objects in a file
+    Like get_objet, but returns the union of all the objects of the file.
      */
     pub fn get_whole_content(
         &self,
@@ -96,7 +104,10 @@ impl Holder<Wavefront>
         Ok(())
     }
 
-    /** remove a file from the graphical memory**/
+    /**
+    Remove a file from the graphical memory.
+    (bad idea for now)
+     */ 
     pub fn unload(&mut self, filename: &str) -> Result<(), &'static str> {
         if self.0.contains_key(filename) {
             self.0.remove(filename);

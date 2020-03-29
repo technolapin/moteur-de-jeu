@@ -1,6 +1,15 @@
-use glium::texture::Texture2d;
+use std::path::PathBuf;
+use glium::texture::{RawImage2d, Texture2d};
 use std::sync::Arc;
+
 use super::Material;
+use crate::engine::Display;
+use base::{Base, EngineError};
+
+/**
+ A tile is a 2D rectangle with an image on it.
+Stores the proportions of the image and the image itselve.
+*/
 #[derive(Debug, Clone)]
 pub struct Tile
 {
@@ -9,13 +18,9 @@ pub struct Tile
 }
 
 
-use base::{Base, EngineError};
-use crate::engine::Display;
-use std::path::PathBuf;
-use glium::texture::RawImage2d;
-
 impl Tile
 {
+    /// Creates a new Tile from the given image path
     pub fn new(base: &Base, display: &Display, image_path: PathBuf) -> Result<Self, EngineError>
     {
         let image = base.open_image(image_path)?

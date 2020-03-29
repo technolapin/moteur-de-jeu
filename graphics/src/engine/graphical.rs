@@ -1,35 +1,29 @@
-use super::camera::*;
-use super::frame::*;
-use super::programs::*;
-use super::display::*;
-use super::params::*;
+use super::{Camera, Frame, Display, ProgramsHolder};
+use crate::ressource_handling::RessourcesHolder;
 use base::Base;
+use glium::glutin::event_loop::EventLoop;
 
 /**
 Owns the various components needed to display things on the screen.
 */
 pub struct Graphical
 {
-    pub parameters: Params,
     pub display: Display,
     pub program: ProgramsHolder,
     pub camera: Camera,
 }
 
-use crate::ressource_handling::ressources_holder::RessourcesHolder;
 
 impl Graphical
 {
-    /** Constructor of Graphical */
-    pub fn new(event_loop: &glutin::EventsLoop, base: &Base, holder: &mut RessourcesHolder) -> Self
+    /// Constructor of Graphical
+    pub fn new(event_loop: &EventLoop<()>, base: &Base, holder: &mut RessourcesHolder) -> Self
     {
 	let display = Display::new(event_loop) ;
-	let params = Params::new();
         let mut program = ProgramsHolder::new();
         program.update(&display, base, holder);
         Self
         {
-            parameters: params,
             display: display,
 	    program: program,
             camera: Camera::new(2.0),

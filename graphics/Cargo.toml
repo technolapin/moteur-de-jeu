@@ -9,8 +9,8 @@ edition = "2018"
 
 
 [dependencies]
-glium="0.25.1"
-glutin="0.21.2"
+glium="0.26"
+glutin="0.24"
 
 genmesh = "0.6"
 obj = { version = "0.9", features = ["genmesh"] }

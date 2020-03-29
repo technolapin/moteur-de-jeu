@@ -1,11 +1,13 @@
+use std::sync::Arc;
+
 use super::Group;
 use crate::engine::{ProgramId, Params};
 
-use std::sync::Arc;
     
 /**
-This structure represents a 3D object.
-It is created by the ModelsHolder, which owns the data.
+This structure represents a drawable 3D object.
+It is basicaly a set of groups associated with shaders programs, and some rendering parameters.
+It owns no heavy data, only contains atomic shared pointers.
  */
 #[derive(Debug)]
 pub struct Object

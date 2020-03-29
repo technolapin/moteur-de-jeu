@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 use std::fs::File;
 use std::io::{Read, Write, BufReader};
 
+use glium::glutin::event_loop::EventLoop;
 
 use super::errors::{EngineError};
 
@@ -9,7 +10,7 @@ use super::errors::{EngineError};
 /// Separate the engine from the files & os
 pub struct Base
 {
-    events_loop: glutin::EventsLoop,
+    events_loop: EventLoop<()>,
     ressources_folder_path: PathBuf
 }
 
@@ -20,7 +21,7 @@ impl Base
 {
     pub fn new() -> Self
     {
-        let events_loop = glutin::EventsLoop::new();
+        let events_loop = EventLoop::new();
 //        let mut holder = ModelsHolder::new();
         Self
         {
@@ -29,12 +30,16 @@ impl Base
          }
     }
 
-    pub fn get_events_loop(&self) -> &glutin::EventsLoop
+    pub fn get_events_loop(&self) -> &EventLoop<()>
     {
         &self.events_loop
     }
+    pub fn move_events_loop(self) -> EventLoop<()>
+    {
+        self.events_loop
+    }
     
-    pub fn get_events_loop_mut(&mut self) -> &mut glutin::EventsLoop
+    pub fn get_events_loop_mut(&mut self) -> &mut EventLoop<()>
     {
         &mut self.events_loop
     }

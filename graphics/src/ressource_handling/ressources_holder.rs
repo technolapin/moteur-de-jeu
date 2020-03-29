@@ -1,23 +1,25 @@
-use super::{Material, Object, Wavefront, Holder, Tile, Group, Vertex};
-use crate::engine::programs::ProgramId;
-use crate::engine::Display;
-use base::EngineError;
 use std::path::Path;
 use glium::vertex::VertexBuffer;
 use std::sync::Arc;
 use std::path::PathBuf;
-use base::Base;
-use crate::engine::params::Params;
+
+use super::{Material, Object, Wavefront, Holder, Tile, Group, Vertex};
+use crate::engine::{ProgramId, Display, Params};
+
+use base::{Base, EngineError};
 
 /**
-Owns the all Objects imported.
-This is what the user is supposed to use.
+Registers all the ressources.
  */
 #[derive(Debug)]
 pub struct RessourcesHolder {
+    /// The meshes and materials data.
     wavefronts: Holder<Wavefront>,
+    /// The existing shaders programs
     programs: Holder<ProgramId>,
+    /// The 2d tiles
     tiles: Holder<Tile>,
+    /// The drawing parameters
     params: Holder<Arc<Params>>, // overkill
 }
 
@@ -33,23 +35,27 @@ impl RessourcesHolder {
         }.init()
     }
 
+    /// used to insert some default values.
     fn init(mut self) -> Self
     {
         self.add_parameters(Params::new(), "scene");
         self.add_parameters(Params::new().always_top(), "foreground");
         self
     }
-
+    
+    /// Adds a shader program    
     pub fn register_program(&mut self, pgrm: ProgramId, name: String)
     {
         self.programs.insert(name, pgrm);
     }
-    
+
+    /// Fetches a shader program
     pub fn get_program(&self, name: &str) -> Option<&ProgramId>
     {
         self.programs.get(name)
     }
-
+    
+    /// Returns a default shader program capable of handling the given material.
     fn associate_program(&self, mat: &Material) -> ProgramId
     { 
         match mat
@@ -67,13 +73,13 @@ impl RessourcesHolder {
         }
     }
 
+    /// Adds some drawing parameters
     pub fn add_parameters(&mut self, params: Params, name: &str)
     {
         self.params.insert(name.to_string(), Arc::new(params))
     }
 
-//    pub fn with_parameters(&mut self)
-    
+    /// Add a tile based on the given image.
     pub fn add_tile( &mut self,
                       display: &Display,
                       base: &Base,
@@ -96,7 +102,7 @@ impl RessourcesHolder {
         Ok(())
     }
 
-
+    /// Returns an Object using the given drawing parameters.
     pub fn obj_parameters(&self, obj: Object, params_name: &str) -> Result<Object, EngineError>
     {
         match self.params.get(params_name)
@@ -107,7 +113,7 @@ impl RessourcesHolder {
     }
     
     
-    /// Fetch a displayable tile as an Object
+    /// Fetch a displayable tile as a drawable Object
     pub fn get_tile( &self,
                       name: &str,
                       display: &Display ) -> Result<Object, EngineError>
@@ -129,7 +135,7 @@ impl RessourcesHolder {
 	            Vertex{position: [w, h, 0.], texture: [1., 1.], .. Default::default()},
 	        ];
 
-                let vbo = VertexBuffer::new(&display.display, &mesh).unwrap().into_vertex_buffer_any();
+                let vbo = VertexBuffer::new(&display.display, &mesh).unwrap().into();
 
                 let group = Group
                 {

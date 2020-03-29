@@ -176,9 +176,9 @@ pub enum Key {
 }
 
 impl Key {
-    pub fn convert_key(key: Option<glutin::VirtualKeyCode>, scancode: u32) -> Self {
+    pub fn convert_key(key: Option<glium::glutin::event::VirtualKeyCode>, scancode: u32) -> Self {
         // https://docs.rs/glutin/0.21.2/glutin/enum.VirtualKeyCode.html
-        use glutin::VirtualKeyCode::*;
+        use glium::glutin::event::VirtualKeyCode::*;
         match key {
             None => Self::Other(scancode),
             Some(known_key) => match known_key {

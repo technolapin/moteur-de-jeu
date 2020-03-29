@@ -1,13 +1,15 @@
 use std::io::Read ;
 use std::string::String;
 use std::fs::File;
-use std::path::Path;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use nalgebra_glm::{vec3, vec4, translation, rotation, TMat4, Vec3};
 use nalgebra::base::Matrix4;
 use glium::implement_vertex;
 use glium::vertex::VertexBuffer;
+
 use crate::engine::Display;
+
 /// used for debug, will be discarded eventually.
 pub fn maybe<T>(option: Option<T>, s: &'static str) -> T
 {
@@ -118,6 +120,43 @@ impl Similarity
     pub fn deconstruct(&self) -> (Vec3, Vec3, f32)
     {
 //        let trans: Vec3 = &self.world_transformation[3][0..3];
+        let origin = vec4(0., 0., 0., 1.);
+        let x = vec4(1., 0., 0., 0.);
+        let y = vec4(0., 1., 0., 0.);
+        let z = vec4(0., 0., 1., 0.);
+        let it = self.world_transformation.iter()
+            .flatten().cloned();
+        let mat: TMat4<f32> = TMat4::from_iterator(it);
+        let scale = (mat*x).norm();
+        let trans = mat*origin;
+        let a_x = x.angle(&(mat*x));
+        let a_y = y.angle(&(mat*y));
+        let a_z = z.angle(&(mat*z));
+        let rot = vec3(a_x, a_y, a_z);
+        (trans.xyz(), rot, scale)
+    }
+}
+
+impl Similarity
+{
+    /// creates a new Similarity from a position, a vector of 3 angles and a scale
+    pub fn new(pos: Vec3, rot: Vec3, scale: f32) -> Self
+    {
+        let rot =
+        rotation(rot.x, &vec3(1., 0., 0.)) *
+        rotation(rot.y, &vec3(0., 1., 0.)) *
+        rotation(rot.z, &vec3(0., 0., 1.));
+        let trans = translation(&vec3(pos.x, pos.y, pos.z));
+        let resize = TMat4::from_diagonal(&vec4(scale, scale, scale, 1.));
+        Self
+        {
+            world_transformation: *(trans*rot*resize).as_ref()
+        }
+    }
+
+    /// returns the pos, rot and scale encoded within the inner matrix
+    pub fn deconstruct(&self) -> (Vec3, Vec3, f32)
+    {
         let origin = vec4(0., 0., 0., 1.);
         let x = vec4(1., 0., 0., 0.);
         let y = vec4(0., 1., 0., 0.);

@@ -1,15 +1,15 @@
-use glium::Surface;
-use glium::uniform;
+use glium::{Surface, uniform};
 
-use super::graphical::*;
-use super::params::*;
+use super::{Graphical, Params};
 use crate::ressource_handling::{Object, Material};
 use crate::misc::Similarity;
-use super::programs::ProgramId;
+
+
 
 /**
 Where the scene is being constructed.
 Destroyed uppon displaying.
+This is a wrapper around glium::Frame with custom methods.
 */
 pub struct Frame {
     frame: glium::Frame,
@@ -24,64 +24,8 @@ impl Frame {
     }
 
 
-    /// draws a simple image on top of the render
-    pub fn draw_image_2d(
-	&mut self,
-	gr: &Graphical,
-	(x, y, w, h): (f32, f32, f32, f32),
-	depth: f32,
-	texture: &glium::Texture2d,
-	program: ProgramId
-    )
-    {
-	
-	unsafe {texture.generate_mipmaps();} // necessary to bind the texture
-	use crate::ressource_handling::vertex::Vertex;
-	use glium::vertex::VertexBuffer;
-
-        let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-	
-	let mesh = vec![
-	    Vertex{position: [x, y, depth], texture: [0., 0.], .. Default::default()},
-	    Vertex{position: [x+w, y, depth], texture: [1., 0.], .. Default::default()},
-	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], .. Default::default()},
-	    Vertex{position: [x, y, depth], texture: [0., 0.], .. Default::default()},
-	    Vertex{position: [x, y+h, depth], texture: [0., 1.], .. Default::default()},
-	    Vertex{position: [x+w, y+h, depth], texture: [1., 1.], .. Default::default()},
-	];
-	let instance = glium::vertex::VertexBuffer::dynamic(
-            &gr.display.display,
-            &vec![Similarity {
-		world_transformation: [[1., 0., 0., 0.],
-				       [0., 1., 0., 0.],
-				       [0., 0., 1., 0.],
-				       [0., 0., 0., 1.]]
-            }],
-	).unwrap();
-	
-	let vbo = VertexBuffer::new(&gr.display.display, &mesh).unwrap();
-
-
-	let params = Params::new()
-	    .always_top();
-	    
-	
-
-        self.frame
-            .draw(
-                (&vbo, instance.per_instance().unwrap()),
-                &indices,
-                &gr.program.get(program).unwrap(),
-                &uniform! {
-                    texture: texture,
-                },
-                &params.parameters,
-            )
-            .unwrap();
-    }
-
-
-    /** Draws several instances of an Object in the Frame using the similarities contained by the VBO per_instance.
+    /**
+    Draws several instances of an Object in the Frame using the similarities contained by the VBO per_instance.
     Calls fn draw_group for each group of Object.
      */
     pub fn draw(
@@ -116,7 +60,13 @@ impl Frame {
                 specular_exponent,
                 opacity,
             } => {
-		unsafe {texture.generate_mipmaps();} // binds the texture
+                /*
+                This is a bit ugly but necessary.
+                Creates the mipmap of the textures and also binds it.
+                We look forward to replace this by something cleaner (or safer).
+                 */
+		unsafe {texture.generate_mipmaps();}
+                
                 self.frame
                     .draw(
                         (vertex_buffer, per_instance.per_instance().unwrap()),
@@ -178,7 +128,7 @@ impl Frame {
     }
 
     
-    /// Resets the Frame
+    /// Clear and resets the Frame in colour and depth.
     pub fn clear(&mut self) {
         self.frame.clear_color_and_depth((0.0, 0.0, 0.0, 0.0), 1.0);
     }
@@ -187,7 +137,7 @@ impl Frame {
     Sends the Frame to the Graphical Card.
     The frame then cannot be used anymore
      */
-    pub fn show(self) {
+    pub fn swap(self) {
         self.frame.finish().unwrap();
     }
 }

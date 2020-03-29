@@ -1,13 +1,12 @@
 use std::path::{Path, PathBuf};
 use std::string::String;
-use base::Base;
-use base::EngineError;
-use crate::ressource_handling::ressources_holder::RessourcesHolder;
-
-use crate::misc::{read_file};
-
+use base::{Base, EngineError};
 
 use super::Display;
+use crate::ressource_handling::RessourcesHolder;
+use crate::misc::{read_file};
+
+/// This structure purpose is to create ProgramsIds
 #[derive(Debug)]
 pub struct ProgramCreator(usize);
 impl ProgramCreator
@@ -25,13 +24,16 @@ impl ProgramCreator
     }
 }
 
+/**
+ Corresponds to a program stored by the ProgramHolder
+ Might be replaced by a Arc sometimes
+*/
 #[derive(PartialEq, Debug, Copy, Clone)]
 pub struct ProgramId(usize);
 
 
 /**
 The various registered shaders programs.
-For now it has some shaders hard-coded but those will eventually be dissmissed.
  */
 #[derive(Debug)]
 pub struct ProgramsHolder
@@ -42,6 +44,8 @@ pub struct ProgramsHolder
 
 impl ProgramsHolder
 {
+
+    /// Creates the ProgramHolder
     pub fn new() -> Self
     {
 	Self
@@ -64,7 +68,7 @@ impl ProgramsHolder
     }
     
 
-    // TODO: give this responsability to base
+    /// Loads all the programs in the ressources/shaders folder
     pub fn update(&mut self, display: &Display, base: &Base, holder: &mut RessourcesHolder)
     {
 	for path in base.open_folder(PathBuf::from("shaders"))
@@ -82,12 +86,6 @@ impl ProgramsHolder
 	    }
 	}
     }
-
-
-
-
-//    pub fn add_program_from_name(&mut self, display: &Display, program_name: PathBuf)
-  //  {}
     
     /**
     Loads a program from source files.
@@ -99,12 +97,6 @@ impl ProgramsHolder
 	let path_fragment = program_path.join(Path::new("fragment.glsl"));
 	let path_geometry = program_path.join(Path::new("geometry.glsl"));
 
-
-	
-	
-	
-	println!("{:?}", path_vertex);
-	
 	let pgrm = 
 	if path_geometry.is_file()
 	{	glium::Program::from_source(

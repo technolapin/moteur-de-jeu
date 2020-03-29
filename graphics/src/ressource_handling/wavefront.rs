@@ -1,21 +1,21 @@
-use super::{Vertex, Group, Material};
-use base::EngineError;
-use crate::engine::display::Display;
-use glium::texture::{RawImage2d, Texture2d};
-use glium::vertex::{VertexBuffer};
-
-use obj::{Mtl, Obj};
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::Path;
-
 use std::sync::Arc;
+
+use glium::texture::{RawImage2d, Texture2d};
+use glium::vertex::{VertexBuffer};
+use obj::{Mtl, Obj};
 use genmesh::{Polygon, Quad, Triangle};
+
+use super::{Vertex, Group, Material};
+use crate::engine::Display;
+use base::EngineError;
+
 
 /**
 This structure represents a set of 3D objects and their shared materials.
 It typicaly contains all the information a wavefront file and their associated mtl file can provide.
-It is owned by the ModelsHolder struct.
  */
 #[derive(Debug)]
 pub struct Wavefront {
@@ -26,7 +26,7 @@ pub struct Wavefront {
 
 impl Wavefront {
     /**
-    Imports new wavefront file
+    Imports new wavefront file.
      */
     pub fn new(
         disp: &Display,
@@ -191,7 +191,7 @@ impl Wavefront {
                     vertexes: Arc::new(
                         VertexBuffer::new(&disp.display, &mesh)
                             .unwrap()
-                            .into_vertex_buffer_any()),
+                            .into()),
                     material: mat,
                     
                 });
@@ -207,7 +207,7 @@ impl Wavefront {
     }
 
     /**
-    Returns a displayable structure made of references of the datas stored in ModelsHolder.
+    Fetches the material and mesh data corresponding to the given object name.
      */
     pub fn get_object(&self, name: String) -> Result<Vec<Group>, EngineError>
     {
@@ -217,58 +217,5 @@ impl Wavefront {
             Some(thing) => Ok(thing.to_vec()),
             None => EngineError::new(&format!("object '{}' does not exist", name))
         }
-        /*
-        let groups = self.objects.get(&name).unwrap();
-	let v = groups
-            .iter()
-            .map(|group| {
-		let material: Arc<_> = match &group.material
-		{
-                    None => Arc::new(Material::Default),
-                    Some(string) => {
-                        self.materials.get(string)
-			    .unwrap_or(&Arc::new(Material::Default)).clone()
-                    }
-                };
-		
-                (
-                    group.vertexes.clone(),
-		    material
-                )
-            })
-            .collect::<Vec<_>>();
-            Ok(v)
-*/
     }
-
-    /*
-    
-    /**
-    Same as get_object() but cannot fail. (preferable as this isn't an operation that's supposed to be repeated a lot).
-     */
-    pub fn get_object_checked(&self, name: String) -> Result<Vec<(&VertexBufferAny, &Material)>, EngineError> {
-        match self.objects.get(&name) {
-            None => Err(EngineError::NoneError),
-            Some(groups) => Ok(groups
-                    .iter()
-                    .map(|group| {
-			let material = match &group.material
-			{
-                            None => &Material::Default,
-                            Some(string) => {
-				self.materials.get(string)
-				    .unwrap_or(&Material::Default)
-                            }
-			};
-			
-			(
-                            &group.vertexes,
-			    material
-			)
-                    })
-                    .collect::<Vec<_>>(),
-            ),
-        }
-    }
-*/
 }

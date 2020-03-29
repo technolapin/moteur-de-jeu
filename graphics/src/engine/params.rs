@@ -1,19 +1,18 @@
-/**
-Owns the rendering parameters.
- */
+/// Owns the rendering parameters.
 #[derive(Debug)]
 pub struct Params {
     pub parameters: glium::draw_parameters::DrawParameters<'static>,
 }
 
 impl Params {
+    /// Returns some default parameters.
     pub fn new() -> Self {
         Self {
             parameters: glium::DrawParameters {
                 depth: glium::Depth {
-                    test: glium::DepthTest::IfLess, // if the object is
-                    write: true,                    // alors on dessine
-                    ..Default::default()            // Others parameters initialised by default
+                    test: glium::DepthTest::IfLess,
+                    write: true,
+                    ..Default::default()
                 },
                 ..Default::default()
             },
@@ -56,6 +55,7 @@ impl Params {
         return self;
     }
 
+    /// Put the drawn object in foreground (usefull for UIs)
     pub fn always_top(mut self) -> Self {
         self.parameters.depth.test = glium::DepthTest::Overwrite;
         self

@@ -1,3 +1,8 @@
+use glium::glutin::window::WindowBuilder;
+use glium::glutin::ContextBuilder;
+use glium::glutin::event_loop::EventLoop;
+
+
 /**
 Wrapper around the "Display" struct from glium
 */
@@ -9,13 +14,14 @@ pub struct Display
 
 impl Display
 {
-   pub fn new(event_loop: &glutin::EventsLoop) -> Self
-   {	
-	let wb = glutin::WindowBuilder::new();  
-	let cb = glutin::ContextBuilder::new().with_depth_buffer(24); 
+    /// returns a Display using the given EventLoop
+    pub fn new(event_loop: &EventLoop<()>) -> Self
+    {	
+	let wb = WindowBuilder::new();  
+	let cb = ContextBuilder::new().with_depth_buffer(24); 
 	Self
 	{	  
-		display: glium::Display::new(wb, cb, event_loop).unwrap()   
+	    display: glium::Display::new(wb, cb, event_loop).unwrap()   
 	}
-   }
+    }
 }
