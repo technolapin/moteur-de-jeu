@@ -13,3 +13,4 @@ pub mod misc;
 pub mod ressource_handling;
 pub use engine::*;
 
+pub use glium;
