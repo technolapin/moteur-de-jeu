@@ -6,11 +6,10 @@ mod tests {
     }
 }
 
-extern crate glium;
+pub extern crate glium;
 
 pub mod engine;
 pub mod misc;
 pub mod ressource_handling;
 pub use engine::*;
 
-pub use glium;
