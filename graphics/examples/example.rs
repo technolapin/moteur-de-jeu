@@ -85,7 +85,6 @@ impl Game
     // maybe user defined
     fn handle_event(&mut self, event: Event)
     {
-        println!("EVENT: {:?}", event);
         match event {
             Event::KeyPressed(key) => {self.devices.keyboard_state.insert(key);},
             Event::KeyReleased(key) => {self.devices.keyboard_state.remove(&key);},
@@ -130,12 +129,10 @@ impl Game
                      now = std::time::Instant::now();
                      if render_date < now
                      {
-                         println!("RENDER!");
                          let delta = (now-render_date+delay).as_nanos();
-                         println!("{} fps ({} ns)", 1_000_000_000/(delta+1), delta);
+                         //println!("{} fps ({} ns)", 1_000_000_000/(delta+1), delta);
                          self.render();
                          render_date = now + delay;
-                         println!("NEW RENDER DATE: {:?}", render_date);
                      }
 
                  });
