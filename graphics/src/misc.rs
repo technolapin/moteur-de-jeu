@@ -132,6 +132,18 @@ impl Similarity
         let rot = vec3(a_x, a_y, a_z);
         (trans.xyz(), rot, scale)
     }
+
+    /// creates a new Similarity from a position, a vector of 3 angles and a scale
+    pub fn set_pos(mut self, pos: Vec3, rot: Vec3, scale: f32)
+    {
+        let rot =
+        rotation(rot.x, &vec3(1., 0., 0.)) *
+        rotation(rot.y, &vec3(0., 1., 0.)) *
+        rotation(rot.z, &vec3(0., 0., 1.));
+        let trans = translation(&vec3(pos.x, pos.y, pos.z));
+        let resize = TMat4::from_diagonal(&vec4(scale, scale, scale, 1.));
+        self.world_transformation = *(trans*rot*resize).as_ref()
+    }
 }
 
 

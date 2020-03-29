@@ -14,7 +14,8 @@ pub struct Physics{
     pub bodies: DefaultBodySet<f32>,
     pub colliders: DefaultColliderSet<f32>,
     pub joint_constraints: DefaultJointConstraintSet<f32>,
-    pub force_generators: DefaultForceGeneratorSet<f32>
+    pub force_generators: DefaultForceGeneratorSet<f32>,
+    pub col_tab: Vec<generational_arena::Index>,
 }
 
 impl Physics
@@ -24,14 +25,16 @@ impl Physics
         bodies: DefaultBodySet<f32>,
         colliders: DefaultColliderSet<f32>,
         joint_constraints: DefaultJointConstraintSet<f32>,
-        force_generators: DefaultForceGeneratorSet<f32>) -> Physics{
+        force_generators: DefaultForceGeneratorSet<f32>,
+        col_tab: Vec<generational_arena::Index>) -> Physics{
 
         let physics = Physics{mechanical_world: mechanical_world,
             geometrical_world: geometrical_world,
             bodies: bodies,
             colliders: colliders,
             joint_constraints: joint_constraints,
-            force_generators: force_generators};
+            force_generators: force_generators,
+            col_tab};
 
         return physics;
     }
