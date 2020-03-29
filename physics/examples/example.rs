@@ -61,12 +61,13 @@ struct Game
     devices: DevicesState,
     exit: bool,
     game_logic: fn(&mut Self),
+    game_controls: fn(&mut Self),
     physics: Physics,
 }
 
 impl Game
 {
-    fn new(logic: fn(&mut Self), event_loop: &EventLoop<()>) -> Self
+    fn new(logic: fn(&mut Self), controls: fn(&mut Self), event_loop: &EventLoop<()>) -> Self
     {
         let base = Base::new();
         let mut holder = RessourcesHolder::new();
@@ -92,6 +93,7 @@ impl Game
             devices: DevicesState::new(),
             exit: false,
             game_logic: logic,
+            game_controls: controls,
             physics: physics,
         }
 
@@ -182,8 +184,9 @@ impl Game
 
         let mut now = std::time::Instant::now();
         let mut render_date = std::time::Instant::now();
-        // 30 fps
-        let delay = std::time::Duration::from_millis(1000/30);
+        let mut tick_date = std::time::Instant::now();
+        let render_delay = std::time::Duration::from_millis(1000/30); // 30 fps
+        let tick_delay = std::time::Duration::from_millis(40);
         
         event_loop
             .run(move |event, _, control_flow|
@@ -198,29 +201,35 @@ impl Game
                      {
                          *control_flow = ControlFlow::Exit
                      }
-
+                     
+                     
+                     // game controls
+                     (self.game_controls)(&mut self);
+                     
+                     now = std::time::Instant::now();
                      // game logic
-                    (self.game_logic)(&mut self);
-
-
+                     if tick_date < now
+                     {
+                         (self.game_logic)(&mut self);
+                         tick_date = now + tick_delay;
+                     }
+                     
                      // render
                      now = std::time::Instant::now();
                      if render_date < now
                      {
-                         let _delta = (now-render_date+delay).as_nanos();
-                         //println!("{} fps ({} ns)", 1_000_000_000/(delta+1), delta);
                          self.render();
-                         render_date = now + delay;
+                         render_date = now + render_delay;
                      }
-
-                 });
+                     
+                 }
+            );
     }
     
 }
 
-fn game_logic(game: &mut Game)
+fn game_control(game: &mut Game)
 {
-
     let mut camera_pos = Vector3::new(0., 0., 0.);
     let mut camera_rot = Vector3::new(0., 0., 0.);
     let sensibility = 0.005;
@@ -247,6 +256,12 @@ fn game_logic(game: &mut Game)
     }
     game.graphic_engine.camera.relative_move(camera_pos);
     game.graphic_engine.camera.rotation(camera_rot.clone());
+
+
+}
+
+fn game_logic(game: &mut Game)
+{
 
     // #################################################################################
     let mut i = 0;
@@ -311,7 +326,7 @@ fn make_scene(
             world_transformation: new_transformation(
                 (rand::random(), rand::random::<f32>(), rand::random::<f32>()), 
                 (rand::random(), rand::random(), rand::random()),
-                0.0001)
+                0.001)
         }).collect::<Vec<_>>();
 
     
@@ -382,7 +397,7 @@ fn make_objects(scene: &Scene) -> ObjSet{
 fn main() -> Result<(), EngineError> {
 
     let event_loop = EventLoop::new();
-    let game = Game::new(game_logic, &event_loop);
+    let game = Game::new(game_logic, game_control, &event_loop);
     game.run(event_loop)
 
 }
