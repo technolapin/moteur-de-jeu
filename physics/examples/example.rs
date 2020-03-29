@@ -249,20 +249,20 @@ fn game_logic(game: &mut Game)
     game.graphic_engine.camera.rotation(camera_rot.clone());
 
     // #################################################################################
-    game.physics.run();
     let mut i = 0;
+    game.physics.run();
     for object in game.scene.objects.iter_mut() {
         for similarity in object.1.iter_mut() {
-            let homogenous = game.physics.colliders.get(game.physics.col_tab[i]).unwrap().position().to_homogeneous();
-
+            let homogenous = game.physics
+                .colliders
+                .get(game.physics.col_tab[i])
+                .unwrap()
+                .position()
+                .to_homogeneous();
+            let (_, _, scale) = similarity.deconstruct();
             similarity.world_transformation = *homogenous.as_ref();
-
-            /*
-            let translation = ;
-            let rotation = /*?????????????????????*/;
-            let scale = similarity.deconstruct().2;
-            similarity.set_pos(translation, rotation, scale);
-             */
+            let (tra, rot, _) = similarity.deconstruct();
+            *similarity = Similarity::new(tra, rot, scale);
             i += 1;
         }
     }
@@ -307,11 +307,11 @@ fn make_scene(
     
 
     // le buffer d'instanciation pour les cubes
-    let instances = (0..30).map(|_| Similarity {
+    let instances = (0..20).map(|_| Similarity {
             world_transformation: new_transformation(
                 (rand::random(), rand::random::<f32>(), rand::random::<f32>()), 
                 (rand::random(), rand::random(), rand::random()),
-                0.001)
+                0.0001)
         }).collect::<Vec<_>>();
 
     
