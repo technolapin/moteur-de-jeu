@@ -349,12 +349,24 @@ fn make_objects(scene: &Scene) -> ObjSet{
             let translation = trs.0;
             let rotation = trs.1;
             let scale = trs.2;
+            let mut grav = false;
+            let mut shape = ShapeType::Ball(Ball::new(scale));
+            let mut stat = BodyStatus::Static;
 
+            if translation[0] == 0. && translation[1] == 0. && translation[2] == 0.{
+                grav = false;
+                shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(20.,0.1,20.)));
+            }
+            else{
+                grav = true;
+                shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(scale,scale,scale)));
+                stat = BodyStatus::Dynamic;
+            }
             let rb_data = RbData::new(
                 translation,                            // translation
                 rotation,                               // rotation
-                true,                                   // gravity_enabled
-                BodyStatus::Dynamic,                    // bodystatus
+                grav,                                   // gravity_enabled
+                stat,                    // bodystatus
                 Vector3::new(0.0, 0.0, 0.0),            // linear_velocity
                 Vector3::new(0.0, 0.0, 0.0),            // angular_velocity
                 0.0,                                    // linear_damping
@@ -384,7 +396,6 @@ fn make_objects(scene: &Scene) -> ObjSet{
                 0                                       // user_data
             );
 
-            let shape = ShapeType::Ball(Ball::new(scale)); // NOT THE RIGHT SHAPE FOR NOW
             let handle = physics::misc::Object::new(shape, rb_data, col_data); // CHANGER LE NOM DE 'Object' (optionnel mais préférable)
             obj_set.push(handle);
         }
