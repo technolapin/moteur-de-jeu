@@ -250,13 +250,19 @@ fn game_logic(game: &mut Game)
 
     // #################################################################################
     game.physics.run();
-    let i = 0;
-    for object in game.scene.objects.iter() {
-        for similarity in object.1.iter() {
-            let translation = game.physics.colliders.get(game.physics.col_tab[i]).unwrap().position(); /*C'est de type Isometry -> ?????????????????????*/
+    let mut i = 0;
+    for object in game.scene.objects.iter_mut() {
+        for similarity in object.1.iter_mut() {
+            let homogenous = game.physics.colliders.get(game.physics.col_tab[i]).unwrap().position().to_homogeneous();
+
+            similarity.world_transformation = *homogenous.as_ref();
+
+            /*
+            let translation = ;
             let rotation = /*?????????????????????*/;
             let scale = similarity.deconstruct().2;
             similarity.set_pos(translation, rotation, scale);
+             */
             i += 1;
         }
     }
