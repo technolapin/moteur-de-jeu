@@ -25,7 +25,7 @@ impl Event {
                 device_id: _,
                 event,
             } => Self::parse_device_event(event),
-            lol => {println!("{:?}", lol); Self::Default},
+            _ => Self::Default,
         }
     }
     pub fn parse_relevant(ev: glutin::event::Event<()>) -> Option<Self>
