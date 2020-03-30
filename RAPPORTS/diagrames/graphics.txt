@@ -3,84 +3,113 @@ skinparam style strictuml
 
 
 
-package Engine
+package engine
 {
-	class Graphical
-	class Frame
+	class Projection
 	class Camera
-	class Programs
 	class Display
+	class Frame
+	class Graphical
 	class Params
-
+	class ProgramCreator
+	class ProgramId
+	class ProgramsHolder
 }
 
-package Processing
+package ressource_handling
 {
-	class Vertex
 	class Group
+
+	class "Holder<Wavefront>" as h_wavefront
+	class "Holder<ProgramId>" as h_programs
+	class "Holder<Tiles>" as h_tiles
+	class "Holder<Params>" as h_params
+
 	enum Material {
 	     Textured
     	     NonTextured
 	     Default
 	}
-	class ModelsHolder
 	class Object
-	class Objects
+	class RessourcesHolder
+	class Tile
 	class Scene
 	class Vertex
-	class Similarity
-	
+	class Wavefront
 }
 
-/'
+class Similarity
+class Game
+
 package glium
 {
 	package vertex
 	{
-		class VertexBufferAny
-		class VertexBuffer
+		class glium::VertexBufferAny
+		class glium::VertexBuffer
 	}
 	package texture
 	{
-		class Texture2D
-		class RawImage2D
+		class glium::Texture2D
+		class glium::RawImage2D
 	}
-	class DrawParameters
-	class Display
-	class Program
+	class glium::DrawParameters
+	class glium::Display
+	class glium::Program
 	class glium::Frame
 }
-'/
 
-/'package glutin
+
+package glutin
 {
 	class EventsLoop
 	class WindowBuilder
 	class ContextBuilder
-}'/
+}
 
-ModelsHolder --> Objects
-Object ..> Material
-Object ..> Group
-Objects --> Group
-Objects --> Material
 
-Graphical --> Camera
-Graphical --> Params
+RessourcesHolder --> h_wavefront
+RessourcesHolder --> h_params
+RessourcesHolder --> h_tiles
+RessourcesHolder --> h_programs
+h_wavefront --> Wavefront
+h_params --> Params
+h_tiles --> Tile
+h_programs --> ProgramId
+Object --> Group
+Object --> ProgramId
+Object ..> Params
+Group ...> glium::VertexBufferAny
+Group ..> Material
+Wavefront --> Group
+Wavefront ..> Material
+Tile ..> Material
+
+Scene --> Object
+Scene --> Similarity
+
+Material --> glium::Texture2D
+
+
+
+Camera --> Projection
+Frame --> glium::Frame
+
+ProgramsHolder --> glium::Program
+ProgramsHolder --> ProgramCreator
+Display --> glium::Display
+
 Graphical --> Display
-Graphical --> Programs
+Graphical --> ProgramsHolder
+Graphical --> Camera
+
+Params --> glium::DrawParameters
 
 
-Scene ..> Object
-Scene ---> Similarity
-
-'Group --> VertexBufferAny
-'Material -->Texture2D
-'Params --> DrawParameters
-'Programs -> Program
-'Frame --> glium::Frame
-
-Frame ..> Display
-
+Game --> Scene
+Game --> Graphical
+Game --> RessourcesHolder
+Game --> Base
+Game --> DevicesStates
 
 @enduml
