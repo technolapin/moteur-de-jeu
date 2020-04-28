@@ -1,6 +1,6 @@
 use glium::{Surface, uniform};
 
-use super::{Graphical, Params};
+use super::{Graphical, Params, Camera};
 use crate::ressource_handling::{Object, Material};
 use crate::misc::Similarity;
 
@@ -12,7 +12,7 @@ Destroyed uppon displaying.
 This is a wrapper around glium::Frame with custom methods.
 */
 pub struct Frame {
-    frame: glium::Frame,
+    pub frame: glium::Frame,
 }
 
 impl Frame {
@@ -33,23 +33,33 @@ impl Frame {
         gr: &Graphical,
         obj: &Object,
         per_instance: &glium::VertexBuffer<Similarity>, // position
+        camera: &Camera
     ) {
         obj.data
             .iter()
             .for_each(|(group, program)|
-                      self.draw_group(gr, &group.vertexes, per_instance, &group.material, gr.program.get(*program).unwrap(), &obj.params)
+                      self.draw_group
+                      (
+                          &group.vertexes,
+                          per_instance,
+                          &group.material,
+                          gr.program.get(*program)
+                              .unwrap(),
+                          &obj.params,
+                          camera
+                      )
             );
     }
     
     /// Draws a group of Object (part of the Object) in the Frame, called by fn draw, with a specific material and program
     pub fn draw_group(
         &mut self,
-        gr: &Graphical,
         vertex_buffer: &glium::vertex::VertexBufferAny,
         per_instance: &glium::VertexBuffer<Similarity>,
         material: &Material,
 	program: &glium::Program,
-        params: &Params
+        params: &Params,
+        camera: &Camera
     ) {
         let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -74,8 +84,8 @@ impl Frame {
                         program,
                         &uniform! {
                             texture: texture,
-                            view_matrix: gr.camera.get_view_matrix(),
-                            perspective_matrix: gr.camera.get_perspective_matrix(),
+                            view_matrix: camera.get_view_matrix(),
+                            perspective_matrix: camera.get_perspective_matrix(),
 
                             specular_color: *specular_color,
                             specular_exponent: *specular_exponent,
@@ -100,8 +110,8 @@ impl Frame {
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
                         program,
-                        &uniform! {view_matrix: gr.camera.get_view_matrix(),
-                                   perspective_matrix: gr.camera.get_perspective_matrix(),
+                        &uniform! {view_matrix: camera.get_view_matrix(),
+                                   perspective_matrix: camera.get_perspective_matrix(),
                                    ambiant: *ambiant_color,
                                    diffuse: *diffuse_color,
                                    specular: *specular_color,
@@ -119,7 +129,7 @@ impl Frame {
                         (vertex_buffer, per_instance.per_instance().unwrap()),
                         indices,
                         program,
-                        &uniform! {view_matrix: gr.camera.get_view_matrix() },
+                        &uniform! {view_matrix: camera.get_view_matrix() },
                         &params.parameters,
                     )
                     .unwrap();
