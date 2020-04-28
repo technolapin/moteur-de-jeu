@@ -88,9 +88,7 @@ impl Wavefront {
                     map_kd: None,
                     ..
                 } => {
-                    println!("trans/opac: {:?} {:?}", transparency, opacity);
                     let opacity = opacity.unwrap_or(1.).min(1. - transparency.unwrap_or(0.));
-                    println!("OPA: {}", opacity);
                     
                     Material::NonTextured {
                         ambiant_color: *ambiant,

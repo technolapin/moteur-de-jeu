@@ -12,7 +12,11 @@ use na::geometry::Point3;
 
 use nphysics3d::algebra::Velocity3;
 
+use graphics::{Scene, Similarity};
+use std::f32::consts::PI;
+use std::f32::INFINITY;
 
+use nphysics3d::object::ActivationStatus;
 
 // We implement the Clone trait to the structure
 #[derive(Clone)]
@@ -261,4 +265,69 @@ pub fn build_rb_col(obj_set: ObjSet) -> (DefaultBodySet<f32>, DefaultColliderSet
         coll_tab.push(coll_handle);
     }
     return (bodies, colliders, coll_tab);
+}
+
+
+
+pub fn make_objects(scene: &Scene) -> ObjSet{
+    let mut obj_set = ObjSet::new();
+
+    for object in scene.objects.iter() {
+        for similarity in object.1.iter() {
+            let trs = similarity.deconstruct();
+            let translation = trs.0;
+            let rotation = trs.1;
+            let scale = trs.2;
+            let mut grav = false;
+            let mut shape = ShapeType::Ball(Ball::new(scale));
+            let mut stat = BodyStatus::Static;
+
+            if translation[0] == 0. && translation[1] == 0. && translation[2] == 0.{
+                grav = false;
+                shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(20.,0.1,20.)));
+            }
+            else{
+                grav = true;
+                shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(scale,scale,scale)));
+                stat = BodyStatus::Dynamic;
+            }
+            let rb_data = RbData::new(
+                translation,                            // translation
+                rotation,                               // rotation
+                grav,                                   // gravity_enabled
+                stat,                    // bodystatus
+                Vector3::new(0.0, 0.0, 0.0),            // linear_velocity
+                Vector3::new(0.0, 0.0, 0.0),            // angular_velocity
+                0.0,                                    // linear_damping
+                0.0,                                    // angular_damping
+                INFINITY,                               // max_linear_velocity
+                INFINITY,                               // max_angular_velocity
+                0.0,                                    // angular_inertia
+                2000.0,                                 // mass
+                Point3::new(0.0, 0.0, 0.0),             // local_center_of_mass
+                ActivationStatus::default_threshold(),  // sleep_threshold
+                Vector3::new(false, false, false),      // kinematic_translations
+                Vector3::new(false, false, false),      // kinematic_rotations
+                0,                                      // user_data
+                true                                    // enable_linear_motion_interpolation
+            );
+
+            let col_data = ColData::new(
+                Vector3::new(0.0, 0.0, 0.0),            // translation
+                Vector3::new(0.0, 0.0, 0.0),            // rotation
+                0.0,                                    // density
+                0.5,                                    // restitution
+                0.2,                                    // friction
+                0.01,                                   // margin
+                0.002,                                  // linear_prediction
+                PI / 180.0 * 5.0,                       // angular_prediction
+                false,                                  // sensor
+                0                                       // user_data
+            );
+
+            let handle = Object::new(shape, rb_data, col_data); // CHANGER LE NOM DE 'Object' (optionnel mais préférable)
+            obj_set.push(handle);
+        }
+    }
+    return obj_set;
 }

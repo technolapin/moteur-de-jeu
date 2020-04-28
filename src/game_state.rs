@@ -8,14 +8,27 @@ use imgui_glium_renderer::Renderer;
 
 use base::EngineError;
 
+use physics::Physics;
+
 use std::collections::HashMap;
+
+use physics::nphysics3d::{
+    force_generator::DefaultForceGeneratorSet,
+    joint::DefaultJointConstraintSet,
+    world::{DefaultMechanicalWorld, DefaultGeometricalWorld},
+            object::{ActivationStatus, BodyStatus, DefaultBodySet, DefaultColliderSet}            
+};
+use physics::make_objects;
+use graphics::nalgebra::Vector3;
+
 
 pub struct GameState
 {
     pub name: String,
     pub scene: Scene,
+    pub physics: Option<Physics>,
     gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
-    pub logic: fn(&mut GameState, &DevicesState),
+    logic: fn(&mut GameState, &DevicesState),
     render_behavior: RenderBehavior,
     logic_behavior: LogicBehavior,
     proxy: EventLoopProxy<GameEvent>
@@ -27,12 +40,42 @@ impl GameState
 {
     pub fn new(name: String,
                scene: Scene,
+               with_physics: bool,
                logic: fn(&mut GameState, &DevicesState),
                render_behavior: RenderBehavior,
                logic_behavior: LogicBehavior,
                gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
                proxy: EventLoopProxy<GameEvent>) -> Self
     {
+        let physics = if with_physics
+        {
+            // MechanicalWorld with a gravity vector
+            let mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
+
+            let geometrical_world = DefaultGeometricalWorld::<f32>::new();
+            let joint_constraints = DefaultJointConstraintSet::<f32>::new();
+            let force_generators = DefaultForceGeneratorSet::<f32>::new();
+
+            let obj_set = make_objects(&scene);
+
+            // (bodies, colliders, coll_tab)
+            let three_uplet = physics::build_rb_col(obj_set);
+
+            // Where we store all the RigidBody object
+            let bodies = three_uplet.0;
+
+            // Where we store all the Collider object
+            let colliders = three_uplet.1;
+
+            // Where we store the handle of every collider so we can get their position and material later (used for testing only at the moment)
+            let col_tab = three_uplet.2;
+
+            Some(Physics::new(mechanical_world, geometrical_world, bodies, colliders, joint_constraints, force_generators, col_tab))
+        }
+        else
+        {
+            None
+        };
         Self
         {
             name: name,
@@ -41,7 +84,8 @@ impl GameState
             render_behavior: render_behavior,
             gui: gui,
             logic_behavior: logic_behavior,
-            proxy: proxy
+            proxy: proxy,
+            physics: physics
         }
     }
     
@@ -49,16 +93,14 @@ impl GameState
         game: &mut Game,
         proto: &ProtoState) -> Result<Self, EngineError>
     {
-        Ok(Self
-           {
-               name: proto.name.clone(),
-               scene: (proto.scene_builder)(game)?,
-               logic: proto.run_logic,
-               render_behavior: proto.render_behavior,
-               gui: proto.run_gui,
-               logic_behavior: proto.logic_behavior,
-               proxy: game.event_loop_proxy.clone()
-           })
+        Ok(Self::new(proto.name.clone(),
+                     (proto.scene_builder)(game)?,
+                     proto.with_physics,
+                     proto.run_logic,
+                     proto.render_behavior,
+                     proto.logic_behavior,
+                     proto.run_gui,
+                     game.event_loop_proxy.clone()))
     }
 
     pub fn send_event(&self, user_event: GameEvent)
@@ -129,6 +171,7 @@ impl GameStateStack
         &mut self,
         name: &str,
         scene_builder: fn(&mut Game) -> Result<Scene, EngineError>,
+        with_physics: bool,
         run_gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
         run_logic: fn(&mut GameState, &DevicesState),
         render_behavior: RenderBehavior,
@@ -142,6 +185,7 @@ impl GameStateStack
             ProtoState
             {
                 name: name,
+                with_physics: with_physics,
                 scene_builder: scene_builder,
                 run_gui: run_gui,
                 run_logic: run_logic,
@@ -253,6 +297,7 @@ impl GameStateStack
 pub struct ProtoState
 {
     name: String,
+    with_physics: bool,
     scene_builder: fn(&mut Game) -> Result<Scene, EngineError>,
     run_gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
     run_logic: fn(&mut GameState, &DevicesState),

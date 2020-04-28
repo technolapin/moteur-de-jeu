@@ -141,6 +141,30 @@ fn game_logic(game_state: &mut GameState,
     game_state.scene.camera.relative_move(camera_pos);
     game_state.scene.camera.rotation(camera_rot.clone());
 
+    ///////////////////
+    // #################################################################################
+    let mut physics = game_state.physics.as_mut().unwrap();
+    let mut i = 0;
+    physics.run();
+    for object in game_state.scene.objects.iter_mut() {
+        for similarity in object.1.iter_mut() {
+            let homogenous = physics
+                .colliders
+                .get(physics.col_tab[i])
+                .unwrap()
+                .position()
+                .to_homogeneous();
+            let (_, _, scale) = similarity.deconstruct();
+            similarity.world_transformation = *homogenous.as_ref();
+            let (tra, rot, _) = similarity.deconstruct();
+            *similarity = Similarity::new(tra, rot, scale);
+            i += 1;
+        }
+    }
+    // #################################################################################
+
+
+
 }
 
 fn menu_logic(game_state: &mut GameState,
@@ -185,12 +209,14 @@ fn main() -> Result<(), EngineError>
     let mut game = Game::new();
     game.register_state("main state",
                         make_main_scene,
+                        true,
                         game_logic,
                         None,
                         RenderBehavior::Superpose,
                         LogicBehavior::Superpose);
     game.register_state("menu state",
                         make_menu_scene,
+                        false,
                         menu_logic,
                         Some(render_gui),
                         RenderBehavior::Superpose,

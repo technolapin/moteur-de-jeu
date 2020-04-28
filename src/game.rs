@@ -139,6 +139,7 @@ impl Game
         &mut self,
         name: &str,
         scene_builder: fn(&mut Game) -> Result<Scene, EngineError>,
+        with_physics: bool,
         run_logic: fn(&mut GameState, &DevicesState),
         run_gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
         render_behavior: RenderBehavior,
@@ -150,6 +151,7 @@ impl Game
             .register(
                 name,
                 scene_builder,
+                with_physics,
                 run_gui,
                 run_logic,
                 render_behavior,
@@ -212,7 +214,7 @@ impl Game
         let mut now = std::time::Instant::now();
         let mut render_date = std::time::Instant::now();
         // 30 fps
-        let delay = std::time::Duration::from_millis(1000/30);
+        let delay = std::time::Duration::from_millis(1000/15);
         
         self.event_loop.consume()
             .run(move |event, _, control_flow|
