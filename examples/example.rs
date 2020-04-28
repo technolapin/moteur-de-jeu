@@ -30,7 +30,8 @@ fn make_main_scene(
     holder.load_wavefront(disp, "reds.obj", &ressources_path)?;
     holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
     holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "terrain.obj", &ressources_path)?;
+    //holder.load_wavefront(disp, "terrain.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "maison.obj", &ressources_path)?;
 
     let _sphere_mauve = holder.get_object("transparent_sphere", "Sphere").unwrap();
     let teto = holder
@@ -38,7 +39,7 @@ fn make_main_scene(
         .unwrap();
     let red = holder.get_object("reds", "Cube_translaté_Cube.002").unwrap();
     let zeldo = holder.get_object("textured_cube", "Cube.001").unwrap();
-    let map_elements = holder.get_whole_content("terrain").unwrap();
+    let map_elements = holder.get_whole_content("maison").unwrap();
     // le buffer d'instanciation pour la map
     let map_position = vec![Similarity {
         world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
