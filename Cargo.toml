@@ -14,6 +14,7 @@ graphics = {path = "graphics"}
 base = { path = "base" }
 events_handling = {path = "events_handling"}
 physics = {path = "physics"}
+sounds = { path = "sounds" }
 rand = "*"
 movable="*"
 
@@ -22,3 +23,4 @@ image = "*"
 imgui-sys = "*"
 imgui-glium-renderer = "*"
 imgui-winit-support = "*"
+

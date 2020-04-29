@@ -20,7 +20,9 @@ use imgui_winit_support::{HiDpiMode, WinitPlatform};
 use imgui_glium_renderer::Renderer;
 use imgui::{Context, Ui};
 
+use sounds::{OneSound};
 
+use std::thread;
 
 
 
@@ -168,7 +170,38 @@ impl Game
     }
 
 
-    
+
+
+    fn play_sound(&self, music_path: String, position: Option<[f32; 3]>)
+    {
+        let thread_music= thread::spawn(move || {
+	     let mut music = OneSound:: new(music_path.as_str());
+
+             match position{
+		None => {},
+		Some(position) => music.set_position(position)
+             }
+    	     music.play_all();       
+        });
+    }    
+
+    fn play_sound_timeLimit(&self,music_path: String, duration: Option<f32>,position: Option<[f32; 3]>)
+    {
+        let thread_music= thread::spawn(move || {
+	     let mut music = OneSound:: new(music_path.as_str());
+
+              match position{
+		None => {},
+		Some(position) => music.set_position(position)
+	      }
+	      match duration{
+                 Some(duration) => music.play_time_limit(duration),
+                 None => music.play_nolimit()
+              }
+ 
+        });
+    } 
+
 
     // maybe user defined
     fn handle_event(&mut self, event: Event<GameEvent>) -> ControlFlow
@@ -198,7 +231,9 @@ impl Game
                         self.push_state(
                             &state_name
                         ).unwrap();
-                    }
+                    },
+                    GameEvent::PlaySound(music_path,position) => self.play_sound(music_path,position),
+    		    GameEvent::PlaySound_timeLimit(music_path,duration,position) => self.play_sound_timeLimit(music_path,duration,position)
                 }
             }
             _ => ()
