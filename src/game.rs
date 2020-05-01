@@ -22,9 +22,8 @@ use imgui::{Context, Ui};
 
 use sounds::{OneSound};
 
+use specs::{Dispatcher, World};
 use std::thread;
-
-
 
 
 /**
@@ -106,6 +105,7 @@ impl Game
         frame.clear();
         self.states.borrow_mut()
             .render(&self.graphic_engine,
+		    &self.ressources,
                     &mut self.gui_renderer,
                     &mut frame,
                     &mut self.gui_context);
@@ -114,11 +114,21 @@ impl Game
         
     }
 
-    /// useless for now
-        /// useless for now
+    pub fn load_state(&mut self,
+		      name: &str) -> Result<(), base::EngineError>
+    {
+        let proto = self.states.get_mut()
+	    .get_proto(name.to_string())?;
+        let state = GameState::from_proto(self, &proto)?;
+        self.states.get_mut()
+            .loaded.insert(name.to_string(), state);
+	Ok(())
+	
+    }
+    
+
     pub fn push_state(&mut self,
-                      name: &str
-    ) -> Result<(), base::EngineError>
+                      name: &str) -> Result<(), base::EngineError>
     {
         if let Some(state) = self.states.get_mut()
             .loaded.remove(&name.to_string())
@@ -129,10 +139,8 @@ impl Game
         }
         else
         {
-            let proto = self.states.get_mut().get_proto(name.to_string())?;
-            let state = GameState::from_proto(self, &proto)?;
-            self.states.get_mut()
-                .push(state);
+	    self.load_state(name)?;
+	    self.push_state(name)?;
         }
         Ok(())
     }
@@ -146,6 +154,7 @@ impl Game
         run_gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
         render_behavior: RenderBehavior,
         logic_behavior: LogicBehavior,
+	init: fn(&mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
 
     )
     {
@@ -157,7 +166,8 @@ impl Game
                 run_gui,
                 run_logic,
                 render_behavior,
-                logic_behavior)
+                logic_behavior,
+		init)
     }
     
     fn pop_state(&self, n_to_pop: usize)

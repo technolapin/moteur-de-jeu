@@ -1,24 +1,26 @@
 extern crate moteur_jeu_video;
 
-use moteur_jeu_video::{
-    Game,
-    GameState,
-    RenderBehavior,
-    LogicBehavior,
-    GameEvent
+use moteur_jeu_video::prelude::*;
+use specs::
+{
+    World,
+    WorldExt,
+    DispatcherBuilder,
+    Dispatcher,
+    Builder,
 };
-use ::base::EngineError;
-use graphics::{
-    glium::glutin::event_loop::EventLoopProxy,
-    nalgebra::Vector3,
-    nalgebra_glm::{TMat4, vec3, vec4, translation, rotation},
-    Similarity,
-    get_ressources_path,
-    Scene,
-    Params
+
+use moteur_jeu_video::
+{
+    Spatial,
+    Model,
 };
-use events_handling::{Key, DevicesState};
-use imgui::{Window, im_str, Condition, Ui};
+
+use graphics::RessourcesHolder;
+
+
+
+
 
 
 fn make_main_scene(
@@ -27,63 +29,25 @@ fn make_main_scene(
 {
     let disp = &game.graphic_engine.display;
     let holder = &mut game.ressources;
-    let base = &game.base;
     let ressources_path = get_ressources_path();
 
-    holder.load_wavefront(disp, "textured_cube.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "reds.obj", &ressources_path)?;
     holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "terrain.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "Test.obj", &ressources_path)?;
-
-    let sphere = holder.get_object("transparent_sphere", "Sphere").unwrap();
-    let _teto = holder
-        .get_object("teto", "Lat式改変テト_mesh_Lat式改変テト")
-        .unwrap();
-    let red = holder.get_object("reds", "Cube_translaté_Cube.002").unwrap();
-    let zeldo = holder.get_object("textured_cube", "Cube.001").unwrap();
-    let map_elements = holder.get_whole_content("terrain").unwrap();
-    // le buffer d'instanciation pour la map
-    let map_position = vec![
-        Similarity
-        {
-            world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
-        }
-    ];
-
-//    let maison = holder.get_whole_content("Test").unwrap();
-    let maison = holder.get_object("Test", "SM_Bld_Saloon_01_27_SM_Bld_Saloon_01").unwrap();
-
-    holder.add_parameters(Params::new().polygon_line(), "wireframe");
-
-    let red = holder.obj_parameters(red, "wireframe")?;
+    holder.load_wavefront(disp, "maison.obj", &ressources_path)?;
     
-    holder.add_tile(&disp, &base, "edgytet.png")?;
-    
-    
+    let mut scene = Scene::new(&disp);
 
-    let positions_balles = vec![
-        (0.1, 0.01, 1.2),
-        (0.8, 0.04, 0.0),
-        (0., 0., 0.2),
-        (0.1, 0.01, 1.2),
-    ];
 
-    
-    // le buffer d'instanciation pour les cubes
-    let instances = (0..4).map(|i| Similarity {
-            world_transformation: new_transformation(
-                positions_balles[i], 
-                (rand::random(), rand::random(), rand::random()),
-                0.001)
-        }).collect::<Vec<_>>();
-
-    
-    let mut scene = Scene::new();
-
-    scene.add(vec![sphere], instances);
-    scene.add(vec![maison], map_position);
+    for _ in 0..10
+    {
+	scene.add_light(
+	    Light::Point(
+	    
+		1.,
+		[rand::random::<f32>(); 3],
+		[rand::random::<f32>(); 3]
+	    )
+	);
+    }    
 
     Ok(scene)
 }
@@ -94,38 +58,11 @@ fn make_menu_scene(
 ) -> Result<Scene, EngineError>
 {
     let disp = &game.graphic_engine.display;
-    let holder = &mut game.ressources;
-    let base = &game.base;
     
-    holder.add_tile(&disp, &base, "edgytet.png")?;
-    
-    let tile = holder.get_tile("edgytet", &disp)?;
-
-    let tile_position = vec![Similarity {
-        world_transformation: new_transformation((0., 0., 0.), (0., 0., 0.), 1.)
-    }];
-    
-    let mut scene = Scene::new();
-
-    scene.add(vec![tile], tile_position);
+    let mut scene = Scene::new(&disp);
 
     Ok(scene)
 }
-
-fn new_transformation((tx, ty, tz): (f32, f32, f32),
-                      (rx, ry, rz): (f32, f32, f32), scale: f32) -> [[f32; 4]; 4]
-{
-    let rot =
-        rotation(rx, &vec3(1., 0., 0.)) *
-        rotation(ry, &vec3(0., 1., 0.)) *
-        rotation(rz, &vec3(0., 0., 1.));
-    let trans = translation(&vec3(tx, ty, tz));
-    let resize = TMat4::from_diagonal(&vec4(scale, scale, scale, 1.));
-    *(trans*rot*resize).as_ref()
-}
-
-
-
 
 
 fn game_logic(game_state: &mut GameState,
@@ -158,7 +95,7 @@ fn game_logic(game_state: &mut GameState,
     }
     game_state.scene.camera.relative_move(camera_pos);
     game_state.scene.camera.rotation(camera_rot.clone());
-
+/*
     ///////////////////
     // #################################################################################
     let mut physics = game_state.physics.as_mut().unwrap();
@@ -180,7 +117,7 @@ fn game_logic(game_state: &mut GameState,
         }
     }
     // #################################################################################
-
+*/
 
 
 }
@@ -214,6 +151,58 @@ fn render_gui(ui: &mut Ui, proxy: &EventLoopProxy<GameEvent>)
 
 }
 
+fn init_game(ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
+{
+    let mut world = World::new();
+    world.register::<Spatial>();
+    world.register::<Model>();
+
+    let sphere = Model(ressources.get_object("transparent_sphere", "Sphere").unwrap());
+    for _ in 0..400
+    {
+	let spatial =Spatial
+	{
+            pos: vec3(rand::random(), rand::random(), rand::random()),
+            rot: vec3(rand::random(), rand::random(), rand::random()),
+            scale: 0.001
+	};
+	world.create_entity()
+	    .with(spatial)
+	    .with(sphere)
+	    .build();
+    }
+
+    let zero = Spatial
+    {
+	pos: vec3(0., 0., 0.),
+	rot: vec3(0., 0., 0.),
+	scale: 1.
+    };
+    let maison = Model(ressources.get_object("maison", "SM_Bld_Saloon_01_27_SM_Bld_Saloon_01").unwrap());
+    world.create_entity()
+	.with(zero)
+	.with(maison)
+	.build();
+
+    
+    let dispatcher = DispatcherBuilder::new()
+	.build();
+    
+    (world, dispatcher)
+}
+
+fn init_menu(ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
+{
+    let mut world = World::new();
+    world.register::<Spatial>();
+    world.register::<Model>();
+
+    let dispatcher = DispatcherBuilder::new()
+	.build();
+    
+    (world, dispatcher)
+}
+
 /*
 Un exemple simple avec un état de jeu et un état pour le menu.
 Le menu bloque le jeu quand il est en place, mais le jeu s'affiche toujours même
@@ -227,19 +216,27 @@ fn main() -> Result<(), EngineError>
     let mut game = Game::new();
     game.register_state("main state",
                         make_main_scene,
-                        true,
+                        false,
                         game_logic,
                         None,
                         RenderBehavior::Superpose,
-                        LogicBehavior::Superpose);
+                        LogicBehavior::Superpose,
+			init_game
+    );
     game.register_state("menu state",
                         make_menu_scene,
                         false,
                         menu_logic,
                         Some(render_gui),
                         RenderBehavior::Superpose,
-                        LogicBehavior::Blocking);
+                        LogicBehavior::Blocking,
+			init_menu
+
+    );
     game.push_state("main state")?;
+    game.load_state("menu state")?;
+//    println!("{:?}", game.ressources);
+    
     game.run()
 
 }
