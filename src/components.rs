@@ -3,7 +3,16 @@ use specs::
     Component,
     DenseVecStorage
 };
-use graphics::{Object, Handle, nalgebra::Vector3};
+use graphics::
+{
+    Object,
+    Handle,
+    nalgebra::Vector3,
+    glium::glutin::event_loop::EventLoopProxy
+};
+
+use super::GameEvent;
+
 
 
 #[derive(Debug, Clone, Copy)]
@@ -35,6 +44,16 @@ use graphics::Light;
 pub struct Lighting(pub Light);
 
 impl Component for Lighting
+{
+    type Storage = DenseVecStorage<Self>;
+}
+
+
+/// The indice of the physical object
+#[derive(Debug, Clone, Copy)]
+pub struct PhysicId(pub usize);
+
+impl Component for PhysicId
 {
     type Storage = DenseVecStorage<Self>;
 }
