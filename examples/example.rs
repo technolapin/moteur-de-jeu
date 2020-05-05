@@ -46,7 +46,15 @@ fn make_main_scene(
 
     holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
 
-    holder.load_wavefront(disp, "saloon.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "candle.obj", &ressources_path)?;
+
+    holder.load_wavefront(disp, "chandelier.obj", &ressources_path)?;
+
+    holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
+
+    holder.load_wavefront(disp, "all_objects_saloon.obj", &ressources_path)?;
+    
+    /*holder.load_wavefront(disp, "saloon.obj", &ressources_path)?; //sol
     holder.load_wavefront(disp, "porte_chambre.obj", &ressources_path)?;
     holder.load_wavefront(disp, "porte_entree.obj", &ressources_path)?;
     holder.load_wavefront(disp, "table.obj", &ressources_path)?;
@@ -54,8 +62,8 @@ fn make_main_scene(
     holder.load_wavefront(disp, "chaise.obj", &ressources_path)?;
     holder.load_wavefront(disp, "tabourets.obj", &ressources_path)?;
     holder.load_wavefront(disp, "verres.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "bouteille.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "bouteille.obj", &ressources_path)?;*/
+
 
     
 
@@ -153,7 +161,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
             .build();
     }
 
-    let map_elements = Model(ressources.get_whole_content("saloon").unwrap());
+    let saloon = Model(ressources.get_object("all_objects_saloon", "saloon_SM_Bld_Saloon_01_27_SM_Bld_Saloon_01").unwrap());
     let zero = Spatial
     {
         pos: vec3(0., 0., 0.),
@@ -162,10 +170,16 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     };
     world.create_entity()
 	.with(zero)
-	.with(map_elements)
+	.with(saloon)
     .build();
     
-    let porte_chambre = Model(ressources.get_whole_content("porte_chambre").unwrap());
+    let sol = Model(ressources.get_object("all_objects_saloon", "sol_SM_Env_Sand_Ground_06_246_SM_Env_Sand_Ground_06").unwrap());
+    world.create_entity()
+	.with(zero)
+	.with(sol)
+    .build();
+
+    let porte_chambre = Model(ressources.get_object("all_objects_saloon", "porte_chambre_SM_Bld_Saloon_RoomDoor_01_273_SM_Bld_Saloon_RoomDoor_01.001").unwrap());
     let portes_chambres_positions = vec! [
             Spatial { pos: vec3(-19.3022, 3.41965, -17.4815), rot: vec3(0., 0., 0.), scale: 1. },
             Spatial { pos: vec3(-15.5513, 3.41965, -17.4815), rot: vec3(0., 0., 0.), scale: 1. },
@@ -178,7 +192,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
     
-    let porte_entree = Model(ressources.get_whole_content("porte_entree").unwrap());
+    let porte_entree = Model(ressources.get_object("all_objects_saloon", "porte_entree_SM_Bld_Saloon_Swinging_Doors_01_171_SM_Bld_Saloon_Swinging_Door").unwrap());
     let portes_entree_positions = vec! [
             Spatial { pos: vec3(-9.64833, 1.46962, -8.76043), rot: vec3(0., 0.7853, 0.), scale: 1. },
             Spatial { pos: vec3(-8.71997, 1.46962, -9.68726), rot: vec3(0., -2.3561, 0.), scale: 1.  },
@@ -190,11 +204,11 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let table = Model(ressources.get_whole_content("table").unwrap());
+    let table = Model(ressources.get_object("all_objects_saloon", "table_SM_Prop_Table_3_SM_Prop_Table_01").unwrap());
     let tables_positions = vec! [
         Spatial { pos: vec3(-14.6168, 0.333457, -12.643), rot: vec3(0., -0.33592, 0.), scale: 1. },
-        Spatial { pos: vec3(-10.5536, 0.360777, -12.879), rot: vec3(0., 0.94535 , 0.), scale:1.  },
-        Spatial { pos: vec3(-12.5902, 0.360777, -10.1726), rot: vec3(0., 0.28788 , 0.), scale:1.  },
+        Spatial { pos: vec3(-10.5536, 0.333457, -12.879), rot: vec3(0., 0.94535 , 0.), scale:1.  },
+        Spatial { pos: vec3(-12.5902, 0.333457, -10.1726), rot: vec3(0., 0.28788 , 0.), scale:1.  },
         ];
     for position in tables_positions.iter()
     {   world.create_entity()
@@ -203,7 +217,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
  
-    let lit_double = Model(ressources.get_whole_content("lit_double").unwrap());
+    let lit_double = Model(ressources.get_object("all_objects_saloon", "lit_double_SM_Prop_Bed_01_281_SM_Prop_Bed_01").unwrap());
     let lits_doubles_positions = vec! [
         Spatial { pos: vec3(-13.8841, 3.27735, -19.7949), rot: vec3(0., -1.5707, 0.), scale:1. },
         Spatial { pos: vec3(-19.6265, 3.27735, -19.7949), rot: vec3(0., 1.5707 , 0.), scale:1.  },
@@ -216,7 +230,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
   
-    let chaise = Model(ressources.get_whole_content("chaise").unwrap());
+    let chaise = Model(ressources.get_object("all_objects_saloon", "chaise_SM_Prop_Chair_01_327_SM_Prop_Chair_01").unwrap());
     let chaises_positions = vec! [
         Spatial { pos: vec3(-14.714, 0.325766, -11.6007), rot: vec3(0., 3.1415, 0.), scale:1. },
         Spatial { pos: vec3(-13.6238, 0.325766, -13.0231), rot: vec3(0., -1.22495, 0.), scale:1. },
@@ -230,7 +244,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let tabourets = Model(ressources.get_whole_content("tabourets").unwrap());
+    let tabourets = Model(ressources.get_object("all_objects_saloon", "tabouret_SM_Prop_Stool_Round_6_SM_Prop_Stool_Round_01.002").unwrap());
     let tabourets_positions = vec! [
         Spatial { pos: vec3(-9.5536, 0.360777, -12.879), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-11.5536, 0.360777, -12.879), rot: vec3(0., 0., 0.), scale:1. },
@@ -248,7 +262,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let verres = Model(ressources.get_whole_content("verres").unwrap());
+    let verres = Model(ressources.get_object("all_objects_saloon", "verres_SM_Prop_Cup_357_SM_Prop_Cup_01.002").unwrap());
     let verres_positions = vec! [
         Spatial { pos: vec3(-10.4869, 1.2616, -12.4206), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-11.0091, 1.2616, -13.0586), rot: vec3(0., 0., 0.), scale:1. },
@@ -265,7 +279,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let bouteille = Model(ressources.get_whole_content("bouteille").unwrap());
+    let bouteille = Model(ressources.get_object("all_objects_saloon", "bouteille_SM_Prop_Bottle_363_SM_Prop_Bottle_01").unwrap());
     let bouteilles_positions = vec! [
         Spatial { pos: vec3(-14.1798, 1.47845, -15.2044), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-14.2691, 1.47845, -15.0703), rot: vec3(0., 0., 0.), scale:1. },
@@ -273,12 +287,12 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         Spatial { pos: vec3(-13.0485, 1.48304, -15.1097), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-10.075, 1.48645, -15.2669), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-9.7778, 1.48645, -15.1302), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-10.7084, 1.2616, -13.1072), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-10.675, 1.2616, -12.679), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-10.471, 1.2616, -12.9902), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-12.5093, 1.2616, -10.2678), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-12.7289, 1.2616, -10.2876), rot: vec3(0., 0., 0.), scale:1. },
-        Spatial { pos: vec3(-12.613, 1.2616, -10.0908), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-10.7184, 1.2616, -13.1172), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-10.685, 1.2616, -12.669), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-10.461, 1.2616, -13.1002), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-12.2993, 1.2616, -10.1778), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-12.9389, 1.2616, -10.1976), rot: vec3(0., 0., 0.), scale:1. },
+        Spatial { pos: vec3(-12.523, 1.2616, -9.8908), rot: vec3(0., 0., 0.), scale:1. },
         ];
     for position in bouteilles_positions.iter()
     {   world.create_entity()
@@ -286,6 +300,37 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .with(bouteille)
         .build();
     }
+
+
+    // Il faudra ajouter la lumière pour les deux suivants
+    let candle = Model(ressources.get_whole_content("candle").unwrap()); // Model
+    let candle_position = vec![ 
+        Spatial { pos: vec3(-14.6168, 1.2416, -12.643), rot: vec3(0., 0. , 0.), scale:0.05 }, 
+        Spatial { pos: vec3(-10.5536, 1.2416, -12.879), rot: vec3(0., 0. , 0.), scale:0.05  },
+        Spatial { pos: vec3(-12.5902, 1.2416, -10.1726), rot: vec3(0., 0. , 0.), scale:0.05  }, 
+        ];
+    //let colour = [0.7, 0.7, 0.7] ; 
+    for position in candle_position.iter()
+    {
+        //let light = Light::Point(1000., [0., 0., 0.], colour); // [position.pos[0], position.pos[1], position.pos[2]]
+        world.create_entity()
+        //.with(Lighting(light))
+        .with(*position)
+        .with(candle)
+        .build();
+    }
+
+    let chandelier = Model(ressources.get_whole_content("chandelier").unwrap()); // Model
+    let chandelier_position = Spatial { pos: vec3(-14.6168, 2.0, -12.643), rot: vec3(0., 0. , 0.), scale:1. } ;
+    //let colour = [1., 1., 1.] ; 
+    //let light = Light::Point(1000., [chandelier_position.pos[0], chandelier_position.pos[1], chandelier_position.pos[2]], colour);
+    world.create_entity()
+    //.with(Lighting(light))
+    .with(chandelier_position)
+    .with(chandelier)
+    .build();
+    
+
 
 
 
@@ -301,7 +346,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
 	let rot = [rand::random::<f32>(); 3];
 	let light = Light::Point
 	    (
-		1.,
+		100.,
 		pos,
 		rot
 	    );
@@ -337,7 +382,7 @@ impl<'a> System<'a> for CameraSystem
     {
 
 	let sensibility = 0.003;
-	let speed = 0.08; // parce que pourquoi pas.
+	let speed = 0.40; // parce que pourquoi pas.
 
 	let (mouse_x, mouse_y) = devices.mouse_motion();
 
