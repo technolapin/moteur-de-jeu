@@ -1,7 +1,8 @@
 extern crate nalgebra as na;
+
 use crate::shapes::*;
 
-use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, BodyPartHandle, ColliderDesc, BodyStatus};
+use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, BodyPartHandle, ColliderDesc, BodyStatus, ActivationStatus};
 use nphysics3d::material::{MaterialHandle, BasicMaterial};
 
 use ncollide3d::shape::ShapeHandle;
@@ -15,8 +16,6 @@ use nphysics3d::algebra::Velocity3;
 use graphics::Scene;
 use std::f32::consts::PI;
 use std::f32::INFINITY;
-
-use nphysics3d::object::ActivationStatus;
 
 // We implement the Clone trait to the structure
 #[derive(Clone)]
@@ -278,10 +277,13 @@ pub fn make_objects(scene: &Scene) -> ObjSet{
             let translation = trs.0;
             let rotation = trs.1;
             let scale = trs.2;
-            let mut grav = false;
-            let mut shape = ShapeType::Ball(Ball::new(scale));
+            let grav;
+            let shape;
             let mut stat = BodyStatus::Static;
 
+            // ### A CHANGER !!! ###
+            // On ne fait que des Cuboid pour le moment
+            // Il faut adapter en choisissant la bonne forme ou en ne faisant que des TriMesh (voir physics/src/shapes/trimesh.rs)
             if translation[0] == 0. && translation[1] == 0. && translation[2] == 0.{
                 grav = false;
                 shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(20.,0.1,20.)));
@@ -291,11 +293,13 @@ pub fn make_objects(scene: &Scene) -> ObjSet{
                 shape = ShapeType::Cuboid(Cuboid::new(Vector3::new(scale,scale,scale)));
                 stat = BodyStatus::Dynamic;
             }
+            // ### A CHANGER !!! ###
+
             let rb_data = RbData::new(
                 translation,                            // translation
                 rotation,                               // rotation
                 grav,                                   // gravity_enabled
-                stat,                    // bodystatus
+                stat,                                   // bodystatus
                 Vector3::new(0.0, 0.0, 0.0),            // linear_velocity
                 Vector3::new(0.0, 0.0, 0.0),            // angular_velocity
                 0.0,                                    // linear_damping
@@ -330,4 +334,86 @@ pub fn make_objects(scene: &Scene) -> ObjSet{
         }
     }
     return obj_set;
+}
+
+
+
+
+use ncollide3d::query::{Ray, RayCast};
+use nalgebra::geometry::Isometry3;
+use super::super::game_state;
+
+// Partie a mettre dans la fonction game_logic de l'exemple
+/*
+if devices.key_continous(Key::F) {
+    take_obj(game_state, devices);
+}
+
+if devices.key_continous(Key::E) {
+    throw_obj(game_state, devices);
+}
+*/
+
+/// Returns None if the ray given in parameter doesn't intersect with the object given in parameter. Returns the shape of the object otherwise.
+pub fn do_intersect(object: Object, ray: Ray<f32>) -> Option<(Object, f32)> {
+
+    // We get the shape of the object (of type ShapeType)
+    let shape_type = object.shape;
+
+    // We get the shape of the object (of type ncollide3d::shape::ShapeHandle) to apply toi_with_ray on it
+    let shape = process_shape(shape_type);
+
+    /* 
+     Result of the intersection between the Ray and a TriMesh 
+     0.0 means no intersection
+     otherwise the value is the distance from the Ray origin at which the intersection is
+     Ex: Ray origin = (0.0, 0.0, 0.0) and intersection at (0.0, 0.0, 5.0) -> intersection = 5.0
+    */
+    let intersection = shape.toi_with_ray(&Isometry3::identity(), &ray, false).unwrap(); 
+
+    // S'il y a intersection, on retourne l'objet pour lequel il y a intersection
+    if intersection != 0.0 {
+        return Some((object, intersection));
+    }
+    else {
+        return None;
+    }
+}
+
+pub fn nearest_obj(game_state: &mut GameState) -> Object {
+
+    // Position of the camera
+    let camera_pos = game_state.scene.camera.position.to_point();
+
+    // Direction the camera is looking at
+    let camera_dir = game_state.scene.camera.orientation;
+
+    // A Ray
+    let ray = Ray::new(camera_pos, camera_dir);
+
+    // A Vec containing every object the Ray intersects with
+    let inters = Vec::new();
+
+    // An f32 if there's an intersection between a certain object and the Ray, None if there's no intersection
+    let result;
+
+    for object in obj_set {
+        result = do_intersect(object, ray);
+        if !result.is_none() {
+            inters.push(result);
+        }
+    }
+
+    let d = INFINITY;
+    let ob;
+
+    for tuple in inters {
+        if let Some((a,b)) = tuple {
+            if b < d {
+                d = b;
+                ob = a;
+            }
+        }
+    }
+    return ob;
 }
