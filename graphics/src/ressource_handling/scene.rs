@@ -3,7 +3,6 @@ use crate::engine::{Graphical, Frame, Camera, Display};
 use crate::misc::{Similarity, new_vertexbuffer};
 
 
-use std::time::{Duration, Instant};
 
 /**
 A scene contains pointers to existing ressources and datas to place them in the space.

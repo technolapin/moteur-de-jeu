@@ -9,10 +9,8 @@ use graphics::
     Object,
     Handle,
     nalgebra::Vector3,
-    glium::glutin::event_loop::EventLoopProxy
 };
 
-use super::GameEvent;
 
 
 

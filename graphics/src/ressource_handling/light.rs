@@ -1,7 +1,6 @@
 use glium::uniforms::UniformBuffer;
 pub const N_MAX_LIGHTS: usize = 128;
 
-use nalgebra::Vector3;
 
 
 #[derive(Debug, Clone, Copy)]
@@ -102,8 +101,7 @@ impl Lights
                     self.position.map()[n][3] = 4.;
 
                     self.n += 1;
-                },
-		_ => unimplemented!()
+                }
             }
         }
     }

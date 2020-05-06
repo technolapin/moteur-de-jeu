@@ -25,7 +25,6 @@ use sounds::{OneSound};
 use specs::{Dispatcher, World};
 use std::thread;
 
-use std::time::{Instant, Duration};
 
 
 
@@ -194,7 +193,7 @@ impl Game
         });
     }    
 
-    fn play_sound_timeLimit(&self,music_path: String, duration: Option<f32>,position: Option<[f32; 3]>)
+    fn play_sound_time_limit(&self,music_path: String, duration: Option<f32>,position: Option<[f32; 3]>)
     {
         let thread_music= thread::spawn(move || {
 	     let mut music = OneSound:: new(music_path.as_str());
@@ -242,7 +241,7 @@ impl Game
                         ).unwrap();
                     },
                     GameEvent::PlaySound(music_path,position) => self.play_sound(music_path,position),
-    		    GameEvent::PlaySound_timeLimit(music_path,duration,position) => self.play_sound_timeLimit(music_path,duration,position)
+    		    GameEvent::PlaySoundTimeLimit(music_path,duration,position) => self.play_sound_time_limit(music_path,duration,position)
                 }
             }
             _ => ()

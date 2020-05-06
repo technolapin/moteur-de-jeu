@@ -4,8 +4,6 @@ use super::{Graphical, Params, Camera};
 use crate::ressource_handling::{Object, Material, Lights, Vertex};
 use crate::misc::Similarity;
 
-use std::time::{Instant, Duration};
-
 /**
 Where the scene is being constructed.
 Destroyed uppon displaying.

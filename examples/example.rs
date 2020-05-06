@@ -35,7 +35,6 @@ use graphics::
 
 use physics::{Physics, make_trimesh};
 
-use nalgebra::normalize;
 
 
 fn make_main_scene(
@@ -105,40 +104,40 @@ fn render_gui(ui: &mut Ui, proxy: &EventLoopProxy<GameEvent>)
             ui.same_line(125.0);
             if ui.button(im_str!("Back to the game"), [350.0, 36.0])
             {
-                proxy.send_event(GameEvent::Pop(1));
+                proxy.send_event(GameEvent::Pop(1)).unwrap();
             };
             ui.dummy([0.0, 5.0]);
             ui.new_line();
             ui.same_line(125.0);
             if ui.button(im_str!("Click 1"), [150.0, 36.0])
             {
-                proxy.send_event(GameEvent::QuitRequested);
+                proxy.send_event(GameEvent::QuitRequested).unwrap();
             };
             ui.same_line_with_spacing(275.0, 50.0);
             
             if ui.button(im_str!("Click 2"), [150.0, 36.0])
             {
-                proxy.send_event(GameEvent::QuitRequested);
+                proxy.send_event(GameEvent::QuitRequested).unwrap();
             };
             ui.dummy([0.0, 5.0]);
             ui.new_line();
             ui.same_line(125.0);
             if ui.button(im_str!("Click 3"), [150.0, 36.0])
             {
-                proxy.send_event(GameEvent::QuitRequested);
+                proxy.send_event(GameEvent::QuitRequested).unwrap();
             };
             ui.same_line_with_spacing(275.0, 50.0);
             
             if ui.button(im_str!("Click 4"), [150.0, 36.0])
             {
-                proxy.send_event(GameEvent::QuitRequested);
+                proxy.send_event(GameEvent::QuitRequested).unwrap();
             };
             ui.dummy([0.0, 5.0]);
             ui.new_line();
             ui.same_line(125.0);
             if ui.button(im_str!("Quit the game"), [350.0, 36.0])
             {
-                proxy.send_event(GameEvent::QuitRequested);
+                proxy.send_event(GameEvent::QuitRequested).unwrap();
             };
             
            
@@ -224,7 +223,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let table = Model(ressources.get_whole_content("table").unwrap());
+    let table = Model(ressources.get_object("all_objects_saloon", "table_SM_Prop_Table_3_SM_Prop_Table_01").unwrap());
     let obj_table = ressources.get_by_handle(table.0);
     let table_trimesh = make_trimesh(&obj_table);
     let tables_positions = vec! [
@@ -324,7 +323,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
 
-    let bouteille = Model(ressources.get_whole_content("bouteille").unwrap()); // Model
+    let bouteille = Model(ressources.get_object("all_objects_saloon", "bouteille_SM_Prop_Bottle_363_SM_Prop_Bottle_01").unwrap()); // Model
     let obj_bouteille = ressources.get_by_handle(bouteille.0) ; // &Object
     let bouteille_trimesh = make_trimesh(&obj_bouteille) ;
 
@@ -404,7 +403,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
 
 
 
-    let teto = Model(ressources.get_object("teto", "Lat式改変テト_mesh_Lat式改変テト").unwrap());
+    let _teto = Model(ressources.get_object("teto", "Lat式改変テト_mesh_Lat式改変テト").unwrap());
 
     let light = Light::NonDirectional
 	(
@@ -552,7 +551,7 @@ impl<'a> System<'a> for PhysicSystem
 
 
 
-fn init_menu(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
+fn init_menu(mut world: World, _ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
 {
     world.register::<Spatial>();
     world.register::<Model>();

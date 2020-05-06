@@ -33,9 +33,8 @@ use graphics::
     RessourcesHolder
 };
 
-use physics::{Physics, make_trimesh, ShapeHandle};
+use physics::{Physics, make_trimesh};
 
-use nalgebra::normalize;
 
 
 
@@ -49,7 +48,9 @@ fn make_main_scene(
 
     holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
     holder.load_wavefront(disp, "sphere_smooth.obj", &ressources_path)?;
-
+    holder.load_wavefront(disp, "all_objects_saloon.obj", &ressources_path)?;
+    holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
+/*
     holder.load_wavefront(disp, "saloon.obj", &ressources_path)?;
     holder.load_wavefront(disp, "porte_chambre.obj", &ressources_path)?;
     holder.load_wavefront(disp, "porte_entree.obj", &ressources_path)?;
@@ -60,13 +61,12 @@ fn make_main_scene(
     holder.load_wavefront(disp, "verres.obj", &ressources_path)?;
     holder.load_wavefront(disp, "bouteille.obj", &ressources_path)?;
     holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
-
+*/
     
 
 //    holder.add_parameters(Params::new().with_transparency(true), "Sphere");
 
     let scene = Scene::new(&disp);
-
 
     Ok(scene)
 }
@@ -95,7 +95,7 @@ fn render_gui(ui: &mut Ui, proxy: &EventLoopProxy<GameEvent>)
     .build(&ui, || {
         if ui.button(im_str!("QUIT"), [60.0, 36.0])
         {
-            proxy.send_event(GameEvent::QuitRequested);
+            proxy.send_event(GameEvent::QuitRequested).unwrap();
         };
 
         ui.text(im_str!("Useless text"));
@@ -115,6 +115,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
 
     let mut camera = Camera::default();
 
+    
     camera.set_position(vec3(-18., 1., -10.));
     world.insert(camera);
 
@@ -135,8 +136,12 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .with(sphere)
         .build();
     }
+println!("MARCO");
 
-    let bouteille = Model(ressources.get_whole_content("bouteille").unwrap()); // Model
+    let bouteille = Model(ressources.get_object("all_objects_saloon", "bouteille_SM_Prop_Bottle_363_SM_Prop_Bottle_01").unwrap()); // Model
+
+    println!("POLO");
+
     let obj_bouteille = ressources.get_by_handle(bouteille.0) ; // &Object
     let bouteille_trimesh = make_trimesh(&obj_bouteille) ;
 
@@ -178,7 +183,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
 
 
-    let table = Model(ressources.get_whole_content("table").unwrap());
+    let table = Model(ressources.get_object("all_objects_saloon", "table_SM_Prop_Table_3_SM_Prop_Table_01").unwrap());
 
     let obj_table = ressources.get_by_handle(table.0);
     let table_trimesh = make_trimesh(&obj_table);
@@ -453,7 +458,7 @@ impl<'a> System<'a> for PhysicSystem
 
 
 
-fn init_menu(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
+fn init_menu(mut world: World, _ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
 {
     world.register::<Spatial>();
     world.register::<Model>();

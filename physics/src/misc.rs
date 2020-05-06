@@ -2,9 +2,7 @@ extern crate nalgebra as na;
 
 use crate::shapes::*;
 
-use nphysics3d::object::BodyStatus;
-use nphysics3d::object::{DefaultBodySet, DefaultColliderSet, RigidBodyDesc, BodyPartHandle, ColliderDesc, BodyStatus, ActivationStatus};
-use nphysics3d::material::{MaterialHandle, BasicMaterial};
+use nphysics3d::object::{BodyStatus, ActivationStatus};
 
 use ncollide3d::shape::ShapeHandle;
 use na::Vector3;
@@ -15,7 +13,6 @@ use graphics::{Object, Vertex};
 use std::f32::consts::PI;
 use std::f32::INFINITY;
 
-use nphysics3d::object::ActivationStatus;
 
 
 
@@ -324,7 +321,7 @@ pub fn process_shape(event: &ShapeType) -> ShapeHandle<f32>{
 pub fn make_trimesh(object: &Object) -> ShapeType
 {
     let all_vertex = object.data.iter()
-	.map(|(group, programId)|  
+	.map(|(group, _)|  
 	{
 		(*group.vertexes)
 		.read()
