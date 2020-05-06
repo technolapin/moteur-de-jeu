@@ -30,6 +30,13 @@ package ressource_handling
     	     NonTextured
 	     Default
 	}
+	
+	enum Light {
+		NonDirectional
+		Directional
+	}
+	class Lights
+
 	class Object
 	class RessourcesHolder
 	class Tile
@@ -45,7 +52,6 @@ package glium
 {
 	package vertex
 	{
-		class glium::VertexBufferAny
 		class glium::VertexBuffer
 	}
 	package texture
@@ -79,7 +85,7 @@ h_programs --> ProgramId
 Object --> Group
 Object --> ProgramId
 Object ..> Params
-Group ...> glium::VertexBufferAny
+Group ...> glium::VertexBuffer
 Group ..> Material
 Wavefront --> Group
 Wavefront ..> Material
@@ -87,6 +93,9 @@ Tile ..> Material
 
 Scene --> Object
 Scene --> Similarity
+Scene --> Lights
+
+Lights --> Light
 
 Material --> glium::Texture2D
 
@@ -113,3 +122,4 @@ Game --> Base
 Game --> DevicesStates
 
 @enduml
+
