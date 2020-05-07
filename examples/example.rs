@@ -36,7 +36,8 @@ use graphics::
 use physics::{Physics, make_trimesh};
 
 
-
+/** Construct the main scene by creating Display, Holder, Scene and load all the wavefront we will use in the example.
+*/
 fn make_main_scene(
     game: &mut Game
 ) -> Result<Scene, EngineError>
@@ -58,7 +59,8 @@ fn make_main_scene(
     Ok(scene)
 }
 
-
+/** Construct the menu scene by creating Display and Scene.
+*/
 fn make_menu_scene(
     game: &mut Game
 ) -> Result<Scene, EngineError>
@@ -71,7 +73,8 @@ fn make_menu_scene(
 }
 
 
-
+/** Construct the Pause menu by creating a new window and put some options.
+*/
 fn render_gui(ui: &mut Ui, proxy: &EventLoopProxy<GameEvent>)
 {
     Window::new(im_str!("Pause Menu"))
@@ -128,6 +131,9 @@ fn render_gui(ui: &mut Ui, proxy: &EventLoopProxy<GameEvent>)
         });
 
 }
+
+/** Initialise the game : Giving all the elements of the game and place every objects in the scene associated to their Physical structure and lights.
+*/
 fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
 {
     world.register::<Spatial>();
@@ -570,8 +576,9 @@ impl Component for ControledComp
     type Storage = NullStorage<Self>;
 }
 
-struct CameraSystem;
 
+
+struct CameraSystem;
 impl<'a> System<'a> for CameraSystem
 {
     type SystemData = (Write<'a, Camera>,
@@ -631,7 +638,6 @@ impl<'a> System<'a> for CameraSystem
 
 
 struct EventSendingSystem;
-
 impl<'a> System<'a> for EventSendingSystem
 {
 
@@ -646,8 +652,8 @@ impl<'a> System<'a> for EventSendingSystem
     }
 }
 
-struct MenuEventSystem;
 
+struct MenuEventSystem;
 impl<'a> System<'a> for MenuEventSystem
 {
 
@@ -660,8 +666,9 @@ impl<'a> System<'a> for MenuEventSystem
     }
 }
 
-struct PhysicSystem;
 
+
+struct PhysicSystem;
 impl<'a> System<'a> for PhysicSystem
 {
     type SystemData = (Write<'a, Physics>, WriteStorage<'a, Spatial>, ReadStorage<'a, PhysicComponent>);
@@ -687,8 +694,8 @@ impl<'a> System<'a> for PhysicSystem
 }
 
 
-
-
+/** Initialise the menu : Giving all the elements of the menu.
+*/
 fn init_menu(mut world: World, _ressources: &mut RessourcesHolder) -> (World, Dispatcher<'static, 'static>)
 {
     world.register::<Spatial>();
@@ -704,12 +711,10 @@ fn init_menu(mut world: World, _ressources: &mut RessourcesHolder) -> (World, Di
     (world, dispatcher)
 }
 
-/*
-Un exemple simple avec un état de jeu et un état pour le menu.
-Le menu bloque le jeu quand il est en place, mais le jeu s'affiche toujours même
-si le menu est par-dessus.
-Le jeu n'as pas de GUI, le menu si.
-
+/**
+Create a new Game that contains two states, one for the main game and one other for the menu.
+The menu stop the game when it's open and is displayed on top of the game.
+The game has no GUI, but the menu has one.
 */
 fn main() -> Result<(), EngineError>
 {
