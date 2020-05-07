@@ -35,6 +35,7 @@ pub enum ShapeType {
 
 impl ShapeType 
 {
+    /// Construct a PhysicObject with a BodyStatus::Static (no movements allowed)
     pub fn make_static(
 	&self,
 	translation: Vector3<f32>,
@@ -45,6 +46,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Static, None, None)
     }
 
+    /// Construct a PhysicObject with a BodyStatus::Dynamic (all movements allowed)
     pub fn make_dynamic(
 	&self,
 	translation: Vector3<f32>,
@@ -55,6 +57,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Dynamic, None, None)
     }
 
+    /// Construct a PhysicObject with a BodyStatus::Kinematic (movements non affected by external forces)
     pub fn make_kinematic(
 	&self,
 	translation: Vector3<f32>,
@@ -67,6 +70,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Kinematic, Some(kinematic_rotations), Some(kinematic_translations))
     }
 
+    /// Construct a PhysicObject with a BodyStatus::Dynamic (movements allowed but restrictions on translations and rotations)
     pub fn make_dynamic_sans_liberte(
         &self,
         translation: Vector3<f32>,
@@ -80,6 +84,7 @@ impl ShapeType
         }
 
 
+    /// Construct a PhysicObject (implemented only for TriMesh but other shapes are disponible)
     pub fn make_object(
 	&self,
 	translation: Vector3<f32>,
@@ -99,10 +104,7 @@ impl ShapeType
 		        let center: Point3<f32> = trimesh
 		        .points.iter()
 		        .fold(Point3::new(0., 0., 0.), |sum, p| sum+p.coords) / (trimesh.points.len() as f32);
-        
-              //  let kinematic_rotations = kinematic_rot.unwrap_or(Vector3::new(false, false, false));
-              //  let kinematic_translations = kinematic_trans.unwrap_or(Vector3::new(false, false, false));
-                
+          
                 let rb_data = RbData::new(
                     translation,                            // translation
                     rotation,                               // rotation
@@ -298,7 +300,7 @@ impl ColData{
     }
 }
 
-/// An PhysicObject with different features
+/// A PhysicObject with different features
 pub struct PhysicObject {
     pub shape: ShapeType,
     pub rbdata: RbData,
@@ -317,7 +319,7 @@ impl PhysicObject {
 
 
 
-/// Creates and returns a RigidBody corresponding to the PhysicObject's shape
+/// Creates and returns a RigidBody (ncollide type) corresponding to the PhysicObject's shape
 pub fn process_shape(event: &ShapeType) -> ShapeHandle<f32>{
     match event {
         ShapeType::Ball(ball) => return Ball::process_ball(ball.clone()),
@@ -336,7 +338,7 @@ pub fn process_shape(event: &ShapeType) -> ShapeHandle<f32>{
 
 
 
-// Create the ShapeType::TriMesh associated to the object and return it
+/// Create the ShapeType::TriMesh associated to the object and return it
 pub fn make_trimesh(object: &Object) -> ShapeType
 {
     let all_vertex = object.data.iter()
