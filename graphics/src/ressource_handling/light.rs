@@ -2,7 +2,7 @@ use glium::uniforms::UniformBuffer;
 pub const N_MAX_LIGHTS: usize = 128;
 
 
-
+/// Different kinds of Light (directional and non directional)
 #[derive(Debug, Clone, Copy)]
 pub enum Light
 {
@@ -10,6 +10,7 @@ pub enum Light
     Directional(f32, [f32; 3], [f32; 3]),
 }
 
+/// Contains many Light with some informations about them
 pub struct Lights
 {
     pub light_type: UniformBuffer<[u32; N_MAX_LIGHTS]>,
@@ -25,6 +26,7 @@ pub struct Lights
 
 impl Lights
 {
+    /// Create a new Lights
     pub fn new(disp: &glium::Display) -> Self
     {
         Self
@@ -38,6 +40,7 @@ impl Lights
         }
     }
 
+    /// Push the Light into Lights with its optional position
     pub fn push(&mut self, light: Light, maybe_pos: Option<([f32; 4], [f32; 4])>)
     {
         if (self.n as usize) < N_MAX_LIGHTS-1
@@ -106,6 +109,7 @@ impl Lights
         }
     }
 
+    /// Reset all the content of Lights
     pub fn clear(&mut self)
     {
 	self.n = 0;
@@ -118,7 +122,7 @@ impl Lights
 	
     }
     
-    /// for debug purpose
+    /// For debug purpose
     pub fn print(&mut self)
     {
         println!("LIGHTS:");
@@ -133,9 +137,6 @@ impl Lights
         self.colour.map().iter().for_each(|a| print!("{:?} ", a));
         print!("\nDIR: ");
         self.colour.map().iter().for_each(|a| print!("{:?} ", a));
-//        println!("inte: {:?}", self.intensity.map()[n] = intensity);
-  //      println!("posi: {:?}", self.position.map()[n] = pos);
-    //    println!("colo: {:?}", self.colour.map()[n] = colour);
         
     }
     

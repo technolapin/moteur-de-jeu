@@ -4,6 +4,7 @@ use nalgebra::{Vector3, Perspective3};
 use super::Graphical;
 use std::f32::consts::{PI, FRAC_PI_2};
 
+/// A simple Projection 
 #[derive(Debug, Clone, Copy)]
 pub struct Projection
 {
@@ -12,10 +13,8 @@ pub struct Projection
     
 }
 
-/**
-A simple camera
-*/
 
+/// A simple Camera
 #[derive(Debug, Clone, Copy)]
 pub struct Camera {
     pub h_angular: f32, // theta
@@ -55,7 +54,6 @@ impl Camera {
  	
         }
     }
-
 
     fn compute_forward(theta: f32, phi: f32) -> Vector3<f32>
     {
@@ -118,11 +116,9 @@ impl Camera {
     }
 
 
-    /** Move the Objects of the scene according to the rotation of the Camera, Return the matrix of the view */
-    /**
-    returns the view matrix of the camera
+    /** Move the Objects of the scene according to the rotation of the Camera, Return the matrix of the view.
     It will be used by the shaders to displace the objects of the scene to put them at the right place, with the right forward and size.
-     */
+    */
     pub fn get_view_matrix(&self) -> [[f32; 4]; 4]
     {
 
@@ -148,6 +144,7 @@ impl Camera {
 	*perspective_matrix
     }
 
+    /// Update the aspect ratio with the one of Graphical
     pub fn update_aspect_ratio(&mut self, gr: &Graphical)
     {
         let (w, h) = gr.display.display.get_framebuffer_dimensions();

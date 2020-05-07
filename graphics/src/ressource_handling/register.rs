@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-/// used to designat an Object stored in the RessourcesHolder
+/// Used to designat an Object stored in the RessourcesHolder
 pub struct Handle<T>
 {
     id: u64,

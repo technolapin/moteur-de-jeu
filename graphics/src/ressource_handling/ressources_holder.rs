@@ -46,23 +46,25 @@ impl RessourcesHolder {
         }.init()
     }
 
+    /// Add the object given in parameter and return its Handle
     fn store_object(&mut self, obj: Object) -> Handle<Object>
     {
 	self.objects_register.add(obj)
     }
 
-    /// we suppose that the data exists if the handle does
+    /// We suppose that the data exists if the handle does
     pub fn get_by_handle(&self, handle: Handle<Object>) -> &Object
     {
 	self.objects_register.get(handle)
     }
     
+    /// Remove the handle given in parameter
     pub fn free_object(&mut self, handle: Handle<Object>)
     {
 	self.objects_register.remove(handle);
     }
     
-    /// used to insert some default values.
+    /// Used to insert some default values.
     fn init(mut self) -> Self
     {
         self.add_parameters(Params::new(), "scene");

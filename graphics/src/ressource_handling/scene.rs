@@ -15,7 +15,7 @@ pub struct Scene {
 
 
 impl Scene {
-    /// creates a scene
+    /// Creates a scene
     pub fn new(disp: &Display) -> Self
     {
         Self {
@@ -30,11 +30,13 @@ impl Scene {
         self.objects.push((meshes, instances));
     }
 
+    /// Adds some lights to the scene
     pub fn add_light(&mut self, light: Light, maybe_pos: Option<([f32; 4], [f32; 4])>)
     {
         self.lights.push(light, maybe_pos);
     }
     
+    /// Update the aspect ratio of the camera as Graphical is
     pub fn update_aspect_ratio(&mut self, gr: &Graphical)
     {
         self.camera.update_aspect_ratio(gr);
@@ -48,9 +50,7 @@ impl Scene {
     {
 
         self.camera.update_aspect_ratio(gr);
-//	self.lights.print();
         self.objects.iter().for_each(|(objects, instances)| {
-
 
 	    // 10 % of time spent	    
             let vbo = new_vertexbuffer(&gr.display, instances);

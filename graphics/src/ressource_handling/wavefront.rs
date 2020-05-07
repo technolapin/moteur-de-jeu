@@ -46,9 +46,6 @@ impl Wavefront {
         let mut bufreader = ::std::io::BufReader::new(file);
         let mtl = Mtl::load(&mut bufreader);
 
-
-
-
         /*
         parsing the materials from the .mtl
         several kind of material are supported for now: Textured, NonTextured
