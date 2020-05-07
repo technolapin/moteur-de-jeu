@@ -67,4 +67,7 @@ Voir `AIDE_AVEC_GIT.md`.
 
 ### Compiler et lancer avec Cargo
 
+Se placer dans le répertoire moteur_de_jeu_video, ouvrir un terminal puis utiliser la ligne de commande suivante pour lancer l'exemple : 
+`cargo run --release --example example`
+
 Voir `COURS_RUST.md`.

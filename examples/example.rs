@@ -46,32 +46,14 @@ fn make_main_scene(
     let ressources_path = get_ressources_path();
 
     holder.load_wavefront(disp, "transparent_sphere.obj", &ressources_path)?;
-
     holder.load_wavefront(disp, "candle.obj", &ressources_path)?;
-
     holder.load_wavefront(disp, "chandelier.obj", &ressources_path)?;
-
     holder.load_wavefront(disp, "teto.obj", &ressources_path)?;
-
     holder.load_wavefront(disp, "all_objects_saloon.obj", &ressources_path)?;
-    
-    /*holder.load_wavefront(disp, "saloon.obj", &ressources_path)?; //sol
-    holder.load_wavefront(disp, "porte_chambre.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "porte_entree.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "table.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "lit_double.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "chaise.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "tabourets.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "verres.obj", &ressources_path)?;
-    holder.load_wavefront(disp, "bouteille.obj", &ressources_path)?;*/
-
-
-    
 
     holder.add_parameters(Params::new().with_transparency(true), "Sphere");
 
     let scene = Scene::new(&disp);
-
 
     Ok(scene)
 }
@@ -228,7 +210,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     .build();
 
 
-    // Portes chambres --> Devrait bouger mais avec des contraintes
+    // Portes chambres --> Dynamic mais avec contraintes de mouvement
     let porte_chambre = Model(ressources.get_object("all_objects_saloon", "porte_chambre_SM_Bld_Saloon_RoomDoor_01_273_SM_Bld_Saloon_RoomDoor_01.001").unwrap());
     let portes_chambres_positions = vec! [
         Spatial { pos: vec3(-19.3022, 3.41965, -17.4815), rot: vec3(0., 0., 0.), scale: 1. },
@@ -260,7 +242,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
 
     
-    // Porte entrée --> Devrait bouger mais avec des contraintes
+    // Porte entrée --> Dynamic mais avec des contraintes de mouvement
     let porte_entree = Model(ressources.get_object("all_objects_saloon", "porte_entree_SM_Bld_Saloon_Swinging_Doors_01_171_SM_Bld_Saloon_Swinging_Door").unwrap());
     let portes_entree_positions = vec! [
         Spatial { pos: vec3(-9.64833, 1.46962, -8.76043), rot: vec3(0., 0.7853, 0.), scale: 1. },
@@ -291,7 +273,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
             .build();
     }
 
-    // Tables --> Statiques ?
+    // Tables --> Statiques 
     let table = Model(ressources.get_object("all_objects_saloon", "table_SM_Prop_Table_3_SM_Prop_Table_01").unwrap());
     let obj_table = ressources.get_by_handle(table.0);
     let table_trimesh = make_trimesh(&obj_table);
@@ -322,7 +304,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         .build();
     }
  
-    // Lit double --> Statique 
+    // Lit double --> Statiques 
     let lit_double = Model(ressources.get_object("all_objects_saloon", "lit_double_SM_Prop_Bed_01_281_SM_Prop_Bed_01").unwrap());
     let lits_doubles_positions = vec! [
         Spatial { pos: vec3(-13.8841, 3.27735, -19.7949), rot: vec3(0., -1.5707, 0.), scale:1. },
@@ -355,7 +337,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
  
   
-    // Chaises --> Pas statique
+    // Chaises --> Dynamique sans contraintes
     let chaise = Model(ressources.get_object("all_objects_saloon", "chaise_SM_Prop_Chair_01_327_SM_Prop_Chair_01").unwrap());
     let chaises_positions = vec! [
         Spatial { pos: vec3(-14.714, 0.325766, -11.6007), rot: vec3(0., 3.1415, 0.), scale:1. },
@@ -387,7 +369,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
  
 
-    // Tabourets --> Pas statiques
+    // Tabourets --> Dynamiques sans contraintes
     let tabourets = Model(ressources.get_object("all_objects_saloon", "tabouret_SM_Prop_Stool_Round_6_SM_Prop_Stool_Round_01.002").unwrap());
     let tabourets_positions = vec! [
         Spatial { pos: vec3(-9.5536, 0.360777, -12.879), rot: vec3(0., 0., 0.), scale:1. },
@@ -424,7 +406,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
 
 
-    // Verres --> Pas statiques
+    // Verres --> Dynamiques sans contraintes
     let verres = Model(ressources.get_object("all_objects_saloon", "verres_SM_Prop_Cup_357_SM_Prop_Cup_01.002").unwrap());
     let verres_positions = vec! [
         Spatial { pos: vec3(-10.4869, 1.2616, -12.4206), rot: vec3(0., 0., 0.), scale:1. },
@@ -460,9 +442,9 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     }
 
 
-    // Bouteilles --> Pas statiques
-    let bouteille = Model(ressources.get_object("all_objects_saloon", "bouteille_SM_Prop_Bottle_363_SM_Prop_Bottle_01").unwrap()); // Model
-    let obj_bouteille = ressources.get_by_handle(bouteille.0) ; // &Object
+    // Bouteilles --> Dynamiques sans contraintes
+    let bouteille = Model(ressources.get_object("all_objects_saloon", "bouteille_SM_Prop_Bottle_363_SM_Prop_Bottle_01").unwrap()); 
+    let obj_bouteille = ressources.get_by_handle(bouteille.0) ; 
     let bouteille_trimesh = make_trimesh(&obj_bouteille) ;
     
     let bouteilles_positions = vec! [
@@ -479,8 +461,6 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         Spatial { pos: vec3(-12.9389, 1.2616, -10.1976), rot: vec3(0., 0., 0.), scale:1. },
         Spatial { pos: vec3(-12.523, 1.2616, -9.8908), rot: vec3(0., 0., 0.), scale:1. },
         ];
-
-    
 
     for position in bouteilles_positions.iter()
     {
@@ -499,14 +479,13 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         world.create_entity()
             .with(*position)
             .with(bouteille)
-	       // .with(Lighting(light))
 	        .with(phy)
             .build();
     }
 
 
-    // Candle --> Pas statique et source de lumière
-    let candle = Model(ressources.get_whole_content("candle").unwrap()); // Model
+    // Candle --> Dynamique et sans contraintes (mais on retire la physique parce que ce modèle bug avec) + Source de lumière
+    let candle = Model(ressources.get_whole_content("candle").unwrap()); 
     let candle_positions = vec![ 
         Spatial { pos: vec3(-14.6168, 1.2516, -12.643), rot: vec3(0., 0. , 0.), scale:0.05 }, 
         Spatial { pos: vec3(-10.5536, 1.2516, -12.879), rot: vec3(0., 0. , 0.), scale:0.05  },
@@ -518,13 +497,15 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
 	    0.4,
 	    [1., 0.8, 0.2]
 	);
-   /* let obj_candle = ressources.get_by_handle(candle.0) ; // &Object
+    /* 
+    let obj_candle = ressources.get_by_handle(candle.0) ; // &Object
     let candle_trimesh = make_trimesh(&obj_candle) ;
     */
 
     for position in candle_positions.iter()
     {
-	   /* let Spatial{pos, rot, scale} = position.clone();
+        /* 
+        let Spatial{pos, rot, scale} = position.clone();
         let physic_obj_candle = candle_trimesh
 	    .make_dynamic(pos, rot, scale, true);
 	
@@ -534,7 +515,8 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
 	    {
 	        collider_id: gen_index,
 	        shape: candle_trimesh.clone()
-	    };*/
+        };
+        */
 
         world.create_entity()
             .with(*position)
@@ -546,8 +528,8 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
         
    
 
-    // Chandelier --> Statique et source de lumière
-    let chandelier = Model(ressources.get_whole_content("chandelier").unwrap()); // Model
+    // Chandelier --> Source de lumière (pas besoin de physique)
+    let chandelier = Model(ressources.get_whole_content("chandelier").unwrap()); 
     let chandelier_position = Spatial { pos: vec3(-14.6168, 2.0, -12.643), rot: vec3(0., 0. , 0.), scale:1. } ;
     world.create_entity()
     .with(chandelier_position)
@@ -753,7 +735,7 @@ fn main() -> Result<(), EngineError>
     game.push_state("main state")?;
     game.load_state("menu state")?;
     
-    game.run(10) // fps
+    game.run(30) // fps
 
 }
 
