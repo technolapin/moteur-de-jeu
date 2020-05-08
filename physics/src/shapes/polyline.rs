@@ -7,7 +7,7 @@ use na::geometry::Point2;
 
 
 
-// We implement the Clone trait to the structure
+// We implement the Clone trait to the structure.
 #[derive(Debug, Clone)]
 pub struct Polyline
 {
@@ -16,18 +16,18 @@ pub struct Polyline
 }
 
 impl Polyline{
-    /// Creates a Polyline
+    /// Creates a Polyline.
     pub fn new(points: Vec<Point<f32>>, indices: Option<Vec<Point2<usize>>>) -> Polyline{
         return Polyline{points: points, indices: indices};
     }
 
-    /// Creates and returns a RigidBody corresponding to the 'Polyline' type
+    /// Creates and returns a RigidBody corresponding to the 'Polyline' type.
     pub fn process_polyline(polyline: Polyline) -> ShapeHandle<f32>{
-        // Points and indices of the Polyline
+        // Points and indices of the Polyline.
         let points = polyline.points;
         let indices = polyline.indices;
 
-        // Creation of a Polyline we'll need later to make a RigidBody and Collider
+        // Creation of a Polyline we'll need later to make a RigidBody and Collider.
         let polyl = ShapeHandle::new(shape::Polyline::new(points, indices));
 
         return polyl;

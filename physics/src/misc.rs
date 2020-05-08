@@ -16,9 +16,9 @@ use std::f32::INFINITY;
 
 
 
-// We implement the Clone trait to the structure
+// We implement the Clone trait to the structure.
 #[derive(Debug, Clone)]
-/// Different types of shape an PhysicObject can take
+/// Different types of shape a PhysicObject can take.
 pub enum ShapeType {
     Ball(Ball),
     Capsule(Capsule),
@@ -35,7 +35,7 @@ pub enum ShapeType {
 
 impl ShapeType 
 {
-    /// Construct a PhysicObject with a BodyStatus::Static (no movements allowed)
+    /// Constructs a PhysicObject with a BodyStatus::Static (no movements allowed).
     pub fn make_static(
 	&self,
 	translation: Vector3<f32>,
@@ -46,7 +46,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Static, None, None)
     }
 
-    /// Construct a PhysicObject with a BodyStatus::Dynamic (all movements allowed)
+    /// Constructs a PhysicObject with a BodyStatus::Dynamic (all movements allowed).
     pub fn make_dynamic(
 	&self,
 	translation: Vector3<f32>,
@@ -57,7 +57,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Dynamic, None, None)
     }
 
-    /// Construct a PhysicObject with a BodyStatus::Kinematic (movements non affected by external forces)
+    /// Constructs a PhysicObject with a BodyStatus::Kinematic (movements non affected by external forces).
     pub fn make_kinematic(
 	&self,
 	translation: Vector3<f32>,
@@ -68,7 +68,7 @@ impl ShapeType
 	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Kinematic, None, None)
     }
 
-    /// Construct a PhysicObject with a BodyStatus::Dynamic (movements allowed but restrictions on translations and rotations)
+    /// Constructs a PhysicObject with a BodyStatus::Dynamic (movements allowed but restrictions on translations and rotations).
     pub fn make_dynamic_sans_liberte(
         &self,
         translation: Vector3<f32>,
@@ -82,12 +82,12 @@ impl ShapeType
         }
 
 
-    /// Construct a PhysicObject (implemented only for TriMesh but other shapes are disponible)
+    /// Constructs a PhysicObject (implemented only for TriMesh but other shapes are disponible).
     pub fn make_object(
 	&self,
 	translation: Vector3<f32>,
 	rotation: Vector3<f32>,
-	scale: f32,
+	_scale: f32, // Unused.
 	gravity: bool,
     stat: BodyStatus,
     kinematic_rot : Option<Vector3<bool>>,
@@ -104,38 +104,38 @@ impl ShapeType
 		        .fold(Point3::new(0., 0., 0.), |sum, p| sum+p.coords) / (trimesh.points.len() as f32);
           
                 let rb_data = RbData::new(
-                    translation,                            // translation
-                    rotation,                               // rotation
-                    gravity,                                // gravity_enabled
-                    stat,                                   // bodystatus
-                    Vector3::new(0.0, 0.0, 0.0),            // linear_velocity
-                    Vector3::new(0.0, 0.0, 0.0),            // angular_velocity
-                    0.8,                                    // linear_damping
-                    1.8,                                    // angular_damping
-                    INFINITY,                               // max_linear_velocity
-                    INFINITY,                               // max_angular_velocity
-                    0.0,                                    // angular_inertia
-                    2000.0,                                 // mass
-                    center                    ,             // local_center_of_mass
-                    ActivationStatus::default_threshold(),  // sleep_threshold
-                    kinematic_trans.unwrap_or(Vector3::new(false, false, false)),                  // kinematic_translations
-                    kinematic_rot.unwrap_or(Vector3::new(false, false, false)),                    // kinematic_rotations
-                    0,                                      // user_data
-                    true                                    // enable_linear_motion_interpolation
+                    translation,                            // translation.
+                    rotation,                               // rotation.
+                    gravity,                                // gravity_enabled.
+                    stat,                                   // bodystatus.
+                    Vector3::new(0.0, 0.0, 0.0),            // linear_velocity.
+                    Vector3::new(0.0, 0.0, 0.0),            // angular_velocity.
+                    0.8,                                    // linear_damping.
+                    1.8,                                    // angular_damping.
+                    INFINITY,                               // max_linear_velocity.
+                    INFINITY,                               // max_angular_velocity.
+                    0.0,                                    // angular_inertia.
+                    2000.0,                                 // mass.
+                    center                    ,             // local_center_of_mass.
+                    ActivationStatus::default_threshold(),  // sleep_threshold.
+                    kinematic_trans.unwrap_or(Vector3::new(false, false, false)),                  // kinematic_translations.
+                    kinematic_rot.unwrap_or(Vector3::new(false, false, false)),                    // kinematic_rotations.
+                    0,                                      // user_data.
+                    true                                    // enable_linear_motion_interpolation.
                 );
 
 		
                 let col_data = ColData::new(
-                    Vector3::new(0.0, 0.0, 0.0),            // translation relative to the RigidBody it's attached to
-                    Vector3::new(0.0, 0.0, 0.0),            // rotation relative to the RigidBody it's attached to
+                    Vector3::new(0.0, 0.0, 0.0),            // translation relative to the RigidBody it's attached to.
+                    Vector3::new(0.0, 0.0, 0.0),            // rotation relative to the RigidBody it's attached to.
                     0.0,                                    // density ! Since we use TriMesh objects it needs to be 0.0 or game will crash !
-                    0.5,                                    // restitution
-                    0.2,                                    // friction
-                    0.01,                                   // margin
-                    0.002,                                  // linear_prediction
-                    PI / 180.0 * 5.0,                       // angular_prediction
-                    false,                                  // sensor
-                    0                                       // user_data
+                    0.5,                                    // restitution.
+                    0.2,                                    // friction.
+                    0.01,                                   // margin.
+                    0.002,                                  // linear_prediction.
+                    PI / 180.0 * 5.0,                       // angular_prediction.
+                    false,                                  // sensor.
+                    0                                       // user_data.
                 );
 		
                 PhysicObject::new(shape, rb_data, col_data)  
@@ -146,26 +146,26 @@ impl ShapeType
 }
 
 
-/// Data needed to create a 'RigidBody'
+/// Data needed to create a 'RigidBody'.
 pub struct RbData {
-    pub translation: Vector3<f32>, // The rigid body translation - Default: zero vector
-    pub rotation: Vector3<f32>, // The rigid body rotation - Default: no rotation
-    pub gravity_enabled: bool, // Whether or not this rigid body is affected by gravity - Default: true
-    pub bodystatus: BodyStatus, // The status of this rigid body. It can be Disabled, Static, Kinematic or Dynamic - Default: BodyStatus::Dynamic
-    pub linear_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity
-    pub angular_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity
-    pub linear_damping: f32, // The linear damping applied to this rigid body velocity to slow it down automatically - Default: zero (no damping at all)
-    pub angular_damping: f32, // The angular damping applied to this rigid body velocity to slow down its rotation automatically - Default: zero (no damping at all)
-    pub max_linear_velocity: f32, // The maximum linear velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit)
-    pub max_angular_velocity: f32, // The maximum angular velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit)
-    pub angular_inertia: f32, // The angular inertia tensor of this rigid body, expressed on its local-space - Default: the zero matrix
-    pub mass: f32, // The rigid body mass - Default: 0.0
-    pub local_center_of_mass: Point3<f32>, // The center of mass of this rigid body expressed in its local-space - Default: the origin
-    pub sleep_threshold: f32, // The threshold for putting this rigid body to sleep - Default: Some(ActivationStatus::default_threshold())
-    pub kinematic_translations: Vector3<bool>, // The translations that will be locked for this rigid body - Default: nothing is locked (false everywhere)
-    pub kinematic_rotations: Vector3<bool>, // The rotations that will be locked for this rigid body - Default: nothing is locked (false everywhere)
-    pub user_data: usize, // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data
-    pub enable_linear_motion_interpolation: bool // Whether this rigid body motion should be interpolated linearly during CCD resolution - Default: false (which implies non-linear interpolation)
+    pub translation: Vector3<f32>, // The rigid body translation - Default: zero vector.
+    pub rotation: Vector3<f32>, // The rigid body rotation - Default: no rotation.
+    pub gravity_enabled: bool, // Whether or not this rigid body is affected by gravity - Default: true.
+    pub bodystatus: BodyStatus, // The status of this rigid body. It can be Disabled, Static, Kinematic or Dynamic - Default: BodyStatus::Dynamic.
+    pub linear_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity.
+    pub angular_velocity: Vector3<f32>, // The velocity of this body - Default: zero velocity.
+    pub linear_damping: f32, // The linear damping applied to this rigid body velocity to slow it down automatically - Default: zero (no damping at all).
+    pub angular_damping: f32, // The angular damping applied to this rigid body velocity to slow down its rotation automatically - Default: zero (no damping at all).
+    pub max_linear_velocity: f32, // The maximum linear velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit).
+    pub max_angular_velocity: f32, // The maximum angular velocity this rigid body can reach - Default: f32::max_value() or f64::max_value() (no limit).
+    pub angular_inertia: f32, // The angular inertia tensor of this rigid body, expressed on its local-space - Default: the zero matrix.
+    pub mass: f32, // The rigid body mass - Default: 0.0.
+    pub local_center_of_mass: Point3<f32>, // The center of mass of this rigid body expressed in its local-space - Default: the origin.
+    pub sleep_threshold: f32, // The threshold for putting this rigid body to sleep - Default: Some(ActivationStatus::default_threshold()).
+    pub kinematic_translations: Vector3<bool>, // The translations that will be locked for this rigid body - Default: nothing is locked (false everywhere).
+    pub kinematic_rotations: Vector3<bool>, // The rotations that will be locked for this rigid body - Default: nothing is locked (false everywhere).
+    pub user_data: usize, // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data.
+    pub enable_linear_motion_interpolation: bool // Whether this rigid body motion should be interpolated linearly during CCD resolution - Default: false (which implies non-linear interpolation).
 }
 
 impl Default for RbData
@@ -238,18 +238,18 @@ impl RbData {
     }
 }
 
-/// Data needed to create a 'Collider'
+/// Data needed to create a 'Collider'.
 pub struct ColData{
-    pub translation: Vector3<f32>, // The collider translation wrt. the body part it is attached to - Default: zero vector
-    pub rotation: Vector3<f32>, // The collider rotation wrt. the body part it is attached to - Default: no rotation
-    pub density: f32, // If non-zero the collider's mass and angular inertia will be added to the inertial properties of the body part it is attached to - Default: 0.0
-    pub restitution: f32, // Restitution of the collider - Default 0.0
-    pub friction: f32, // Friction of the collider - Default: 0.5
-    pub margin: f32, // Solid margin surrounding the collider (should always be non-zero) - Default: 0.01
-    pub linear_prediction: f32, // The distance tolerance for predictive contacts generation - Default: 0.002
-    pub angular_prediction: f32, // The angular tolerance for predictive contacts generation - Default: PI / 180.0 * 5.0
-    pub sensor: bool, // Whether this collider is a sensor, i.e., generate only proximity events - Default: false
-    pub user_data: usize // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data
+    pub translation: Vector3<f32>, // The collider translation wrt. the body part it is attached to - Default: zero vector.
+    pub rotation: Vector3<f32>, // The collider rotation wrt. the body part it is attached to - Default: no rotation.
+    pub density: f32, // If non-zero the collider's mass and angular inertia will be added to the inertial properties of the body part it is attached to - Default: 0.0.
+    pub restitution: f32, // Restitution of the collider - Default 0.0.
+    pub friction: f32, // Friction of the collider - Default: 0.5.
+    pub margin: f32, // Solid margin surrounding the collider (should always be non-zero) - Default: 0.01.
+    pub linear_prediction: f32, // The distance tolerance for predictive contacts generation - Default: 0.002.
+    pub angular_prediction: f32, // The angular tolerance for predictive contacts generation - Default: PI / 180.0 * 5.0.
+    pub sensor: bool, // Whether this collider is a sensor, i.e., generate only proximity events - Default: false.
+    pub user_data: usize // Arbitrary user-defined data associated to the rigid body to be built - Default: no associated data.
 }
 
 impl Default for ColData {
@@ -298,7 +298,7 @@ impl ColData{
     }
 }
 
-/// A PhysicObject with different features
+/// Contains all the data needed to create an object in the physic world.
 pub struct PhysicObject {
     pub shape: ShapeType,
     pub rbdata: RbData,
@@ -317,7 +317,7 @@ impl PhysicObject {
 
 
 
-/// Creates and returns a RigidBody (ncollide type) corresponding to the PhysicObject's shape
+/// Creates and returns a shape needed to create a Collider.
 pub fn process_shape(event: &ShapeType) -> ShapeHandle<f32>{
     match event {
         ShapeType::Ball(ball) => return Ball::process_ball(ball.clone()),
@@ -336,7 +336,7 @@ pub fn process_shape(event: &ShapeType) -> ShapeHandle<f32>{
 
 
 
-/// Create the ShapeType::TriMesh associated to the object and return it
+/// Creates the ShapeType::TriMesh associated to the object and return it.
 pub fn make_trimesh(object: &Object) -> ShapeType
 {
     let all_vertex = object.data.iter()

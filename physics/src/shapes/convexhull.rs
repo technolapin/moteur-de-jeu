@@ -4,7 +4,7 @@ use ncollide3d::math::Point;
 
 
 
-// We implement the Clone trait to the structure
+// We implement the Clone trait to the structure.
 #[derive(Debug, Clone)]
 pub struct ConvexHull
 {
@@ -12,17 +12,17 @@ pub struct ConvexHull
 }
 
 impl ConvexHull{
-    /// Creates a ConvexHull
+    /// Creates a ConvexHull.
     pub fn new(points: Vec<Point<f32>>) -> ConvexHull{
         return ConvexHull{points: points};
     }
 
-    /// Creates and returns a RigidBody corresponding to the 'ConvexHull' type
+    /// Creates and returns a RigidBody corresponding to the 'ConvexHull' type.
     pub fn process_convexhull(convexhull: ConvexHull) -> ShapeHandle<f32>{
-        // Points of the ConvexHull
+        // Points of the ConvexHull.
         let points = convexhull.points;
 
-        // Creation of a ConvexHull we'll need later to make a RigidBody and Collider
+        // Creation of a ConvexHull we'll need later to make a RigidBody and Collider.
         let convexh = ShapeHandle::new(shape::ConvexHull::try_from_points(&points).unwrap());
 
         return convexh;

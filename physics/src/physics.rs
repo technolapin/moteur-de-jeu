@@ -16,6 +16,7 @@ use na::Matrix3;
 
 use crate::{PhysicObject, process_shape};
 
+/// Contains all the data of the physic world.
 pub struct Physics{
     pub mechanical_world: DefaultMechanicalWorld<f32>,
     pub geometrical_world: DefaultGeometricalWorld<f32>,
@@ -29,17 +30,17 @@ impl Default for Physics
 {
     fn default() -> Self
     {
-        // MechanicalWorld with a gravity vector
+        // MechanicalWorld with a gravity vector.
         let mechanical_world = DefaultMechanicalWorld::new(Vector3::new(0.0, -9.81, 0.0));
 
         let geometrical_world = DefaultGeometricalWorld::<f32>::new();
         let joint_constraints = DefaultJointConstraintSet::<f32>::new();
         let force_generators = DefaultForceGeneratorSet::<f32>::new();
 	
-        // Where we store all the RigidBody object
+        // Where we store all the RigidBody object.
         let bodies = DefaultBodySet::new();
 
-        // Where we store all the Collider object
+        // Where we store all the Collider object.
         let colliders = DefaultColliderSet::<f32>::new();
 
         Physics::new(
@@ -78,7 +79,7 @@ impl Physics
     
 
 
-    /// Runs the universe and ticks it 60 times per second
+    /// Runs the universe and ticks it 60 times per second.
     pub fn run(&mut self){
         self.mechanical_world.step(
             &mut self.geometrical_world,
@@ -90,12 +91,12 @@ impl Physics
         
     }
 
-/// Creates the RigidBody and Collider of the PhysicObject given in parameter, store them in a ColliderSet and a Vector<Collider> and returns it
+/// Creates the RigidBody and Collider from the data contained in the PhysicObject given in parameter. Store them in a RigidBodySet, ColliderSet and a Vector<Collider> and returns a handle to the collider.
     pub fn build_rigbd_col(&mut self, physic_object: &PhysicObject) -> generational_arena::Index
     {
-        let shape = process_shape(&physic_object.shape); // ShapeHandle object de ncollide
+        let shape = process_shape(&physic_object.shape); // ShapeHandle object from ncollide.
         
-        // We create the RigidBody relative to the field rbdata of 'object'
+        // We create the RigidBody relative to the field rbdata of 'object'.
         let mut rb = RigidBodyDesc::new()
         .translation(physic_object.rbdata.translation)
         .rotation(physic_object.rbdata.rotation)
@@ -113,15 +114,15 @@ impl Physics
         .kinematic_translations(physic_object.rbdata.kinematic_translations)
         .kinematic_rotations(physic_object.rbdata.kinematic_rotations)
         .user_data(physic_object.rbdata.user_data)
-        .build(); // Build the rigid-body
+        .build(); // Build the rigid-body.
     
         rb.enable_linear_motion_interpolation(physic_object.rbdata.enable_linear_motion_interpolation);
     
-        // We add the RigidBody to the RigidBodySet
+        // We add the RigidBody to the RigidBodySet.
         let rb_handle = self.bodies.insert(rb);
     
     
-        // We create the Collider relative to the field coldata of 'object'
+        // We create the Collider relative to the field coldata of 'object'.
         let collider = ColliderDesc::new(shape)
         .translation(physic_object.coldata.translation)
         .rotation(physic_object.coldata.rotation)
@@ -132,9 +133,9 @@ impl Physics
         .angular_prediction(physic_object.coldata.angular_prediction)
         .sensor(physic_object.coldata.sensor)
         .user_data(physic_object.coldata.user_data)
-        .build(BodyPartHandle(rb_handle, 0)); // Build the collider into the world
+        .build(BodyPartHandle(rb_handle, 0)); // Build the collider into the world.
         
-        // We add the Collider to the set of colliders
+        // We add the Collider to the set of colliders.
         let coll_handle = self.colliders.insert(collider);
         
         coll_handle

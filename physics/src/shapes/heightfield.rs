@@ -16,18 +16,18 @@ pub struct HeightField
 }
 
 impl HeightField{
-    /// Creates a HeightField
+    /// Creates a HeightField.
     pub fn new(heights: DMatrix<f32>, scale: Vector3<f32>) -> HeightField{
         return HeightField{heights: heights, scale: scale};
     }
 
-    /// Creates and returns a RigidBody corresponding to the 'HeightField' type
+    /// Creates and returns a RigidBody corresponding to the 'HeightField' type.
     pub fn process_heightfield(heightfield: HeightField) -> ShapeHandle<f32>{
-        // Height and scale of the HeightField
+        // Height and scale of the HeightField.
         let heights = heightfield.heights;
         let scale = heightfield.scale;
 
-        // Creation of a HeightField we'll need later to make a RigidBody and Collider
+        // Creation of a HeightField we'll need later to make a RigidBody and Collider.
         let heightf = ShapeHandle::new(shape::HeightField::new(heights, scale));
 
         return heightf;
