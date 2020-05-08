@@ -60,6 +60,7 @@ pub struct Game
     /// the sounds currently playing
     pub sounds_played :HashMap<String,OneSound>,
 
+    // volume of sounds. 0 <=> normal volume of the sounds
     vol: f32,
 
     gui_context: Context,
@@ -259,7 +260,7 @@ impl Game
     /** play sound with time limit
     duration == None -> play the sound to infinity -> set the end fielf of OneSound to -2
     duration == Some(d) -> play the sound d sec
-*/
+    */
     fn play_sound_time_limit(&mut self,name: String, duration: Option<f32>,position: Option<[f32; 3]>)
     {
 
@@ -332,7 +333,7 @@ impl Game
     }
     
 
-    /// uses the events to update Devices and also parses the GameEvents
+    /// Uses the events to update Devices and also parses the GameEvents
     fn handle_event(&mut self, event: Event<GameEvent>) -> ControlFlow
     {
 	//        let mut devices = self.devices.borrow_mut();
