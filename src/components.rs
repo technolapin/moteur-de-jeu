@@ -1,4 +1,3 @@
-
 use specs::
 {
     Component,
@@ -13,7 +12,7 @@ use graphics::
 
 
 
-
+/// A component to store spatial informations
 #[derive(Debug, Clone, Copy)]
 pub struct Spatial
 {
@@ -22,6 +21,7 @@ pub struct Spatial
     pub scale: f32,
 }
 
+/// A component to store a Handle to a renderable Object
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Model(pub Handle<Object>);
 
@@ -39,6 +39,7 @@ impl Component for Model
 use graphics::Light;
 
 
+/// A component to store a Light
 #[derive(Debug, Clone, Copy)]
 pub struct Lighting(pub Light);
 
@@ -51,7 +52,7 @@ impl Component for Lighting
 
 use physics::ShapeType;
 
-/// The indice of the physical object
+/// The component storing the physical properties of the entitie
 #[derive(Clone)]
 pub struct PhysicComponent
 {

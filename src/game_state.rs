@@ -1,11 +1,16 @@
 use super::{GameEvent, Game, Model, Spatial, Lighting};
-use graphics::{Scene, Graphical, Frame, RessourcesHolder};
+
 use events_handling::DevicesState;
+
 use graphics::
 {
     glium::glutin::event_loop::EventLoopProxy,
     Similarity,
-    Camera
+    Camera,
+    Scene,
+    Graphical,
+    Frame,
+    RessourcesHolder
 };
 
 use imgui::{Ui, Context};
@@ -13,13 +18,13 @@ use imgui_glium_renderer::Renderer;
 
 use base::EngineError;
 
-
-
 use std::collections::HashMap;
 
-use rayon::iter::ParallelIterator;
-use rayon::iter::IntoParallelIterator;
-
+use rayon::iter::
+{
+    ParallelIterator,
+    IntoParallelIterator
+};
 
 use specs::
 {
@@ -30,7 +35,10 @@ use specs::
     join::ParJoin
 };
 
-
+/**
+A GameState contains a SPECS world, and can be stacked and popped out of the GameStateStack
+GameStates, in the game, have a logic to be run and their rendering to be done.
+*/
 pub struct GameState
 {
     pub name: String,
@@ -38,7 +46,7 @@ pub struct GameState
     gui: Option<fn(&mut Ui, &EventLoopProxy<GameEvent>)>,
     render_behavior: RenderBehavior,
     logic_behavior: LogicBehavior,
-    proxy: EventLoopProxy<GameEvent>, // to be removed (maybe)
+    proxy: EventLoopProxy<GameEvent>, // to be removed (maybe (maybe not))
 
     pub world: World,
     dispatcher: Dispatcher<'static, 'static> // game states never die
@@ -48,7 +56,12 @@ pub struct GameState
 
 impl GameState
 {
-    
+
+    /**
+    Returns a GameState, with some ressources registered in its SPECS World
+    Ressources registered for now:
+    - EventSender
+     */
     fn new(name: String,
            scene: Scene,
            render_behavior: RenderBehavior,
@@ -78,7 +91,8 @@ impl GameState
 	    dispatcher: dispatcher
         }
     }
-    
+
+    /// Build a GameState from a ProtoState
     pub fn from_proto(
         game: &mut Game,
         proto: &ProtoState) -> Result<Self, EngineError>
@@ -93,6 +107,7 @@ impl GameState
 		     &mut game.ressources))
     }
 
+    /// Used to send a GameEvent to the EventLoop through the proxy
     pub fn send_event(&self, user_event: GameEvent)
     {
         match self.proxy.send_event(user_event)
@@ -101,19 +116,23 @@ impl GameState
             _ => ()
         }
     }
+
+    /// Call send() on the EventSender stored in the World, sending all the collected event to the EventLoop
     pub fn send_events(&self)
     {
 	let mut sender = self.world.write_resource::<EventSender>();
 	sender.send(&self.proxy);
     }
 
-    /// probably temporary function (will be in use as long as a Scene is used for render)
+    /// Builds the graphical scene of the GameState (used before rendering)
     pub fn update_scene(&mut self)
     {
-	// pas d'instantiation pour l'instant (soon)
 	let models_storage = self.world.read_storage::<Model>();
 	let light_storage = self.world.read_storage::<Lighting>();
 	let spatial_storage = self.world.read_storage::<Spatial>();
+
+	// we regroup the objects of the scene into instances of the same graphical object
+	// it is done in parallel to improve the performances
 	let instances = (&models_storage, &spatial_storage).par_join()
 	    .fold(|| HashMap::new(), |mut instances, (Model(obj_handle), Spatial{pos, rot, scale})|
 		  {
@@ -131,7 +150,7 @@ impl GameState
 		      };
 		      instances
 		  })
-	    .reduce(
+	    .reduce( // the part where we regroup the results of the differents threadsx
 		|| HashMap::new(),
 		|mut total, part|
 		{
@@ -160,6 +179,7 @@ impl GameState
 	self.scene.objects = objects;
 
 
+	// the lights aren't worth parallelizing
 	self.scene.lights.clear();
 
 	for (Lighting(light), maybe_spatial) in (&light_storage, spatial_storage.maybe()).join()
@@ -182,22 +202,29 @@ impl GameState
     
 }
 
+/// Defines the render behavior of the GameState
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum RenderBehavior
 {
+    /// This GameState never render
     NoRender,
+    /// The GameState let the other states under it to be rendered
     Superpose,
+    /// The GameState prevent the states under it to be rendered
     Blocking
 }
 
-
+/// Defines the logic behavior of the GameState
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub enum LogicBehavior
 {
+    /// The GameState let the other states under it have their logic run
     Superpose,
+    /// The GameState prevent the states under it to have their logic run
     Blocking
 }
 
+/// The GameStateStack contains a stack of the different active GameState, but also the inactives states and the registered ProtoGameState s
 pub struct GameStateStack
 {
     stack: Vec<GameState>,
@@ -208,6 +235,7 @@ pub struct GameStateStack
 
 impl GameStateStack
 {
+    /// Returns an empty GameStateStack
     pub fn new() -> Self
     {
         Self
@@ -218,6 +246,7 @@ impl GameStateStack
         }
     }
 
+    /// Register a new state from a ProtoState, which will then be able to be loaded and added to the stack
     pub fn register_proto(
         &mut self,
         name: &str,
@@ -227,6 +256,7 @@ impl GameStateStack
         self.register.insert(name.to_string(), proto);
     }
 
+    /// Returns the ProtoState registered by the given name
     pub fn get_proto(&self, name: String) -> Result<ProtoState, EngineError>
     {
         match self.register.get(&name)
@@ -235,7 +265,8 @@ impl GameStateStack
             None => EngineError::new(&format!("Game State {} not registered", name))
         }
     }
-    
+
+    /// Register a new state, which will then be able to be loaded and added to the stack
     pub fn register(
         &mut self,
         name: &str,
@@ -261,11 +292,13 @@ impl GameStateStack
             });
     }
 
+    /// Push a state to the Stack
     pub fn push(&mut self, state: GameState)
     {
         self.stack.push(state);
     }
 
+    /// Pop a state out of the stack
     pub fn pop(&mut self)
     {
         if let Some(state) = self.stack.pop()
@@ -276,15 +309,19 @@ impl GameStateStack
         };
     }
 
+    /// Returns an iterator of the stack
     pub fn iter(&self) -> std::slice::Iter<GameState>
     {
         self.stack.iter()
     }
+    
+    /// Returns an mutable iterator of the stack
     pub fn iter_mut(&mut self) -> std::slice::IterMut<GameState>
     {
         self.stack.iter_mut()
     }
     
+    /// Renders the logics of the non-blocked GameStates
     pub fn render(&mut self,
                   gr: &Graphical,
 		  ressources: &RessourcesHolder,
@@ -328,7 +365,7 @@ impl GameStateStack
         }
     }
 
-    
+    /// Runs the logics of the non-blocked GameStates
     pub fn logic(&mut self, devices: &DevicesState)
     {
         let first_block = self.iter()
@@ -349,6 +386,7 @@ impl GameStateStack
     }
 }
 
+/// A "bluprint" to build a GameState
 #[derive(Clone)]
 pub struct ProtoState
 {
@@ -365,21 +403,25 @@ pub struct ProtoState
 }
 
 
-/// a ressource to send events
+/// a ressource to store GameEvent s and send them
 #[derive(Debug, Default)]
 pub struct EventSender(Vec<GameEvent>);
 
 impl EventSender
 {
+    /// Constructor
     fn new() -> Self
     {
 	Self(Vec::new())
     }
+
+    /// add an event to the EventSender
     pub fn push(&mut self, event: GameEvent)
     {
 	self.0.push(event);
     }
 
+    /// use the EventLoopProxy to send the stored event to the EventLoop, emptying the EventSender
     fn send(&mut self, proxy: &EventLoopProxy<GameEvent>)
     {
 	self.0.drain(..).for_each(
@@ -391,6 +433,4 @@ impl EventSender
 	    }
 	)
     }
-    
-    
 }
