@@ -31,18 +31,33 @@ use std::collections::HashMap;
 
 /**
 The Game structure
-It owns everything
+It owns everything.
+When it created, it owns the EventLoop, but that one gets moved out uppon runing.
  */
 pub struct Game
 {
+    /// the renteder
     pub graphic_engine: Graphical,
+
+    /// the ressources for rendering
     pub ressources: RessourcesHolder,
+
+    /// used for os-level access (reading and writting files)
     pub base: Base,
+
+    /// The current state of the keyboard and mouse
     pub devices: RefCell<DevicesState>,
+
+    /// the even loop (will be moved out)
     event_loop: Movable<EventLoop<GameEvent>>,
+
+    /// a proxy to send event to the event loop
     pub event_loop_proxy: EventLoopProxy<GameEvent>,
+
+    /// the differents game states
     pub states: RefCell<GameStateStack>,
 
+    /// the sounds currently playing
     pub sounds_played :HashMap<String,OneSound>,
 
     vol: f32,
@@ -56,6 +71,7 @@ pub struct Game
 
 impl Game
 {
+    /// creator of Game
     pub fn new() -> Self
     {
         let event_loop = EventLoop::<GameEvent>::with_user_event();
@@ -77,16 +93,14 @@ impl Game
             platform.attach_window(imgui.io_mut(), &window, HiDpiMode::Rounded);
         }
 
-
-        /*
-        éventuel truc à faire avec les fonts
-         */
         let renderer = Renderer::init(&mut imgui, display).expect("Failed to initialize renderer");
 
 
-        
+        // we want to be able to move the event loop out without destroying game
         let movable = Movable::new(event_loop);
-        Self
+
+
+	Self
         {
             ressources: holder,
             graphic_engine: gr,
@@ -106,9 +120,10 @@ impl Game
     }
 
 
-    /// renders the stored scene
+    /// Order the rendering of all the GameStates's scene, in respect of their render behavior and order
     fn render(&mut self)
-    {	
+    {
+	// the fbo onto which we draw
         let mut frame = self.graphic_engine.frame();
 	frame.clear();
 	
@@ -123,6 +138,7 @@ impl Game
 
     }
 
+    /// Precharging a registered GameState
     pub fn load_state(&mut self,
 		      name: &str) -> Result<(), base::EngineError>
     {
@@ -135,7 +151,7 @@ impl Game
 	    
     }
     
-
+    /// Pushing a GameState. If the GameState isn't loaded, it is being loaded first.
     pub fn push_state(&mut self,
                       name: &str) -> Result<(), base::EngineError>
     {
@@ -154,6 +170,10 @@ impl Game
         Ok(())
     }
 
+    /**
+    Registers a GameState.
+    The elements given are stored into a ProtoGameState, who contains all the data needed to load the GameState.
+     */
     pub fn register_state(
         &mut self,
         name: &str,
@@ -174,7 +194,8 @@ impl Game
                 logic_behavior,
 		init)
     }
-    
+
+    /// Pop a certain number of state out of the stack
     fn pop_state(&self, n_to_pop: usize)
     {
         if n_to_pop > 0
@@ -185,7 +206,7 @@ impl Game
     }
 
 
-    //play sound entirely
+    /// Play a sound that can optionaly be spatialized
     fn play_sound(&mut self, name: String, position: Option<[f32; 3]>)
     {
 	let music_data =self.ressources.sounds_datas.get(name.as_str());
@@ -235,9 +256,10 @@ impl Game
     }    
 
 
-    // play sound with time limit
-    // duration == none -> play the sound to infinity -> set the end fielf of OneSound to -2
-    // duration == some -> play the sound duration sec
+    /** play sound with time limit
+    duration == None -> play the sound to infinity -> set the end fielf of OneSound to -2
+    duration == Some(d) -> play the sound d sec
+*/
     fn play_sound_time_limit(&mut self,name: String, duration: Option<f32>,position: Option<[f32; 3]>)
     {
 
@@ -289,117 +311,119 @@ impl Game
     }
 
 
-	// down the volume of all played sounds
-	fn down_volume(&mut self)
+    /// Lowers the volume of all played sounds
+    fn down_volume(&mut self)
+    {
+	self.vol -= 1.0;
+	for (_name,sound) in self.sounds_played.iter_mut()
 	{
-	    self.vol=self.vol-1.0;
-	    for (_name,sound) in self.sounds_played.iter_mut()
-	    {
-		sound.down_volume();
-	    }
-	} 
-
-	// up the volume of all played sound
-	fn up_volume(&mut self)
-	{
-	    self.vol=self.vol+1.0;
-	    for (_name,sound) in self.sounds_played.iter_mut()
-	    {
-		sound.up_volume();
-	    }
+	    sound.down_volume();
 	}
+    } 
 
-
-	// maybe user defined
-	fn handle_event(&mut self, event: Event<GameEvent>) -> ControlFlow
+    /// Raises the volume of all played sounds
+    fn up_volume(&mut self)
+    {
+	self.vol += 1.0;
+	for (_name,sound) in self.sounds_played.iter_mut()
 	{
-	    //        let mut devices = self.devices.borrow_mut();
-            match event {
-		Event::KeyPressed(key) => {self.devices.get_mut().keyboard_pressed.insert(key);},
-		Event::KeyReleased(key) => {self.devices.get_mut().keyboard_continuous.remove(&key);},
-		Event::ButtonPressed(button) => {self.devices.get_mut().mouse_state.insert(button);},
-		Event::ButtonReleased(button) => {self.devices.get_mut().mouse_state.remove(&button);},
-		Event::MouseMove(x, y) => {
-                    let mut devices = self.devices.get_mut();
-                    devices.mouse_move = (devices.mouse_move.0+x, devices.mouse_move.1+y);
-		},
-		Event::ScrollMouse(x, y) => {
-                    let mut devices = self.devices.get_mut();
-                    devices.mouse_scroll = (devices.mouse_scroll.0+x, devices.mouse_scroll.1+y);
-		},
-		Event::GameEvent(game_event) =>
-		{
-                    match game_event
-                    {
-			GameEvent::QuitRequested => return ControlFlow::Exit,
-			GameEvent::Pop(n) => self.pop_state(n),
-			GameEvent::Push(state_name) =>
-			{
-                            self.push_state(
-				&state_name
-                            ).unwrap();
-			},
-
-			GameEvent::PlaySound(name,position) => self.play_sound(name,position),
-    			GameEvent::PlaySoundTimeLimit(name,duration,position) => self.play_sound_time_limit(name,duration,position),
-			GameEvent::DownVolume()=>self.down_volume(),
-			GameEvent::UpVolume()=>self.up_volume()
-
-                    }
-		}
-		_ => ()
-            };
-            ControlFlow::Poll
-
+	    sound.up_volume();
 	}
+    }
+    
 
-	/// Initialize and runs the game
-	pub fn run(mut self, fps: u64) -> Result<(), base::EngineError>
-	{
-	    
-            let mut now = std::time::Instant::now();
-            let mut render_date = std::time::Instant::now();
+    /// uses the events to update Devices and also parses the GameEvents
+    fn handle_event(&mut self, event: Event<GameEvent>) -> ControlFlow
+    {
+	//        let mut devices = self.devices.borrow_mut();
+        match event {
+	    Event::KeyPressed(key) => {self.devices.get_mut().keyboard_pressed.insert(key);},
+	    Event::KeyReleased(key) => {self.devices.get_mut().keyboard_continuous.remove(&key);},
+	    Event::ButtonPressed(button) => {self.devices.get_mut().mouse_state.insert(button);},
+	    Event::ButtonReleased(button) => {self.devices.get_mut().mouse_state.remove(&button);},
+	    Event::MouseMove(x, y) => {
+                let mut devices = self.devices.get_mut();
+                devices.mouse_move = (devices.mouse_move.0+x, devices.mouse_move.1+y);
+	    },
+	    Event::ScrollMouse(x, y) => {
+                let mut devices = self.devices.get_mut();
+                devices.mouse_scroll = (devices.mouse_scroll.0+x, devices.mouse_scroll.1+y);
+	    },
+	    Event::GameEvent(game_event) =>
+	    {
+                match game_event
+                {
+		    GameEvent::QuitRequested => return ControlFlow::Exit,
+		    GameEvent::Pop(n) => self.pop_state(n),
+		    GameEvent::Push(state_name) =>
+		    {
+                        self.push_state(
+			    &state_name
+                        ).unwrap();
+		    },
 
-	    let delay = std::time::Duration::from_millis(1000/fps);
+		    GameEvent::PlaySound(name,position) => self.play_sound(name,position),
+    		    GameEvent::PlaySoundTimeLimit(name,duration,position) => self.play_sound_time_limit(name,duration,position),
+		    GameEvent::DownVolume()=>self.down_volume(),
+		    GameEvent::UpVolume()=>self.up_volume()
 
-	    
-            self.event_loop.consume()
-		.run(move |event, _, control_flow|
-                     {
-			 // gui events
-			 {
-                             let gl_window = self.graphic_engine.display.display.gl_window();
-                             self.gui_platform.handle_event(
-				 self.gui_context.io_mut(),
-				 gl_window.window(),
-				 &event);
-			 }
-			 
-			 
-			 // inputs
-			 if let Some(ev) = Event::parse_relevant(event)
-			 {
-                             *control_flow = self.handle_event(ev);
-			 }
-			 
+                }
+	    }
+	    _ => ()
+        };
+        ControlFlow::Poll
 
-			 // render
-			 now = std::time::Instant::now();
-			 if render_date < now
-			 {			 
-			     self.states.borrow_mut()
-				 .logic(&self.devices.borrow());
-                             {
-				 let mut devices = self.devices.borrow_mut();
-				 devices.clear();
-                             }
-			     
-			     // takes about 99% of the time
-                             self.render();
-			     
-                             render_date = now + delay;
-			 }
+    }
+
+    /** Initialize and runs the game at the given fixed framerate
+    The Game structure then cannot be used anymore since it moves its event loop out*/
+    pub fn run(mut self, fps: u64) -> Result<(), base::EngineError>
+    {
+	
+        let mut now = std::time::Instant::now();
+        let mut render_date = std::time::Instant::now();
+	let delay = std::time::Duration::from_millis(1000/fps);
+
+	
+        self.event_loop.consume()
+	    .run(move |event, _, control_flow|
+                 {
+		     // gui events
+		     {
+                         let gl_window = self.graphic_engine.display.display.gl_window();
+                         self.gui_platform.handle_event(
+			     self.gui_context.io_mut(),
+			     gl_window.window(),
+			     &event);
+		     }
+		     
+		     
+		     // inputs
+		     if let Some(ev) = Event::parse_relevant(event)
+		     {
+                         *control_flow = self.handle_event(ev);
+		     }
+		     
+
+		     // render
+		     now = std::time::Instant::now();
+		     if render_date < now
+		     {			 
+			 self.states.borrow_mut()
+			     .logic(&self.devices.borrow());
+                         {
+			     let mut devices = self.devices.borrow_mut();
+			     devices.clear();
+                         }
 			 
+			 // takes about 99% of the time
+                         self.render();
+			 
+                         render_date = now + delay;
+		     }
+		     
+		     // sound management
+		     {
 			 let name_to_pop : Vec<_> = self.sounds_played.iter()
 			     .filter
 			     ( |(_name,sound)|
@@ -423,12 +447,14 @@ impl Game
 					 self.sounds_played.remove(&name);
                                      }
 				 }
-                             }
-			 }
-			 
-                     });
-	    Ok(())
+			     }
+                         }
+		     }
+
+
+		     
+                 });
 	    
-	}
     }
+}
 
