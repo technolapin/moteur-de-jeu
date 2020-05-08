@@ -63,11 +63,9 @@ impl ShapeType
 	translation: Vector3<f32>,
 	rotation: Vector3<f32>,
 	scale: f32,
-    gravity: bool,
-    kinematic_rotations : Vector3<bool>,
-    kinematic_translations : Vector3<bool>) -> PhysicObject
+	gravity: bool) -> PhysicObject
     {
-	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Kinematic, Some(kinematic_rotations), Some(kinematic_translations))
+	    self.make_object(translation, rotation, scale, gravity, BodyStatus::Kinematic, None, None)
     }
 
     /// Construct a PhysicObject with a BodyStatus::Dynamic (movements allowed but restrictions on translations and rotations)
