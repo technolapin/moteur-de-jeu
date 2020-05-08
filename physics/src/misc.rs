@@ -69,7 +69,7 @@ impl ShapeType
     }
 
     /// Constructs a PhysicObject with a BodyStatus::Dynamic (movements allowed but restrictions on translations and rotations).
-    pub fn make_dynamic_sans_liberte(
+    pub fn make_dynamic_constrained(
         &self,
         translation: Vector3<f32>,
         rotation: Vector3<f32>,

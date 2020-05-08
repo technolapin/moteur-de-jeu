@@ -228,9 +228,9 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     
     for position in portes_chambres_positions.iter()
     {
-	    let Spatial{pos, rot, scale} = position.clone();
+	let Spatial{pos, rot, scale} = position.clone();
         let physic_obj_porte_chambre = porte_chambre_trimesh
-	    .make_dynamic_sans_liberte(pos, rot, scale, true, vec3(true, false, true), vec3(true, true, true));
+	    .make_dynamic_constrained(pos, rot, scale, true, vec3(true, false, true), vec3(true, true, true));
 	
         let gen_index = physics.build_rigbd_col(&physic_obj_porte_chambre);
 
@@ -262,7 +262,7 @@ fn init_game(mut world: World, ressources: &mut RessourcesHolder) -> (World, Dis
     {
 	    let Spatial{pos, rot, scale} = position.clone();
         let physic_obj_porte_entree = porte_entree_trimesh
-	    .make_dynamic_sans_liberte(pos, rot, scale, true, vec3(true, false, true), vec3(true, true, true));
+	    .make_dynamic_constrained(pos, rot, scale, true, vec3(true, false, true), vec3(true, true, true));
 	
         let gen_index = physics.build_rigbd_col(&physic_obj_porte_entree);
 

@@ -8,21 +8,22 @@ use std::cell::RefCell;
 use base::EngineError;
 
 /**
-* Ears use internally libsndfile so the format of sound ressources format must to match libsndfile accepted formats.
-* including: WAV, FLAC, PAF
-*/
+Ears use internally libsndfile so the format of sound ressources format must match libsndfile accepted formats.
+including: WAV, FLAC, PAF
+ */
 
 
-/**Use to play and control a sound
-* end == -1 -> play all the sound 
-* end >0 -> play the sound during end time
-* end == -2  -> repeat the sound 
-*/
+/**
+Use to play and control a sound
+end == -1 -> play all the sound 
+end > 0 -> play the sound during end time
+end == -2  -> repeat the sound 
+ */
 pub struct OneSound
 {
-   pub music: Sound,
-   pub start : Instant,
-   pub end :  f32,
+    pub music: Sound,
+    pub start : Instant,
+    pub end :  f32,
 
 }
 
@@ -30,89 +31,88 @@ pub struct OneSound
 
 impl OneSound
 {
- 
-   // Constructor from the path of a sound file
+    
+    /// Constructor from the path of a sound file
     pub fn new(path_given : &str) -> Self 
     { 
 	Self { music : Sound::new(path_given).unwrap(),
                start : Instant::now(),
                end : -1.,  
-             } 
+        } 
     }
 
-   // Constructor from a SoundRessource
-   pub fn new_from_data(sound_data: SoundRessource) -> Result<Self, EngineError>
-   {
+    /// Constructor from a SoundRessource
+    pub fn new_from_data(sound_data: SoundRessource) -> Result<Self, EngineError>
+    {
         let sound = Sound::new_with_data(sound_data.data)?;
         Ok(Self{music: sound, start : Instant::now(), end : -1.,})
-   }
-   
-   // Sets the end field
-   pub fn set_end(&mut self,duration: f32)
-   {
-     self.end=duration;
-   }
+    }
+    
+    /// Fix the duration of the sound
+    pub fn set_end(&mut self,duration: f32)
+    {
+	self.end=duration;
+    }
 
-    // Plays the sound
+    /// Plays the sound
     pub fn play_all(&mut self) 
     {
 	self.music.play();
         self.start=Instant::now();
-	
     }
-  
-   // Checks is the sound is playing
-   pub fn is_playing(& self)-> bool
-   {
-       return self.music.is_playing()
-   }
+    
+    /// Checks is the sound is playing
+    pub fn is_playing(& self)-> bool
+    {
+	return self.music.is_playing()
+    }
 
-   // Stops the sound
-   pub fn stop(&mut self )
-   {
-       self.music.stop();
-   }
+    /// Stops the sound
+    pub fn stop(&mut self )
+    {
+	self.music.stop();
+    }
 
-  // Places spatially the sound
-  pub fn give_position(&mut self,position: [f32; 3])
-  {
-    self.music.set_position(position)
-  }
+    /// Places spatialy the sound
+    pub fn give_position(&mut self,position: [f32; 3])
+    {
+	self.music.set_position(position)
+    }
 
-  // Raises the volume of the sound
-  pub fn up_volume(&mut self)
-  {
-     let mut now=self.get_vol();
-     if now+0.1 <=  1 as f32
-     {  now=now+0.1;
-        self.set_vol(now);
-     }
+    /// Raises the volume of the sound
+    pub fn up_volume(&mut self)
+    {
+	let mut now=self.get_vol();
+	if now+0.1 <=  1 as f32
+	{  now=now+0.1;
+           self.set_vol(now);
+	}
 
-  }
-  
-  // Lowers the volume of the sound
-  pub fn down_volume(&mut self)
-  {
-     let mut now=self.get_vol();
-     if now-0.1 >= 0 as f32
-     {  now=now-0.1;
-        self.set_vol(now);
-     }
+    }
+    
+    /// Lowers the volume of the sound
+    pub fn down_volume(&mut self)
+    {
+	let mut now=self.get_vol();
+	if now-0.1 >= 0 as f32
+	{  now=now-0.1;
+           self.set_vol(now);
+	}
 
-  }
+    }
 
-  // Returns the current volume
-  pub fn get_vol(&self) -> f32
-  {
-     self.music.get_volume()
-  }
+    /// Returns the current volume
+    pub fn get_vol(&self) -> f32
+    {
+	self.music.get_volume()
+    }
 
-  // Sets the volume
-  pub fn set_vol(&mut self, vol: f32)
-  {
-     self.music.set_volume(vol);
-  }
-  
+    /// Sets the volume
+    pub fn set_vol(&mut self, vol: f32)
+    {
+	self.music.set_volume(vol);
+    }
+    
   
 
 }
@@ -127,7 +127,7 @@ impl fmt::Debug for OneSound {
 }
 
 
-// Sample of a sound
+/// Sample of a sound
 pub struct SoundRessource
 {
    pub data : Rc<RefCell<SoundData>>
@@ -136,14 +136,14 @@ pub struct SoundRessource
 
 impl SoundRessource{
 
-    // Constructor from the path of a sound file
+    /// Constructor from the path of a sound file
     pub fn new(path: &str) -> Self
     {
         Self{ data : Rc::new(RefCell::new(SoundData::new(path).unwrap()))}
              
     }
     
-    // Constructor from a SoundRessource
+    /// Constructor from a SoundRessource
     pub fn new_from_data(datas: &SoundRessource)-> Self
     {
        Self{ data : datas.data.clone()}

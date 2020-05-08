@@ -58,7 +58,7 @@ Ou alors, utilisez Windows Sub-Linux (WSL), mais on risque d'être vite limité.
 
 ```
 sudo apt install cargo
-sudo apt install libsdl2-dev
+sudo apt install openal
 ```
 
 ### Cloner le dépot

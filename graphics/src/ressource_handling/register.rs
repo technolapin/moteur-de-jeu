@@ -1,12 +1,26 @@
 use std::marker::PhantomData;
-/// Used to designat an Object stored in the RessourcesHolder
+/// Used to designate an Item stored in a Registerx
 pub struct Handle<T>
 {
+    /// The generation of the associated object
     id: u64,
+
+    /// the index of the associated Item in the Register
     index: usize,
+    
+    /// zero-size, used to add the type parameter
     phantom: PhantomData<T> // for genericity and security
 }
+
+
+
+////////////////////////////////////////////////////////////
+// a few implementations ///////////////////////////////////
+
+
 use std::fmt;
+use std::hash::{Hash, Hasher};
+
 impl<T> fmt::Debug for Handle<T>
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result
@@ -25,7 +39,6 @@ impl<T> PartialEq for Handle<T>
 
 impl<T> Eq for Handle<T>{}
 
-use std::hash::{Hash, Hasher};
 impl<T> Hash for Handle<T>
 {
     fn hash<H: Hasher>(&self, hasher: &mut H)
@@ -52,17 +65,35 @@ impl<T> Copy for Handle<T>{}
 unsafe impl<T> Sync for Handle<T>{}
 unsafe impl<T> Send for Handle<T>{}
 
+
+////////////////////////////////////////////////////////////
+
+
+
+/**
+Storage for any type T.
+Permit constant-time push, deletion and random-access.
+Inserting an item creates a Handle<T> to permit the random access.
+*/
 #[derive(Debug)]
 pub struct Register<T>
 {
+    /// The generation of objects stored so far (always increasing)
     generation: u64,
+
+    /// The elements stored
     storage: Vec<T>,
+
+    /// To keep track of the object "alive"
     alive: Vec<bool>,
+
+    /// The free indexes of storage
     free: Vec<usize>
 }
 
 impl<T> Register<T>
 {
+    /// Constructor
     pub fn new() -> Self
     {
 	Self
@@ -74,6 +105,7 @@ impl<T> Register<T>
 	}
     }
 
+    /// adds an element
     pub fn add(&mut self, thing: T) -> Handle<T>
     {
 	let handle = match self.free.pop()
@@ -105,6 +137,7 @@ impl<T> Register<T>
 	handle
     }
 
+    /// removes an element
     pub fn remove(&mut self, handle: Handle<T>)
     {
 	let index = handle.index;
@@ -115,12 +148,14 @@ impl<T> Register<T>
 	}
     }
 
+    /// returns a reference to a stored element
     pub fn get(&self, handle: Handle<T>) -> &T
     {
 	let index = handle.index;
 	unsafe{self.storage.get_unchecked(index)}
     }
 
+    /// returns a mutable reference to a stored element
     pub fn get_mut(&mut self, handle: Handle<T>) -> &mut T
     {
 	let index = handle.index;

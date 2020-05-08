@@ -365,8 +365,8 @@ impl Game
 
 		    GameEvent::PlaySound(name,position) => self.play_sound(name,position),
     		    GameEvent::PlaySoundTimeLimit(name,duration,position) => self.play_sound_time_limit(name,duration,position),
-		    GameEvent::LowerVolume =>self.down_volume(),
-		    GameEvent::RaiseVolume =>self.up_volume()
+		    GameEvent::LowerVolume => self.down_volume(),
+		    GameEvent::RaiseVolume => self.up_volume()
 
                 }
 	    }
