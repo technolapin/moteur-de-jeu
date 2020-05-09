@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["group",""],["holder",""],["light",""],["material",""],["object",""],["register",""],["ressources_holder",""],["scene",""],["tile",""],["vertex",""],["wavefront",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["N_MAX_LIGHTS",""]],"enum":[["Light","Different kinds of Light (directional and non directional)"]],"struct":[["Lights","Contains many Light with some informations about them"]]});

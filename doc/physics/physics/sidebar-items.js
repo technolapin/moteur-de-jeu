@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Physics","Contains all the data of the physic world."]]});

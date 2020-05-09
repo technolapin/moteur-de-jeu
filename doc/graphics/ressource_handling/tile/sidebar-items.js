@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Tile","A tile is a 2D rectangle with an image on it. Stores the proportions of the image and the image itselve."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ProgramCreator","This structure purpose is to create ProgramsIds"],["ProgramId","Corresponds to a program stored by the ProgramHolder Might be replaced by a Arc sometimes"],["ProgramsHolder","The various registered shaders programs."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["RessourcesHolder","Registers all the ressources."]]});

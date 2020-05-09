@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Material","This structure represents a material in the wavefront sense."]]});

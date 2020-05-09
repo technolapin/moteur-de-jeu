@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Display","Wrapper around the \"Display\" struct from glium"],["Graphical","Owns the various components needed to display things on the screen."],["Params","Owns the rendering parameters."],["Program","The various registered shaders programs. For now it has some shaders hard-coded but those will eventually be dissmissed."]]});

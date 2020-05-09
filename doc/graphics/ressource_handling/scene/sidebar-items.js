@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Scene","A scene contains pointers to existing ressources and datas to place them in the space."]]});

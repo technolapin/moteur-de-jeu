@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["misc",""],["physics",""],["shapes",""]],"struct":[["ShapeHandle","A shared handle to an abstract shape."]]});

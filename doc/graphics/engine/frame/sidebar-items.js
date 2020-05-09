@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Frame","Where the scene is being constructed. Destroyed uppon displaying. This is a wrapper around glium::Frame with custom methods."]]});

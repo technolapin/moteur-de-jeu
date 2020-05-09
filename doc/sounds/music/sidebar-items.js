@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["OneSound","Ears use internally libsndfile so the format of sound ressources format must match libsndfile accepted formats. including: WAV, FLAC, PAF Use to play and control a sound end == -1 -> play all the sound  end > 0 -> play the sound during end time end == -2  -> repeat the sound "],["SoundRessource","Sample of a sound"]]});

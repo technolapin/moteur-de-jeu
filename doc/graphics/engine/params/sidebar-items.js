@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Params","Owns the rendering parameters."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Handle","Used to designate an Item stored in a Registerx"],["Register","Storage for any type T. Permit constant-time push, deletion and random-access. Inserting an item creates a Handle to permit the random access."]]});

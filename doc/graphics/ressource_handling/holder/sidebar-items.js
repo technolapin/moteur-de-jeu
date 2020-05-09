@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Holder","A holder is a struct mapping somme ressources to their names Like a hashmap, but we can implement our own methods on it."]]});

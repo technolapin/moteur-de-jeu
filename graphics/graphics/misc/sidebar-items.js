@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["get_ressources_path","Finds the path of the ressources folder"],["maybe","used for debug, will be discarded eventually."],["normalize_vec","Normalize a vector. Will be eventually be discarted."],["read_file","Reads a file and returns its content"],["v_prod","Some vector product. Will eventually be discarted"]]});
