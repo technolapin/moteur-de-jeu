@@ -9,10 +9,8 @@ Participant·e·s aux semestres 1 et 2 :
 - Alexandre LEBLON
 - Amaury BARUZY
 - Nicolas GOISLARD
-- Barbara PARE
-
-Participant·e·s uniquement au semestre 1 :
 - Maÿlis MONTANI
+- Barbara PARE
 
 Participant·e·s uniquement au semestre 2 :
 - Sébastien ZHOU
@@ -49,6 +47,8 @@ De la jolie documentation sous forme de page web peut être générée à partir
 Ces pages sont séparées dans un autre GIT, disponible à l'adresse suivante...
 
 https://github.com/734F96/moteur_jeu_video_documentation_generee
+
+Pour générer la totalité de la documentation (celle des dépendances en plus), exécutez `cargo doc` .
 
 ## Installation sous Linux
 Vraiment, utilisez Linux. C'est plus simple.
