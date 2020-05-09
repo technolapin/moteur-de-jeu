@@ -44,6 +44,10 @@ Les étudiants devront entre autre :
 ## Documentation générée par Rust
 De la jolie documentation sous forme de page web peut être générée à partir de certains commentaires dans notre code, ainsi que les librairies utilisées.
 
+**Vous pouvez accéder à cette documentation à l'adresse suivante...**
+
+https://734f96.github.io/moteur_jeu_video_documentation_generee/doc/moteur_jeu_video/index.html
+
 Ces pages sont séparées dans un autre GIT, disponible à l'adresse suivante...
 
 https://github.com/734F96/moteur_jeu_video_documentation_generee
