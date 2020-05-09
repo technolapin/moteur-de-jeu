@@ -8,4 +8,4 @@ https://github.com/734F96/moteur_jeu_video
 
 ## Naviguer dans cette documentation avec GitHub Pages
 
-https://734f96.github.io/moteur_jeu_video_documentation_generee/graphics/graphics/
+https://734f96.github.io/moteur_jeu_video_documentation_generee/doc/moteur_jeu_video/index.html
