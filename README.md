@@ -62,7 +62,8 @@ Ou alors, utilisez Windows Sub-Linux (WSL), mais on risque d'être vite limité.
 
 ```
 sudo apt install cargo
-sudo apt install openal
+sudo apt install libopenal-dev
+sudo apt install libsndfile1-dev
 ```
 
 ### Cloner le dépot
