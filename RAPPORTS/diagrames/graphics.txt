@@ -1,74 +1,74 @@
 @startuml
 skinparam style strictuml
 
-
-
+package graphics
+{
 package engine
 {
-	class Projection
-	class Camera
-	class Display
-	class Frame
-	class Graphical
-	class Params
-	class ProgramCreator
-	class ProgramId
-	class ProgramsHolder
+class Projection
+class Camera
+class Display
+class Frame
+class Graphical
+class Params
+class ProgramCreator
+class ProgramId
+class ProgramsHolder
 }
-
 package ressource_handling
 {
-	class Group
+class Group
+class "Register<Object>" as register
+class "Handle<Object>" as handle
+class "Holder<Wavefront>" as h_wavefront
+class "Holder<ProgramId>" as h_programs
+class "Holder<Tiles>" as h_tiles
+class "Holder<Params>" as h_params
 
-	class "Holder<Wavefront>" as h_wavefront
-	class "Holder<ProgramId>" as h_programs
-	class "Holder<Tiles>" as h_tiles
-	class "Holder<Params>" as h_params
+enum Material {
+Textured
+NonTextured
+Default
+}
 
-	enum Material {
-	     Textured
-    	     NonTextured
-	     Default
-	}
-	
-	enum Light {
-		NonDirectional
-		Directional
-	}
-	class Lights
+enum Light {
+NonDirectional
+Directional
+}
+class Lights
 
-	class Object
-	class RessourcesHolder
-	class Tile
-	class Scene
-	class Vertex
-	class Wavefront
+class Object
+class RessourcesHolder
+class Tile
+class Scene
+class Vertex
+class Wavefront
 }
 
 class Similarity
-class Game
-
+}
 package glium
 {
-	package vertex
-	{
-		class glium::VertexBuffer
-	}
-	package texture
-	{
-		class glium::Texture2D
-		class glium::RawImage2D
-	}
-	class glium::DrawParameters
-	class glium::Display
-	class glium::Program
-	class glium::Frame
+package vertex
+{
+class glium::VertexBuffer
+}
+package texture
+{
+class glium::Texture2D
+class glium::RawImage2D
+}
+class glium::DrawParameters
+class glium::Display
+class glium::Program
+class glium::Frame
 }
 
 
 package glutin
 {
-	class EventsLoop
+	class EventLoop
+	class EventLoopProxy
 	class WindowBuilder
 	class ContextBuilder
 }
@@ -78,10 +78,13 @@ RessourcesHolder --> h_wavefront
 RessourcesHolder --> h_params
 RessourcesHolder --> h_tiles
 RessourcesHolder --> h_programs
+RessourcesHolder --> register
+
 h_wavefront --> Wavefront
 h_params --> Params
 h_tiles --> Tile
 h_programs --> ProgramId
+register --> Object
 Object --> Group
 Object --> ProgramId
 Object ..> Params
@@ -91,7 +94,7 @@ Wavefront --> Group
 Wavefront ..> Material
 Tile ..> Material
 
-Scene --> Object
+Scene --> handle
 Scene --> Similarity
 Scene --> Lights
 
@@ -114,12 +117,106 @@ Graphical --> Camera
 
 Params --> glium::DrawParameters
 
+package game
+{
+	class Game
+	class GameState
+	class GameStateStack
+	class GameEvent
+	class ProtoState
 
-Game --> Scene
+	class Spatial
+	class Model
+	class Lighting
+	class PhysicComponent
+}
+
+package base
+{
+	class Base
+}
+package event_handling
+{
+	class DevicesState
+}
+
+package sound
+{
+	class OneSound
+}
+
+package imgui
+{
+	class Context
+	class Renderer
+	class WinitPlatform
+}
+package specs
+{
+	class World
+	class Dispatcher
+}
+
+package nphysics+ncollide
+{
+class DefaultMechanicalWorld
+class DefaultGeometricalWorld
+class DefaultBodySet
+class DefaultColliderSet
+class DefaultJointConstraintSet
+class DefaultForceGeneratorSet
+}
+
+package physics
+{
+	class Physics
+	enum ShapeType
+	class RbData
+	class ColData
+	class PhysicObject
+}
+
+
 Game --> Graphical
 Game --> RessourcesHolder
 Game --> Base
-Game --> DevicesStates
+Game --> DevicesState
+Game --> EventLoop
+Game --> GameStateStack
+Game --> OneSound
+Game --> Context
+Game --> Renderer
+Game --> WinitPlatform
 
+GameStateStack --> GameState
+GameStateStack --> ProtoState
+
+GameState --> Scene
+GameState --> EventLoopProxy
+GameState --> World
+GameState --> Dispatcher
+
+World --> Physics
+World --> Camera
+World --> DevicesState
+World --> PhysicComponent
+World --> Spatial
+World --> Model
+World --> Lighting
+
+Lighting --> Light
+Model --> handle
+
+
+Physics ---> DefaultMechanicalWorld
+Physics ---> DefaultGeometricalWorld
+Physics --> DefaultBodySet
+Physics --> DefaultColliderSet
+Physics --> DefaultJointConstraintSet
+Physics --> DefaultForceGeneratorSet
+
+PhysicObject --> ShapeType
+PhysicObject --> RbData
+PhysicObject --> ColData
 @enduml
 
