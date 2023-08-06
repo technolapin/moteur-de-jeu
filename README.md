@@ -1,11 +1,7 @@
 # Projet E4 : Construction d'un moteur de Jeu Vidéo (Documentation générée uniquement)
 
-Ce GIT ne contient que de la documentation sous forme de page web, générée à partir de certains commentaires dans notre code, ainsi que les librairies utilisées.
-
-Le code source de notre projet est disponible à l'adresse suivante...
-
-https://github.com/734F96/moteur_jeu_video
+Cette branche contient uniquement la documentation sous forme de pages web, générées à partir de certains commentaires dans notre code, ainsi que les librairies utilisées.
 
 ## Naviguer dans cette documentation avec GitHub Pages
 
-https://734f96.github.io/moteur_jeu_video_documentation_generee/doc/moteur_jeu_video/index.html
+https://technolapin.github.io/moteur-de-jeu/doc/moteur_jeu_video/index.html
